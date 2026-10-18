@@ -143,7 +143,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /*
   Feixe de luz que percorre a borda chanfrada (Border Beam do Magic UI, MIT, recriado em CSS).
-  Use junto com .chanfrado. Dá 2 voltas e para (nada se mexe sem parar); .feixe--ativo liga.
+  Use junto com .chanfrado. Dá 1 volta e para (nada se mexe sem parar, menos de 5 s); .feixe--ativo liga.
 */
 @property --feixe-angulo { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @property --feixe-cor { syntax: "<color>"; inherits: false; initial-value: transparent; }
@@ -153,11 +153,26 @@ button, input, select, textarea { font: inherit; color: inherit; }
     var(--cor-borda);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .feixe--ativo::before { animation: feixe-volta 3.2s linear 2; }
+  .feixe--ativo::before { animation: feixe-volta 3.2s linear 1; }
   .feixe--continuo::before { animation: feixe-volta 2.4s linear infinite; }
 }
 @keyframes feixe-volta {
   0% { --feixe-angulo: 0deg; --feixe-cor: transparent; }
   12%, 88% { --feixe-cor: var(--ciano-eletrico-forte); }
   100% { --feixe-angulo: 360deg; --feixe-cor: transparent; }
+}
+
+/*
+  Concordância com 1 vaga (copy 2.3): data-quando-n="singular" só aparece quando resta 1;
+  data-quando-n="plural" some nesse caso. Combine com data-quando-vagas="com".
+*/
+:root[data-vagas-n="1"] [data-quando-n="plural"],
+:root:not([data-vagas-n="1"]) [data-quando-n="singular"] {
+  display: none !important;
+}
+
+/* Alto contraste do Windows: os fundos dos pseudo-elementos somem, então as molduras viram borda real. */
+@media (forced-colors: active) {
+  .chanfrado { border: 1px solid CanvasText; }
+  .chanfrado:focus-visible { outline: 2px solid Highlight; }
 }

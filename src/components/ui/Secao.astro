@@ -20,7 +20,8 @@ const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
     color: var(--ink);
     padding-block: var(--secao-respiro);
   }
-  .secao--elevado { background: var(--surface-sunken); }
+  /* Faixa elevada: um passo perceptível acima do preto profundo, na direção do grafite */
+  .secao--elevado { background: color-mix(in srgb, var(--surface) 72%, var(--surface-raised)); }
   /* Linha de divisão com corte em 45° na esquerda, como as fendas do símbolo */
   .secao + .secao::before {
     --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);

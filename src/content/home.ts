@@ -15,6 +15,8 @@ export const topo = {
 export const hero = {
   selo: {
     comVagas: "5 vagas de fundador · 25% off · restam {X}",
+    // Copy 2.3: concordância quando resta 1 vaga.
+    comUmaVaga: "5 vagas de fundador · 25% off · resta 1",
     esgotado: "Vagas de fundador esgotadas",
     falha: "Vagas de fundador limitadas",
   },
@@ -147,6 +149,7 @@ export const projetos = {
   fundador: {
     titulo: "Seu projeto pode ser o próximo case.",
     texto: "Restam {X} vagas de fundador com 25% de desconto.",
+    textoUmaVaga: "Resta 1 vaga de fundador com 25% de desconto.",
     // Estado "falha ao carregar" (mapa técnico, arquivo 03): o cartão aparece sem número.
     textoSemNumero: "Restam vagas de fundador com 25% de desconto.",
     botao: "Quero ser fundador",
@@ -208,8 +211,8 @@ export const garantia = {
   intro: "Além disso, todo projeto tem:",
   itens: [
     { destaque: "Contrato", texto: "com escopo, prazos e valores definidos" },
-    { destaque: "Validação em cada etapa", texto: "com seu ok antes de avançar" },
-    { destaque: "Ajustes depois da entrega", texto: "conforme o plano" },
+    { destaque: "Validação em cada etapa,", texto: "com seu ok antes de avançar" },
+    { destaque: "Ajustes depois da entrega,", texto: "conforme o plano" },
   ],
   nota: "Garantia válida uma vez por projeto, solicitada em até 3 dias úteis após a apresentação do layout. Detalhes nas dúvidas frequentes.",
 } as const;
@@ -227,6 +230,7 @@ export const sobre = {
 
 export const urgencia = {
   titulo: "Só 5 vagas de fundador. Restam {X}.",
+  tituloUmaVaga: "Só 5 vagas de fundador. Resta 1.",
   paragrafos: [
     "As primeiras 5 empresas pagam **25% menos** em qualquer plano. Em troca, o projeto entra no portfólio e você grava um depoimento curto.",
     "E como cada site é feito por mim, do briefing à publicação, **a agenda é limitada a poucos projetos por mês.**",
@@ -270,12 +274,16 @@ export const ctaFinal = {
 export const ps = {
   texto:
     "**PS:** seu cliente já está procurando o que você vende. A pergunta é se ele vai encontrar uma página que convence, ou só um perfil que ele esquece. Restam **{X} vagas de fundador** com 25% de desconto e garantia no layout.",
+  textoUmaVaga:
+    "**PS:** seu cliente já está procurando o que você vende. A pergunta é se ele vai encontrar uma página que convence, ou só um perfil que ele esquece. Resta **1 vaga de fundador** com 25% de desconto e garantia no layout.",
   // Mapa técnico, arquivo 03: sem vagas, a frase sai; na falha, sai só o número.
   textoSemVagas:
     "**PS:** seu cliente já está procurando o que você vende. A pergunta é se ele vai encontrar uma página que convence, ou só um perfil que ele esquece.",
   textoSemNumero:
     "**PS:** seu cliente já está procurando o que você vende. A pergunta é se ele vai encontrar uma página que convence, ou só um perfil que ele esquece. Restam **vagas de fundador** com 25% de desconto e garantia no layout.",
   botao: "Garantir minha vaga",
+  // Sem vagas, o botão do PS segue o da Urgência (copy 2.3).
+  botaoSemVagas: "Verificar disponibilidade",
 } as const;
 
 export const rodape = {
