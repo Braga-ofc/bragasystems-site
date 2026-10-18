@@ -1,0 +1,248 @@
+---
+/*
+  Topo fixo (copy §1): logo, links da home e o WhatsApp sempre a um toque.
+  Computador (≥ 960 px): links em linha. Celular: os links vão para um menu (scripts/menu.ts)
+  e o botão de WhatsApp continua visível; abaixo de 380 px ele fica só com o ícone.
+*/
+import Botao from "../ui/Botao.astro";
+import Icone from "../ui/Icone.astro";
+import logo from "../../assets/logo/logo-horizontal-escuro.svg?raw";
+import { topo } from "../../content/home";
+import { site } from "../../config/site";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+// As âncoras apontam para a home (/#metodo), para funcionarem em qualquer página; "Quem sou" é página.
+const links = topo.links.map((l) => ({ texto: l.texto, href: "href" in l ? l.href : `/#${l.ancora}` }));
+const caminho = Astro.url.pathname.replace(/\/$/, "") || "/";
+const atual = (href: string) => (href === caminho ? "page" : undefined);
+---
+<header class="topo">
+  <div class="topo__barra">
+    <a class="topo__logo" href="/" aria-label={site.nome} set:html={logo} />
+
+    <nav class="topo__nav">
+      <ul class="topo__links" role="list">
+        {links.map((l) => (
+          <li><a class="topo__link" href={l.href} aria-current={atual(l.href)}>{l.texto}</a></li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="topo__acoes">
+      <Botao variante="secundario" icone="whatsapp" origem="topo" href={montarLinkWhatsapp("topo")}>{topo.botao}</Botao>
+      <button class="topo__menu chanfrado" type="button" aria-expanded="false" aria-controls="topo-menu" aria-label="Menu" data-menu-botao>
+        <Icone nome="menu" class="topo__menu-icone topo__menu-icone--abrir" />
+        <Icone nome="fechar" class="topo__menu-icone topo__menu-icone--fechar" />
+      </button>
+    </div>
+  </div>
+
+  <div class="topo__painel" id="topo-menu" hidden data-menu-painel>
+    <nav>
+      <ul class="topo__painel-links" role="list">
+        {links.map((l) => (
+          <li>
+            <a class="topo__painel-link" href={l.href} aria-current={atual(l.href)}>
+              <span>{l.texto}</span>
+              <Icone nome="seta" class="topo__painel-seta" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<script>
+  import "../../scripts/menu";
+</script>
+
+<style>
+  .topo {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .topo__barra {
+    width: min(100% - 2 * var(--gutter), var(--largura-max));
+    min-height: 63px; /* + 1 px da linha inferior = 64 px */
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+
+  /* Logo: só tamanho, nunca efeito */
+  .topo__logo {
+    display: flex;
+    align-items: center;
+    flex: none;
+    width: 128px;
+    min-height: 44px;
+    margin-right: auto;
+  }
+  .topo__logo :global(svg) { width: 100%; height: auto; }
+
+  /* Links do computador */
+  .topo__nav { display: none; }
+  .topo__links {
+    display: flex;
+    align-items: center;
+    gap: var(--s-1) var(--s-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .topo__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font: 500 0.9375rem/1 var(--font-sans);
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    text-decoration: none;
+    /* Sublinhado ciano de 1 px que corre da esquerda ao passar o mouse */
+    background: linear-gradient(var(--accent), var(--accent)) left calc(50% + 0.75em) / 0 1px no-repeat;
+    transition: color var(--dur) var(--ease-saida), background-size var(--dur) var(--ease-saida);
+  }
+  .topo__link:hover { color: var(--ink-strong); background-size: 100% 1px; }
+  .topo__link:active { color: var(--ink); }
+  .topo__link[aria-current="page"] { color: var(--ink-strong); background-size: 100% 1px; }
+
+  /* Ações: WhatsApp compacto e o botão do menu */
+  .topo__acoes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+  }
+  .topo__acoes :global(.botao) {
+    min-height: 44px;
+    padding: 0 10px;
+    gap: 8px;
+    font-size: 0.875rem;
+  }
+  .topo__acoes :global(.botao__icone) { display: none; width: 18px; height: 18px; }
+
+  /* Abaixo de 380 px: só o ícone; o texto continua para leitores de tela */
+  @media (max-width: 379.98px) {
+    .topo__acoes :global(.botao) { width: 44px; padding: 0; }
+    .topo__acoes :global(.botao__icone) { display: block; }
+    .topo__acoes :global(.botao__texto) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+  @media (min-width: 520px) {
+    .topo__acoes :global(.botao) { padding: 0 14px 0 16px; }
+    .topo__acoes :global(.botao__icone) { display: block; }
+  }
+
+  .topo__menu {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface);
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-strong);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: --cor-borda var(--dur) var(--ease-saida), --cor-fundo var(--dur) var(--ease-saida), translate var(--dur-rapida) var(--ease-saida);
+  }
+  .topo__menu:hover { --cor-borda: var(--ink-muted); }
+  .topo__menu:active { translate: 0 1px; }
+  .topo__menu:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .topo__menu[aria-expanded="true"] { --cor-fundo: var(--surface-sunken); }
+
+  /* Ícone menu ↔ fechar: troca com um giro de 45°, o ângulo da marca */
+  .topo__menu :global(.topo__menu-icone) {
+    grid-area: 1 / 1;
+    transition: opacity var(--dur-rapida) var(--ease-saida), rotate var(--dur) var(--ease-saida);
+  }
+  .topo__menu :global(.topo__menu-icone--fechar) { opacity: 0; rotate: -45deg; }
+  .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--abrir) { opacity: 0; rotate: 45deg; }
+  .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--fechar) { opacity: 1; rotate: 0deg; }
+
+  /* Painel do menu no celular: logo abaixo do topo, sem travar a rolagem da página */
+  .topo__painel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 28px 48px -20px var(--surface-sunken);
+  }
+  .topo__painel[hidden] { display: none; }
+  @media (prefers-reduced-motion: no-preference) {
+    .topo__painel:not([hidden]) { animation: topo-painel-abre var(--dur) var(--ease-saida); }
+  }
+  @keyframes topo-painel-abre {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  .topo__painel-links {
+    width: min(100% - 2 * var(--gutter), var(--largura-max));
+    margin: 0 auto;
+    padding: var(--s-2) 0 var(--s-6);
+    list-style: none;
+  }
+  .topo__painel-links li + li { border-top: 1px solid var(--line); }
+  .topo__painel-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-height: 56px;
+    font: 500 1.375rem/1.2 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color var(--dur-rapida) var(--ease-saida);
+  }
+  .topo__painel-link :global(.topo__painel-seta) {
+    color: var(--ink-muted);
+    transition: translate var(--dur) var(--ease-saida), color var(--dur) var(--ease-saida);
+  }
+  .topo__painel-link:hover :global(.topo__painel-seta),
+  .topo__painel-link:focus-visible :global(.topo__painel-seta) { translate: 4px 0; color: var(--accent); }
+  .topo__painel-link:active { color: var(--ink); }
+  .topo__painel-link:focus-visible { outline-offset: -2px; }
+  .topo__painel-link[aria-current="page"] :global(.topo__painel-seta) { color: var(--accent); }
+
+  @media (min-width: 960px) {
+    .topo__barra { min-height: 71px; gap: 0; }
+    .topo__logo { width: 148px; }
+    .topo__nav { display: block; }
+    .topo__menu, .topo__painel { display: none; }
+    /* Divisória fina entre os links e o botão */
+    .topo__acoes {
+      gap: 0;
+      margin-left: var(--s-6);
+      padding-left: var(--s-6);
+      background: linear-gradient(var(--line), var(--line)) left center / 1px 24px no-repeat;
+    }
+    .topo__acoes :global(.botao) { padding: 0 16px 0 18px; font-size: 0.9375rem; }
+  }
+</style>

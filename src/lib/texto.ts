@@ -1,6 +1,11 @@
-/** Escapa HTML e transforma **trecho** em <strong>. Use com set:html em textos da copy. */
+/** Troca aspas retas em pares por aspas tipográficas (“ ”), sem mudar o texto da copy. */
+export function aspas(texto: string): string {
+  return texto.replace(/"([^"]*)"/g, "\u201C$1\u201D");
+}
+
+/** Escapa HTML, ajusta as aspas e transforma **trecho** em <strong>. Use com set:html em textos da copy. */
 export function rich(texto: string): string {
-  const seguro = texto
+  const seguro = aspas(texto)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

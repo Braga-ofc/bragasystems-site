@@ -1,0 +1,175 @@
+---
+/*
+  Benefícios (copy §7): uma placa de especificação, não uma fileira de cartões.
+  Cada linha: o que muda (Space Grotesk, forte) e como (Inter, apagado), separados por linhas
+  finas e, no computador, por uma régua vertical. O corte em 45° da placa tem um traço ciano
+  aceso: o único destaque do bloco. Com mouse, um brilho neutro segue o cursor na linha sob ele
+  (Magic Card do Magic UI, MIT, recriado em CSS e TS).
+*/
+import Secao from "../ui/Secao.astro";
+import { beneficios } from "../../content/home";
+import { aspas } from "../../lib/texto";
+---
+<Secao class="beneficios">
+  <div class="beneficios__grade">
+    <h2 class="beneficios__titulo">{beneficios.titulo}</h2>
+
+    <div class="beneficios__placa chanfrado" data-revela>
+      <svg class="beneficios__led" width="21" height="21" viewBox="0 0 21 21" fill="none" aria-hidden="true">
+        <path d="M0.5 20.5L20.5 0.5" stroke="currentColor" stroke-width="1.5" />
+      </svg>
+      <ul class="beneficios__lista" role="list" data-beneficios-luz>
+        {beneficios.itens.map((item) => (
+          <li class="beneficios__item">
+            <p class="beneficios__destaque">{item.destaque}</p>
+            <p class="beneficios__texto">{aspas(item.texto)}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
+  <script>
+    // Brilho que segue o cursor na linha sob ele (Magic Card do Magic UI, MIT, recriado em TS).
+    // Só com mouse ou caneta. No toque não há brilho; com movimento reduzido ele fica parado no centro.
+    const lista = document.querySelector<HTMLElement>("[data-beneficios-luz]");
+    const ponteiroFino = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (lista && ponteiroFino && !semMovimento) {
+      let quadro = 0;
+      let x = 0;
+      let y = 0;
+      let alvo: HTMLElement | null = null;
+
+      lista.addEventListener("pointermove", (evento) => {
+        alvo = (evento.target as Element).closest<HTMLElement>(".beneficios__item");
+        x = evento.clientX;
+        y = evento.clientY;
+        if (quadro || !alvo) return;
+        quadro = requestAnimationFrame(() => {
+          quadro = 0;
+          if (!alvo) return;
+          const caixa = alvo.getBoundingClientRect();
+          alvo.style.setProperty("--luz-x", `${Math.round(x - caixa.left)}px`);
+          alvo.style.setProperty("--luz-y", `${Math.round(y - caixa.top)}px`);
+        });
+      });
+    }
+  </script>
+</Secao>
+
+<style>
+  .beneficios__grade { display: grid; min-width: 0; }
+
+  .beneficios__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .beneficios__placa {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    min-width: 0;
+    margin-top: var(--s-7);
+  }
+
+  /* O traço aceso sobre o corte em 45° da placa */
+  .beneficios__led {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 21px;
+    height: 21px;
+    overflow: visible;
+    color: var(--accent);
+    pointer-events: none;
+    filter: drop-shadow(0 0 4px var(--brilho));
+  }
+
+  /* A lista acompanha o recorte da placa, para o brilho não vazar pelos cantos */
+  .beneficios__lista {
+    --recorte: calc(var(--c) - 1px);
+    margin: 1px;
+    padding: 0;
+    list-style: none;
+    clip-path: polygon(
+      var(--recorte) 0, 100% 0, 100% calc(100% - var(--recorte)),
+      calc(100% - var(--recorte)) 100%, 0 100%, 0 var(--recorte)
+    );
+  }
+
+  .beneficios__item {
+    position: relative;
+    display: grid;
+    gap: var(--s-2);
+    padding: var(--s-5);
+  }
+  .beneficios__item + .beneficios__item { border-top: 1px solid var(--line); }
+
+  .beneficios__destaque {
+    position: relative;
+    font: 500 var(--t-h3)/1.3 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .beneficios__texto {
+    position: relative;
+    max-width: 52ch;
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+
+  /* Brilho neutro sob o cursor; sem script (ou com movimento reduzido), parado no centro da linha */
+  .beneficios__item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      280px circle at var(--luz-x, 50%) var(--luz-y, 50%),
+      color-mix(in srgb, var(--ink-strong) 7%, transparent),
+      transparent 70%
+    );
+    transition: opacity var(--dur) var(--ease-saida);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .beneficios__item:hover::before { opacity: 1; }
+  }
+
+  @media (min-width: 960px) {
+    .beneficios__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    .beneficios__titulo { grid-column: 1 / span 7; }
+    .beneficios__placa { grid-column: 1 / -1; margin-top: var(--s-8); }
+
+    /* Tabela: o que muda (5/12) | como (7/12), com a régua vertical na divisa */
+    .beneficios__item {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: baseline;
+      gap: 0;
+      padding: var(--s-5) var(--s-6);
+    }
+    .beneficios__item::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(var(--s-6) + (100% - 2 * var(--s-6)) * 5 / 12);
+      width: 1px;
+      background: var(--line);
+    }
+    .beneficios__destaque { padding-right: var(--s-6); }
+    .beneficios__texto { padding-left: var(--s-6); }
+  }
+</style>

@@ -5,10 +5,12 @@ interface Props {
   variante?: "primario" | "secundario";
   href?: string;
   tipo?: "button" | "submit";
-  icone?: "whatsapp" | "seta" | null;
+  icone?: "whatsapp" | "seta" | "externo" | null;
   carregando?: boolean;
   desativado?: boolean;
   larguraTotal?: boolean;
+  /** Abre o link em nova aba (links de WhatsApp já abrem sozinhos). */
+  novaAba?: boolean;
   /** Origem do clique de WhatsApp (copy §21), usada na medição. */
   origem?: string;
   class?: string;
@@ -22,11 +24,13 @@ const {
   carregando = false,
   desativado = false,
   larguraTotal = false,
+  novaAba = false,
   origem,
   class: classe,
 } = Astro.props;
 
 const ehWhatsapp = href?.startsWith("https://wa.me/");
+const abreNovaAba = ehWhatsapp || novaAba;
 const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "botao--cheio", classe];
 ---
 {href ? (
@@ -35,8 +39,8 @@ const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "bo
     href={desativado ? undefined : href}
     aria-disabled={desativado ? "true" : undefined}
     aria-busy={carregando ? "true" : undefined}
-    target={ehWhatsapp ? "_blank" : undefined}
-    rel={ehWhatsapp ? "noopener" : undefined}
+    target={abreNovaAba ? "_blank" : undefined}
+    rel={abreNovaAba ? "noopener" : undefined}
     data-origem={origem}
   >
     <span class="botao__texto"><slot /></span>

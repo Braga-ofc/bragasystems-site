@@ -1,0 +1,115 @@
+---
+/*
+  Proposta de valor (copy §5), seção clara.
+  O primeiro parágrafo é o h2: a afirmação em tinta forte, a consequência ("nada acontece") apagada.
+  Os demais descem em degraus de 3 colunas (1 → 4 → 7) até um trilho que atravessa a seção:
+  o nó em ciano profundo (o único acento) fica no meio dele, onde começa a frase
+  "a conversa já começa no meio da venda". A página faz a primeira metade; você, a segunda.
+*/
+import Secao from "../ui/Secao.astro";
+import { proposta } from "../../content/home";
+
+const [titulo, antes, meio, depois] = proposta.paragrafos;
+// Separa a primeira frase do título só para dar o tom; o texto continua idêntico ao da copy.
+const [afirmacao, ...consequencia] = titulo.split(/(?<=\.)\s+/);
+const resto = consequencia.join(" ");
+---
+<Secao tema="claro" class="proposta">
+  <div class="proposta__grade">
+    <h2 class="proposta__titulo">
+      {afirmacao}{resto && <> <span class="proposta__consequencia">{resto}</span></>}
+    </h2>
+
+    <p class="proposta__antes">{antes}</p>
+
+    <div class="proposta__virada" data-revela>
+      <span class="proposta__trilho" aria-hidden="true"></span>
+      <span class="proposta__no" aria-hidden="true"></span>
+      <p class="proposta__meio">{meio}</p>
+      <p class="proposta__depois">{depois}</p>
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .proposta__grade { display: grid; min-width: 0; }
+
+  .proposta__titulo {
+    max-width: 20ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+  }
+  .proposta__consequencia { color: var(--ink-muted); }
+
+  .proposta__antes {
+    max-width: 52ch;
+    margin-top: var(--s-6);
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* A virada: trilho fino, nó no ponto onde a conversa começa, e a frase logo abaixo dele */
+  .proposta__virada {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: var(--s-8);
+  }
+  .proposta__trilho,
+  .proposta__no { grid-row: 1; grid-column: 1 / -1; }
+  .proposta__trilho {
+    align-self: center;
+    height: 1px;
+    background: var(--line-forte);
+  }
+  .proposta__no {
+    justify-self: start;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  .proposta__meio {
+    max-width: 24ch;
+    margin-top: var(--s-5);
+    font: 500 var(--t-h2)/1.25 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .proposta__depois {
+    max-width: 46ch;
+    margin-top: var(--s-4);
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  @media (min-width: 960px) {
+    .proposta__grade,
+    .proposta__virada {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    /* A afirmação da página: aqui o título sobe para o tamanho de exibição */
+    .proposta__titulo {
+      grid-column: 1 / span 9;
+      max-width: 22ch;
+      font-size: var(--t-display);
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+    }
+    .proposta__antes { grid-column: 4 / span 6; margin-top: var(--s-7); }
+    .proposta__virada { grid-column: 1 / -1; margin-top: var(--s-9); }
+    .proposta__trilho { grid-column: 1 / -1; }
+    /* O nó cai no meio do trilho, centrado no início da coluna 7, onde a frase começa */
+    .proposta__no { grid-column: 7 / -1; translate: -7px 0; }
+    .proposta__meio,
+    .proposta__depois { grid-column: 7 / -1; }
+    .proposta__meio { margin-top: var(--s-6); }
+  }
+</style>

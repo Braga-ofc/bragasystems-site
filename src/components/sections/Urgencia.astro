@@ -1,0 +1,178 @@
+---
+/*
+  §14 Urgência. Com vagas, o bloco é um instrumento: o medidor das 5 vagas, grande, numa janela
+  chanfrada, e a leitura logo abaixo ("Restam {X}." na tinta forte, o fato fixo apagado).
+  Quando o medidor entra na tela, ele religa e as vagas acendem uma a uma (a mesma entrada do
+  medidor do hero, refeita só aqui). Sem vagas ou na falha do contador, vale a versão "agenda
+  limitada", com a mensagem geral do WhatsApp: a de fundador não serve sem vaga.
+  As duas versões têm h2; só a do estado atual fica visível (mapa técnico, arquivo 03).
+*/
+import Secao from "../ui/Secao.astro";
+import Botao from "../ui/Botao.astro";
+import MedidorVagas from "../ui/MedidorVagas.astro";
+import { urgencia } from "../../content/home";
+import { comVagas, rich } from "../../lib/texto";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+interface Props {
+  /** Vagas do último build (ou o máximo, se não deu para ler). O contador atualiza ao vivo. */
+  vagas: number;
+}
+const { vagas } = Astro.props;
+
+// "Só 5 vagas de fundador." e "Restam {X}.": cada frase numa linha. O texto continua o da copy.
+const frases = urgencia.titulo.split(/(?<=\.)\s+/);
+const fato = frases.length > 1 ? frases.slice(0, -1).join(" ") : "";
+const leitura = frases[frases.length - 1];
+---
+<Secao class="urgencia">
+  <div class="urgencia__com" data-quando-vagas="com">
+    <div class="urgencia__instrumento">
+      <div class="urgencia__janela chanfrado" data-urgencia-medidor>
+        <MedidorVagas tamanho="lg" />
+      </div>
+      <h2 class="urgencia__titulo">
+        {fato && <span class="urgencia__fato">{fato}</span>}{fato && " "}<span class="urgencia__leitura" set:html={comVagas(rich(leitura), vagas)} />
+      </h2>
+    </div>
+
+    <div class="urgencia__corpo">
+      {urgencia.paragrafos.map((paragrafo) => <p class="urgencia__texto" set:html={rich(paragrafo)} />)}
+      <div class="urgencia__acao">
+        <Botao href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{urgencia.botao}</Botao>
+      </div>
+    </div>
+  </div>
+
+  <div class="urgencia__sem" data-quando-vagas="esgotado falha">
+    <h2 class="urgencia__titulo urgencia__titulo--sem">{urgencia.semVagas.titulo}</h2>
+    <div class="urgencia__acao">
+      <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
+    </div>
+  </div>
+
+  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
+  <script>
+    // Religa o medidor quando ele entra na tela: as vagas acendem uma a uma, uma vez só.
+    // Só apaga antes o que ainda está abaixo da tela; sem JavaScript ou com movimento
+    // reduzido, o medidor já aparece aceso.
+    const janela = document.querySelector<HTMLElement>("[data-urgencia-medidor]");
+    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (
+      janela &&
+      !semMovimento &&
+      "IntersectionObserver" in window &&
+      janela.getBoundingClientRect().top > window.innerHeight
+    ) {
+      janela.dataset.urgenciaMedidor = "pendente";
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          if (!entradas.some((entrada) => entrada.isIntersecting)) return;
+          observador.disconnect();
+          janela.dataset.urgenciaMedidor = "ligado";
+        },
+        { rootMargin: "0px 0px -15% 0px", threshold: 1 },
+      );
+      observador.observe(janela);
+    }
+  </script>
+</Secao>
+
+<style>
+  .urgencia__com,
+  .urgencia__sem {
+    display: grid;
+    min-width: 0;
+  }
+
+  /* A janela do instrumento: o medidor ocupa a largura toda, em 45° */
+  .urgencia__janela {
+    --c: var(--chanfro);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface-sunken);
+    padding: var(--s-3);
+    min-width: 0;
+  }
+  .urgencia__janela :global(.medidor) {
+    --alt: 20px;
+    display: flex;
+    width: 100%;
+    gap: var(--s-2);
+  }
+  .urgencia__janela :global(.medidor__seg) { flex: 1 1 0; width: auto; }
+
+  /* Antes de entrar na tela: o medidor some e para; ao ligar, a entrada dele recomeça do zero */
+  .urgencia__janela[data-urgencia-medidor="pendente"] :global(.medidor) { opacity: 0; }
+  .urgencia__janela[data-urgencia-medidor="pendente"] :global(.medidor__seg) { animation: none; }
+
+  .urgencia__titulo {
+    max-width: 18ch;
+    margin-top: var(--s-6);
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .urgencia__fato,
+  .urgencia__leitura { display: block; }
+  .urgencia__fato { color: var(--ink-muted); }
+  .urgencia__leitura { color: var(--ink-strong); }
+
+  .urgencia__corpo { display: grid; gap: var(--s-4); min-width: 0; margin-top: var(--s-5); }
+  .urgencia__texto {
+    max-width: 52ch;
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .urgencia__texto :global(strong) { font-weight: 600; color: var(--ink-strong); }
+
+  .urgencia__acao { margin-top: var(--s-3); }
+  .urgencia__acao :global(.botao) { width: 100%; }
+
+  /* Sem vagas: só o título e o botão */
+  .urgencia__titulo--sem { max-width: 22ch; margin-top: 0; }
+  .urgencia__sem .urgencia__acao { margin-top: var(--s-6); }
+
+  @media (min-width: 640px) {
+    .urgencia__acao :global(.botao) { width: auto; }
+  }
+
+  @media (min-width: 720px) {
+    .urgencia__janela { padding: var(--s-4); }
+    .urgencia__janela :global(.medidor) { --alt: 28px; gap: var(--s-3); }
+  }
+
+  /*
+    Computador: o instrumento e a leitura em 1–7; o texto e o botão em 9–12, assentados na
+    base da leitura. Sem vagas: o título em 1–8 e o botão na base, à direita.
+  */
+  @media (min-width: 960px) {
+    .urgencia__com,
+    .urgencia__sem {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    .urgencia__com { align-items: end; }
+    .urgencia__instrumento { grid-column: 1 / span 7; min-width: 0; }
+    .urgencia__janela { padding: var(--s-5); }
+    .urgencia__janela :global(.medidor) { --alt: 36px; gap: var(--s-4); }
+    .urgencia__com .urgencia__titulo {
+      max-width: none;
+      margin-top: var(--s-7);
+      font-size: var(--t-display);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+    }
+    .urgencia__corpo { grid-column: 9 / -1; margin-top: 0; }
+
+    .urgencia__sem { align-items: end; }
+    .urgencia__titulo--sem { grid-column: 1 / span 8; }
+    .urgencia__sem .urgencia__acao {
+      grid-column: 9 / -1;
+      justify-self: end;
+      margin-top: 0;
+    }
+  }
+</style>

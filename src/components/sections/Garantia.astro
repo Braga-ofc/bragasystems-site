@@ -1,0 +1,139 @@
+---
+/*
+  §12 Garantia, seção clara. A promessa vem selada num módulo chanfrado com borda em ciano
+  profundo (o único acento do bloco): a promessa em cima, a condição embaixo, separadas pela
+  linha com corte em 45°. As cláusulas ficam fora do selo, à direita e assentadas na base dele
+  no computador, como os termos de um contrato; a nota leva às dúvidas frequentes.
+*/
+import Secao from "../ui/Secao.astro";
+import Icone from "../ui/Icone.astro";
+import { garantia } from "../../content/home";
+import { rich } from "../../lib/texto";
+
+// "Detalhes nas dúvidas frequentes": o trecho vira link para a seção #duvidas. O texto não muda.
+const nota = rich(garantia.nota).replace("dúvidas frequentes", '<a href="#duvidas">dúvidas frequentes</a>');
+---
+<Secao tema="claro" class="garantia">
+  <div class="garantia__grade">
+    <div class="garantia__selo chanfrado" data-revela>
+      <h2 class="garantia__titulo">{garantia.titulo}</h2>
+      <span class="garantia__divisa" aria-hidden="true"></span>
+      <p class="garantia__texto">{garantia.texto}</p>
+    </div>
+
+    <div class="garantia__termos">
+      <p class="garantia__intro">{garantia.intro}</p>
+      <ul class="garantia__itens" role="list">
+        {garantia.itens.map((item) => (
+          <li class="garantia__item">
+            <Icone nome="check" class="garantia__check" />
+            <p class="garantia__clausula">
+              <strong>{item.destaque}</strong> <span>{item.texto}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+      <p class="garantia__nota" set:html={nota} />
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .garantia__grade { display: grid; min-width: 0; }
+
+  /* O selo da promessa: o único acento da seção (ciano profundo, via --accent) */
+  .garantia__selo {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--accent);
+    --cor-fundo: var(--surface-raised);
+    display: grid;
+    min-width: 0;
+    padding: var(--s-6) var(--s-5) var(--s-5);
+  }
+
+  .garantia__titulo {
+    max-width: 20ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+  }
+
+  /* Linha fina com o início cortado em 45°, a mesma das divisões entre seções */
+  .garantia__divisa {
+    display: block;
+    height: 9px;
+    margin-block: var(--s-6) var(--s-5);
+    background:
+      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
+  }
+
+  .garantia__texto {
+    max-width: 40ch;
+    font-size: var(--t-body-lg);
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  /* As cláusulas */
+  .garantia__termos { display: grid; min-width: 0; margin-top: var(--s-7); }
+  .garantia__intro { font-weight: 500; color: var(--ink); }
+
+  .garantia__itens {
+    display: grid;
+    margin: var(--s-4) 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .garantia__item {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    column-gap: var(--s-3);
+    align-items: start;
+    padding-block: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .garantia__item :global(.garantia__check) {
+    margin-top: 2px;
+    color: var(--ink-strong);
+  }
+  .garantia__clausula { display: grid; gap: 2px; line-height: 1.5; }
+  .garantia__clausula strong { font-weight: 600; color: var(--ink-strong); }
+  .garantia__clausula span { color: var(--ink-muted); }
+
+  .garantia__nota {
+    max-width: 52ch;
+    margin-top: var(--s-5);
+    font-size: var(--t-small);
+    line-height: 1.55;
+    color: var(--ink-muted);
+  }
+  /* Link discreto: o acento da seção já é o selo */
+  .garantia__nota :global(a) {
+    color: inherit;
+    text-decoration-color: var(--line-forte);
+    transition: color var(--dur) var(--ease-saida), text-decoration-color var(--dur) var(--ease-saida);
+  }
+  .garantia__nota :global(a:hover) { color: var(--ink-strong); text-decoration-color: currentColor; }
+
+  @media (min-width: 720px) {
+    .garantia__selo { padding: var(--s-7) var(--s-7) var(--s-6); }
+  }
+
+  /* Computador: o selo em 7/12; os termos em 9–12, assentados na base do selo */
+  @media (min-width: 960px) {
+    .garantia__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: end;
+    }
+    .garantia__selo {
+      grid-column: 1 / span 7;
+      padding: var(--s-8) var(--s-7) var(--s-7);
+    }
+    .garantia__termos { grid-column: 9 / -1; margin-top: 0; }
+  }
+</style>

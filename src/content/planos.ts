@@ -7,6 +7,7 @@ export const secaoPlanos = {
   texto: "Preços abertos, sem surpresa. Todos os planos incluem a copy de conversão.",
   nota: "Preço de fundador válido para as 5 primeiras vagas.",
   precoFundadorRotulo: "preço de fundador",
+  aPartirDe: "A partir de",
 } as const;
 
 export interface Plano {

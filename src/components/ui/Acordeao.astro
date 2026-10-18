@@ -1,0 +1,121 @@
+---
+/*
+  Acordeão das dúvidas (mapa técnico, arquivo 06): <details>/<summary>, funciona sem JavaScript.
+  Vários podem ficar abertos (sem `name`). O botão é um módulo chanfrado com o "mais" desenhado,
+  que gira 45° e vira o "fechar" ao abrir. Onde o navegador permite, a resposta abre deslizando
+  (::details-content + interpolate-size); nos outros, abre na hora.
+*/
+import Icone from "./Icone.astro";
+import { rich } from "../../lib/texto";
+
+interface Props {
+  itens: ReadonlyArray<{ pergunta: string; resposta: string }>;
+  class?: string;
+}
+const { itens, class: classe } = Astro.props;
+---
+<div class:list={["acordeao", classe]}>
+  {itens.map((item) => (
+    <details class="acordeao__item">
+      <summary class="acordeao__pergunta">
+        <span class="acordeao__texto">{item.pergunta}</span>
+        <span class="acordeao__botao chanfrado" aria-hidden="true">
+          <Icone nome="mais" tamanho={18} class="acordeao__icone" />
+        </span>
+      </summary>
+      <div class="acordeao__resposta">
+        <p set:html={rich(item.resposta)} />
+      </div>
+    </details>
+  ))}
+</div>
+
+<style>
+  .acordeao {
+    --botao: 36px;
+    border-bottom: 1px solid var(--line);
+  }
+  .acordeao__item { border-top: 1px solid var(--line); }
+
+  /* A linha inteira é o alvo de toque: no mínimo 64 px de altura */
+  .acordeao__pergunta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--botao);
+    align-items: center;
+    gap: var(--s-4);
+    min-height: 64px;
+    padding-block: var(--s-4);
+    list-style: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    font: 500 var(--t-body-lg)/1.35 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  .acordeao__pergunta::-webkit-details-marker { display: none; }
+  .acordeao__pergunta::marker { content: ""; }
+
+  .acordeao__botao {
+    --c: 8px;
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    display: grid;
+    place-items: center;
+    width: var(--botao);
+    height: var(--botao);
+    color: var(--ink-muted);
+    transition:
+      --cor-borda var(--dur) var(--ease-saida),
+      --cor-fundo var(--dur) var(--ease-saida),
+      color var(--dur) var(--ease-saida),
+      translate var(--dur-rapida) var(--ease-saida);
+  }
+  .acordeao__botao :global(.acordeao__icone) { transition: rotate var(--dur) var(--ease-saida); }
+
+  @media (hover: hover) {
+    .acordeao__pergunta:hover .acordeao__botao { --cor-borda: var(--line-forte); color: var(--ink-strong); }
+  }
+  .acordeao__pergunta:active .acordeao__botao { translate: 0 1px; }
+
+  /* Aberto: o "mais" gira 45° e vira "fechar"; o módulo acende em grafite */
+  .acordeao__item[open] .acordeao__botao {
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-raised);
+    color: var(--ink-strong);
+  }
+  .acordeao__item[open] :global(.acordeao__icone) { rotate: 45deg; }
+
+  /* A resposta fica na coluna da pergunta, sem passar por baixo do botão */
+  .acordeao__resposta { padding: 0 calc(var(--botao) + var(--s-4)) var(--s-5) 0; }
+  .acordeao__resposta p {
+    max-width: 62ch;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .acordeao__resposta :global(strong) { font-weight: 600; color: var(--ink-strong); }
+
+  /* Abrir deslizando, só onde o navegador sabe animar até a altura do conteúdo */
+  @supports (interpolate-size: allow-keywords) and selector(::details-content) {
+    .acordeao { interpolate-size: allow-keywords; }
+    .acordeao__item::details-content {
+      block-size: 0;
+      overflow-y: clip;
+      transition:
+        block-size var(--dur) var(--ease-saida),
+        content-visibility var(--dur) var(--ease-saida) allow-discrete;
+    }
+    .acordeao__item[open]::details-content { block-size: auto; }
+  }
+
+  @media (min-width: 960px) {
+    .acordeao { --botao: 40px; }
+    .acordeao__pergunta {
+      min-height: 72px;
+      padding-block: var(--s-5);
+      font-size: var(--t-h3);
+      gap: var(--s-5);
+    }
+    .acordeao__resposta { padding-right: calc(var(--botao) + var(--s-5)); padding-bottom: var(--s-6); }
+  }
+</style>

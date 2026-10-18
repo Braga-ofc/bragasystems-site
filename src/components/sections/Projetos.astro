@@ -1,0 +1,272 @@
+---
+/*
+  §8 Projetos. O case EBEN como um módulo preenchido do painel (a ficha) com a voz da cliente
+  presa a ele por um traço; ao lado, o próximo encaixe ainda livre: o cartão de fundador, com a
+  grade aparecendo por dentro e as vagas medidas ao vivo. Sem print do site, nada de mockup
+  falso: o case é tipográfico.
+  Vagas (mapa técnico, arquivo 03): o cartão aparece com {X}, sem número na falha e some no
+  esgotado; aí o case ocupa a largura toda e a voz da cliente vai para o lado da ficha.
+*/
+import Secao from "../ui/Secao.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import Botao from "../ui/Botao.astro";
+import MedidorVagas from "../ui/MedidorVagas.astro";
+import Depoimento from "../ui/Depoimento.astro";
+import { projetos } from "../../content/home";
+import { comVagas, rich } from "../../lib/texto";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+interface Props {
+  /** Vagas do último build (ou o máximo, se não deu para ler). O contador atualiza ao vivo. */
+  vagas: number;
+}
+const { vagas } = Astro.props;
+const { eben, fundador } = projetos;
+
+// Para onde o botão leva: o endereço do site no ar, sem o protocolo (vem do próprio link da copy).
+const enderecoCase = new URL(eben.url).host;
+---
+<Secao id="projetos" tema="elevado">
+  <div class="projetos">
+    <header class="projetos__cabeca">
+      <Rotulo>{projetos.rotulo}</Rotulo>
+      <h2 class="projetos__titulo">{projetos.titulo}</h2>
+    </header>
+
+    <div class="projetos__grade">
+      <article class="projetos-case" aria-labelledby="projetos-eben" data-revela>
+        <div class="projetos-case__corpo">
+          <div class="projetos-ficha chanfrado">
+            <div class="projetos-ficha__cabeca">
+              <h3 id="projetos-eben" class="projetos-ficha__nome">{eben.nome}</h3>
+              <p class="projetos-ficha__tipo">{eben.tipo}</p>
+            </div>
+
+            <dl class="projetos-ficha__dados">
+              <div class="projetos-ficha__linha">
+                <dt>{eben.desafioRotulo}</dt>
+                <dd>{eben.desafio}</dd>
+              </div>
+              <div class="projetos-ficha__linha">
+                <dt>{eben.solucaoRotulo}</dt>
+                <dd>{eben.solucao}</dd>
+              </div>
+            </dl>
+
+            <div class="projetos-ficha__acao">
+              <Botao variante="secundario" href={eben.url} icone="externo" novaAba class="projetos-ficha__link">{eben.botao}</Botao>
+              <span class="projetos-ficha__endereco">{enderecoCase}</span>
+            </div>
+          </div>
+
+          <div class="projetos-case__voz">
+            <Depoimento texto={eben.depoimento} destaque={eben.frase} autora={eben.autora} cargo={eben.cargo} />
+          </div>
+        </div>
+      </article>
+
+      <div class="projetos-fundador chanfrado" data-quando-vagas="com falha" data-revela>
+        <span class="projetos-fundador__grade grade" aria-hidden="true"></span>
+        <div class="projetos-fundador__conteudo">
+          <div class="projetos-fundador__leitura">
+            <MedidorVagas tamanho="sm" />
+            <span class="projetos-fundador__traco" aria-hidden="true"></span>
+          </div>
+          <h3 class="projetos-fundador__titulo">{fundador.titulo}</h3>
+          <p class="projetos-fundador__texto" data-quando-vagas="com" set:html={comVagas(rich(fundador.texto), vagas)} />
+          <p class="projetos-fundador__texto" data-quando-vagas="falha" set:html={rich(fundador.textoSemNumero)} />
+          <Botao href={montarLinkWhatsapp("fundador")} icone="whatsapp" origem="fundador" larguraTotal>{fundador.botao}</Botao>
+        </div>
+      </div>
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .projetos { display: grid; gap: var(--s-7); }
+
+  .projetos__cabeca { display: grid; gap: var(--s-4); justify-items: start; }
+  .projetos__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .projetos__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-7);
+    align-items: start;
+  }
+
+  /* ---------- O case ---------- */
+  .projetos-case {
+    container: projetos-case / inline-size;
+    min-width: 0;
+  }
+  .projetos-case__corpo { display: grid; }
+
+  /* A ficha: módulo com cabeçalho, leitura do desafio e da solução, e a saída para o site no ar */
+  .projetos-ficha {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    --pad: var(--s-5);
+    container: projetos-ficha / inline-size;
+    display: grid;
+  }
+  .projetos-ficha > * { padding-inline: var(--pad); }
+
+  .projetos-ficha__cabeca {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--pad) var(--s-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .projetos-ficha__nome { font-size: var(--t-h2); font-weight: 500; line-height: 1.15; }
+  .projetos-ficha__tipo {
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .projetos-ficha__dados { margin: 0; display: grid; }
+  .projetos-ficha__linha {
+    max-width: 64ch;
+    padding-block: var(--s-5);
+    line-height: 1.65;
+  }
+  .projetos-ficha__linha + .projetos-ficha__linha { border-top: 1px solid var(--line); }
+  .projetos-ficha__linha dt,
+  .projetos-ficha__linha dd { display: inline; margin: 0; }
+  .projetos-ficha__linha dt { font-weight: 600; color: var(--ink-strong); }
+  .projetos-ficha__linha dt::after { content: " "; }
+  .projetos-ficha__linha dd { color: var(--ink); }
+
+  .projetos-ficha__acao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+    padding-block: var(--s-5) var(--pad);
+    border-top: 1px solid var(--line);
+  }
+  .projetos-ficha__endereco {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font: 400 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+  }
+
+  /*
+    A voz da cliente: um traço fino sai da ficha, desce ao lado da citação e vira em 90° até a cunha
+    da autora. O traço nasce na primeira linha da autoria e sobe; a voz corta o que passar do topo.
+  */
+  .projetos-case__voz {
+    --traco-x: var(--s-5);
+    --recuo: calc(var(--s-5) * 2);
+    overflow: hidden;
+    padding: var(--s-7) 0 2px var(--recuo);
+  }
+  .projetos-case__voz :global(.depoimento__autoria) { position: relative; }
+  .projetos-case__voz :global(.depoimento__autoria)::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--traco-x) - var(--recuo));
+    bottom: calc(100% - 12px);
+    bottom: calc(100% - 0.62lh); /* altura da cunha na primeira linha */
+    width: calc(var(--recuo) - var(--traco-x) - var(--s-2));
+    height: 300vh;
+    border-left: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    pointer-events: none;
+  }
+
+  /* ---------- O próximo encaixe: cartão de fundador ---------- */
+  .projetos-fundador {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-sunken);
+    min-width: 0;
+  }
+  /* Grade fina por dentro (utilitário .grade), saindo do canto de cima e se dissolvendo */
+  .projetos-fundador__grade {
+    --grade-cor: color-mix(in srgb, var(--line) 70%, transparent);
+    --grade-origem: right top;
+    --grade-mascara: radial-gradient(ellipse 95% 75% at 100% 0%, #000 10%, transparent 80%);
+    position: absolute;
+    inset: 1px;
+    pointer-events: none;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+  .projetos-fundador__conteudo {
+    position: relative;
+    display: grid;
+    gap: var(--s-5);
+    padding: var(--s-6) var(--s-5) var(--s-5);
+  }
+  .projetos-fundador__leitura { display: flex; align-items: center; gap: var(--s-3); }
+  .projetos-fundador__traco { flex: 1; height: 1px; background: var(--line); }
+  .projetos-fundador__titulo {
+    max-width: 16ch;
+    font-size: var(--t-h2);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .projetos-fundador__texto { max-width: 36ch; color: var(--ink); }
+  .projetos-fundador__texto :global([data-vagas]) { font-weight: 600; color: var(--ink-strong); }
+  .projetos-fundador__conteudo :global(.botao) { margin-top: var(--s-2); }
+
+  @media (min-width: 720px) {
+    .projetos-ficha { --pad: var(--s-6); }
+    .projetos-case__voz { --traco-x: var(--s-6); --recuo: calc(var(--s-6) + var(--s-6)); }
+    .projetos-fundador__conteudo { padding: var(--s-7) var(--s-6) var(--s-6); }
+  }
+
+  /* Ficha larga: o rótulo do desafio e da solução vira coluna, como uma leitura */
+  @container projetos-ficha (min-width: 560px) {
+    .projetos-ficha__linha {
+      display: grid;
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+    .projetos-ficha__linha dt,
+    .projetos-ficha__linha dd { display: block; }
+    .projetos-ficha__linha dt::after { content: none; }
+  }
+
+  /* Case na largura toda (sem vagas): a voz da cliente vai para o lado da ficha */
+  @container projetos-case (min-width: 880px) {
+    .projetos-case__corpo {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      align-items: start;
+    }
+    .projetos-case__voz {
+      --traco-x: var(--s-6);
+      --recuo: calc(var(--s-6) + var(--s-7));
+      padding-top: var(--s-6);
+    }
+  }
+
+  @media (min-width: 960px) {
+    .projetos { gap: var(--s-8); }
+    .projetos__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--s-5);
+    }
+    .projetos-case { grid-column: 1 / span 7; }
+    /* Dupla classe: vence o position: relative do .chanfrado global */
+    .projetos-fundador.chanfrado {
+      grid-column: 8 / span 5;
+      position: sticky;
+      top: calc(72px + var(--s-5)); /* abaixo do topo fixo (72 px no computador) */
+    }
+  }
+
+  /* Esgotado: o cartão de fundador some e o case ocupa a largura toda */
+  :global(:root[data-vagas-estado="esgotado"]) .projetos-case { grid-column: 1 / -1; }
+</style>

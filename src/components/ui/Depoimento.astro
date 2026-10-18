@@ -1,0 +1,107 @@
+---
+/*
+  Depoimento de cliente (mapa técnico, arquivo 06): variantes com foto e sem foto.
+  Com `destaque`, a frase escolhida aparece grande, como citação, e o mesmo trecho fica marcado
+  dentro do texto completo, para o olho ligar uma coisa à outra. O texto não muda.
+*/
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+interface Props {
+  texto: string;
+  autora: string;
+  cargo?: string;
+  /** Frase em destaque (copy): precisa existir dentro do texto para ser marcada nele. */
+  destaque?: string;
+  /** Foto autorizada da pessoa. Sem ela, a variante sem foto. */
+  foto?: ImageMetadata;
+  class?: string;
+}
+const { texto, autora, cargo, destaque, foto, class: classe } = Astro.props;
+
+// Procura a frase no texto sem a pontuação final (no depoimento ela continua a frase).
+const trecho = destaque?.replace(/[.!?…]+$/, "") ?? "";
+const pos = trecho ? texto.indexOf(trecho) : -1;
+const partes =
+  pos >= 0
+    ? { antes: texto.slice(0, pos), trecho, depois: texto.slice(pos + trecho.length) }
+    : { antes: texto, trecho: "", depois: "" };
+---
+<figure class:list={["depoimento", foto && "depoimento--foto", classe]}>
+  {destaque && <p class="depoimento__destaque"><q>{destaque}</q></p>}
+
+  <blockquote class="depoimento__texto">
+    <p>{partes.antes}{partes.trecho && <span class="depoimento__trecho">{partes.trecho}</span>}{partes.depois}</p>
+  </blockquote>
+
+  <figcaption class="depoimento__autoria">
+    {foto ? (
+      <Image class="depoimento__foto" src={foto} alt="" width={96} height={96} />
+    ) : (
+      <span class="depoimento__cunha" aria-hidden="true"></span>
+    )}
+    <span class="depoimento__quem"><strong>{autora}</strong>{cargo && `, ${cargo}`}</span>
+  </figcaption>
+</figure>
+
+<style>
+  .depoimento {
+    display: grid;
+    gap: var(--s-5);
+    margin: 0;
+    min-width: 0;
+  }
+
+  /* A frase em destaque: citação grande, com a aspa de abertura pendurada na margem */
+  .depoimento__destaque {
+    max-width: 22ch;
+    font: 500 var(--t-h2)/1.22 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+    text-indent: -0.42em;
+  }
+  .depoimento__destaque q { quotes: "“" "”" "‘" "’"; }
+
+  .depoimento__texto {
+    margin: 0;
+    max-width: 62ch;
+    font-size: var(--t-body);
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .depoimento__texto p { quotes: "“" "”" "‘" "’"; }
+  .depoimento__texto p::before { content: open-quote; }
+  .depoimento__texto p::after { content: close-quote; }
+
+  /* O mesmo trecho da citação, marcado no texto completo só pelo tom (sublinhado pareceria link) */
+  .depoimento__trecho { font-weight: 500; color: var(--ink-strong); }
+
+  .depoimento__autoria {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    font-size: var(--t-small);
+    line-height: 1.45;
+    color: var(--ink-muted);
+  }
+  .depoimento__autoria strong { font-weight: 600; color: var(--ink-strong); }
+
+  /* Marcador cunha em 45°, no lugar de bolinha ou avatar falso */
+  .depoimento__cunha {
+    width: 12px;
+    height: 8px;
+    flex: none;
+    background: var(--line-forte);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+
+  /* Variante com foto: retrato pequeno com o canto chanfrado da marca */
+  .depoimento__foto {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    object-fit: cover;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+</style>

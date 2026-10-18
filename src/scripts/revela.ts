@@ -24,3 +24,5 @@ if (!semMovimento && "IntersectionObserver" in window) {
     observador.observe(el);
   }
 }
+
+export {};

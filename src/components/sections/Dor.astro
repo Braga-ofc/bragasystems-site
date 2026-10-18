@@ -1,0 +1,145 @@
+---
+/*
+  Dor (copy §4): o registro do que dá errado hoje.
+  Seis linhas, cada uma com a cunha em 45° apagada. O fechamento acende a mesma cunha
+  em ciano (o único destaque do bloco), na coluna da direita: o registro termina resolvido.
+*/
+import Secao from "../ui/Secao.astro";
+import { dor } from "../../content/home";
+import { rich } from "../../lib/texto";
+
+// A fala do cliente ("quanto custa?") ganha a cor forte; o resto da abertura fica em segundo plano.
+const abertura = rich(dor.abertura).replace(/\u201C(.+?)\u201D/, '<span class="dor__fala">\u201C$1\u201D</span>');
+
+// No computador o registro corre em duas colunas, de cima para baixo.
+const linhas = Math.ceil(dor.itens.length / 2);
+---
+<Secao class="dor">
+  <div class="dor__grade">
+    <header class="dor__cabeca">
+      <p class="dor__abertura" set:html={abertura} />
+      <h2 class="dor__titulo">{dor.titulo}</h2>
+    </header>
+
+    <ul class="dor__registro" role="list" style={`--linhas:${linhas}`} data-revela>
+      {dor.itens.map((item, i) => (
+        <li
+          class:list={[
+            "dor__item",
+            i === dor.itens.length - 1 && "dor__item--ultimo",
+            i === linhas - 1 && "dor__item--fim-coluna",
+          ]}
+        >
+          <span class="dor__cunha" aria-hidden="true"></span>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+
+    <p class="dor__fechamento" data-revela>
+      <span class="dor__luz" aria-hidden="true"><span class="dor__cunha dor__cunha--acesa"></span></span>
+      <span>{dor.fechamento}</span>
+    </p>
+  </div>
+</Secao>
+
+<style>
+  .dor__grade { display: grid; min-width: 0; }
+
+  .dor__cabeca { display: grid; gap: var(--s-4); }
+  .dor__abertura {
+    max-width: 44ch;
+    font-size: var(--t-body-lg);
+    line-height: 1.55;
+    color: var(--ink-muted);
+  }
+  .dor__abertura :global(.dor__fala) { color: var(--ink-strong); }
+
+  .dor__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  /* Registro: linhas finas, a cunha apagada marca cada ocorrência */
+  .dor__registro {
+    display: grid;
+    margin: var(--s-7) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dor__item {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr);
+    column-gap: var(--s-4);
+    align-items: start;
+    padding-block: var(--s-4) calc(var(--s-4) + 2px);
+    border-top: 1px solid var(--line);
+    font-size: var(--t-body-lg);
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .dor__item--ultimo { border-bottom: 1px solid var(--line); }
+
+  /* A cunha: o núcleo do símbolo, um paralelogramo em 45°, centrado na primeira linha do texto */
+  .dor__cunha {
+    display: block;
+    width: 12px;
+    height: 8px;
+    margin-top: calc((1lh - 8px) / 2);
+    background: var(--ink-muted);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+
+  /* Fechamento: a mesma cunha, agora acesa */
+  .dor__fechamento {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    column-gap: var(--s-4);
+    align-items: start;
+    max-width: 30ch;
+    margin-top: var(--s-8);
+    font: 500 var(--t-h2)/1.25 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+  /* O brilho fica no invólucro: no próprio paralelogramo o recorte cortaria a sombra */
+  .dor__luz {
+    display: block;
+    margin-top: calc((1lh - 12px) / 2);
+    filter: drop-shadow(0 0 8px var(--brilho));
+  }
+  .dor__cunha--acesa {
+    width: 20px;
+    height: 12px;
+    margin-top: 0;
+    background: var(--accent);
+  }
+
+  /* Duas colunas a partir do tablet; no computador, a grade de 12 */
+  @media (min-width: 720px) {
+    .dor__registro {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: repeat(var(--linhas), auto);
+      grid-auto-flow: column;
+      column-gap: var(--s-5);
+    }
+    .dor__item--fim-coluna { border-bottom: 1px solid var(--line); }
+  }
+
+  @media (min-width: 960px) {
+    .dor__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    .dor__cabeca { grid-column: 1 / span 8; }
+    .dor__abertura { max-width: 46ch; font-size: var(--t-h3); line-height: 1.5; }
+    .dor__registro { grid-column: 1 / -1; margin-top: var(--s-8); }
+    .dor__item { padding-block: var(--s-5) calc(var(--s-5) + 2px); }
+    /* O fechamento cai na coluna da direita, alinhado às cunhas dela: a leitura desce em diagonal */
+    .dor__fechamento { grid-column: 7 / -1; max-width: none; }
+  }
+</style>

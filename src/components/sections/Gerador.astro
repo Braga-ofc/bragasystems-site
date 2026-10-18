@@ -1,0 +1,392 @@
+---
+/*
+  §3 Gerador de headline com IA: o console do painel. Vive dentro da .abertura (index.astro),
+  ao lado do Hero no computador e logo abaixo dele no celular.
+  Estados em data-estado: inicial | carregando | resultado | enviado. Todos já estão no HTML;
+  quem troca é scripts/gerador.ts. Sem JavaScript, o formulário faz POST (nada vai para a URL).
+*/
+import Campo from "../ui/Campo.astro";
+import Botao from "../ui/Botao.astro";
+import Icone from "../ui/Icone.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import { ctaFinal, gerador } from "../../content/home";
+import { comLinkPrivacidade } from "../../lib/texto";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+const linkWhatsapp = montarLinkWhatsapp("gerador");
+
+// Na mensagem de limite, o trecho final da copy vira link para o WhatsApp.
+const trechoLink = "Fale comigo no WhatsApp.";
+const posLink = gerador.erros.limite.indexOf(trechoLink);
+const limite =
+  posLink >= 0
+    ? { antes: gerador.erros.limite.slice(0, posLink), link: trechoLink, depois: gerador.erros.limite.slice(posLink + trechoLink.length) }
+    : { antes: gerador.erros.limite, link: "", depois: "" };
+
+const [rodapeIa, rodapeLimite] = gerador.rodape;
+
+// Palavras com hífen (Pré-Venda) não quebram no meio do título.
+const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
+---
+<section id="gerador" class="gerador" aria-labelledby="gerador-titulo">
+  <div class="console chanfrado feixe" data-gerador data-estado="inicial">
+    <div class="console__zona console__cabeca">
+      <h2 id="gerador-titulo" class="console__titulo">
+        {tituloPartes.map((parte) => (parte.includes("-") ? <span class="console__inteira">{parte}</span> : parte))}
+      </h2>
+      <p class="console__texto">{gerador.texto}</p>
+    </div>
+
+    {/* Saída: a headline gerada, impressa sobre a grade */}
+    <div class="console__zona console__visor">
+      <span class="console__visor-grade grade" aria-hidden="true"></span>
+      <div class="console__resultado" data-resultado tabindex="-1">
+        <Rotulo>{gerador.resultadoRotulo}</Rotulo>
+        <p class="console__headline" data-headline></p>
+      </div>
+    </div>
+
+    {/* Entrada: o que vende e para quem */}
+    <form class="console__zona console__entrada" method="post" action="/api/gerar-headline" novalidate data-gerador-form>
+      <div class="console__campos">
+        <Campo
+          id="gerador-vende"
+          nome="vende"
+          rotulo={gerador.campos.vende.rotulo}
+          placeholder={gerador.campos.vende.exemplo}
+          maxlength={80}
+          obrigatorio
+        />
+        <Campo
+          id="gerador-para-quem"
+          nome="paraQuem"
+          rotulo={gerador.campos.paraQuem.rotulo}
+          placeholder={gerador.campos.paraQuem.exemplo}
+          maxlength={80}
+          obrigatorio
+        />
+      </div>
+      {/* Próxima etapa: o widget do Turnstile entra aqui; o token segue no pedido (scripts/gerador.ts). */}
+      <div class="console__acao">
+        <Botao tipo="submit" larguraTotal icone="seta">{gerador.botao}</Botao>
+        <p class="console__status" aria-hidden="true">{gerador.carregando}</p>
+        <div class="console__aviso" role="alert" data-aviso-geracao></div>
+      </div>
+    </form>
+
+    {/* Depois do resultado: as outras duas versões pelo WhatsApp */}
+    <div class="console__zona console__depois">
+      <div class="console__depois-cabeca">
+        <h3 class="console__depois-titulo">{gerador.depois.titulo}</h3>
+        <p class="console__depois-texto">{gerador.depois.texto}</p>
+      </div>
+      <form
+        class="console__lead"
+        method="post"
+        action="/api/enviar-lead"
+        novalidate
+        data-gerador-lead
+        data-erro-vazio={ctaFinal.erros.campoVazio}
+        data-erro-whatsapp={ctaFinal.erros.whatsappInvalido}
+        data-erro-consentimento={gerador.erros.semConsentimento}
+      >
+        <div class="console__campos">
+          <Campo id="gerador-nome" nome="nome" rotulo={gerador.depois.nome} autocomplete="name" maxlength={80} obrigatorio />
+          <Campo id="gerador-whatsapp" nome="whatsapp" tipo="telefone" rotulo={gerador.depois.whatsapp} maxlength={15} obrigatorio />
+        </div>
+        <Campo id="gerador-consentimento" nome="consentimento" tipo="consentimento" obrigatorio>
+          <Fragment set:html={comLinkPrivacidade(gerador.depois.consentimento)} />
+        </Campo>
+        {/* Próxima etapa: um novo token do Turnstile entra aqui (memory.md, 18/10/2026). */}
+        <div class="console__acao">
+          <Botao tipo="submit" larguraTotal icone="whatsapp">{gerador.depois.botao}</Botao>
+          <div class="console__aviso" role="alert" data-aviso-lead></div>
+        </div>
+      </form>
+    </div>
+
+    {/* Enviado */}
+    <div class="console__zona console__enviado">
+      <p class="console__confirmacao" data-confirmacao tabindex="-1">
+        <span class="console__check chanfrado" aria-hidden="true"><Icone nome="check" /></span>
+        <span>{gerador.confirmacao}</span>
+      </p>
+    </div>
+
+    <ul class="console__zona console__rodape">
+      <li>{rodapeIa}<span class="console__sep" aria-hidden="true">·</span></li>
+      <li>{rodapeLimite}</li>
+    </ul>
+
+    {/* Anúncios para leitor de tela (carregando) */}
+    <p class="sr-only" aria-live="polite" data-anuncio></p>
+  </div>
+
+  <template data-modelo="campoVazio">
+    <p class="console__erro"><Icone nome="alerta" tamanho={16} /><span>{gerador.erros.campoVazio}</span></p>
+  </template>
+  <template data-modelo="limite">
+    <p class="console__erro">
+      <Icone nome="alerta" tamanho={16} />
+      <span>{limite.antes}{limite.link && <a href={linkWhatsapp} target="_blank" rel="noopener" data-origem="gerador">{limite.link}</a>}{limite.depois}</span>
+    </p>
+  </template>
+  <template data-modelo="erro">
+    <p class="console__erro"><Icone nome="alerta" tamanho={16} /><span>{gerador.erros.erro}</span></p>
+  </template>
+  <template data-modelo="falha">
+    <div class="console__falha">
+      <p class="console__erro"><Icone nome="alerta" tamanho={16} /><span>{ctaFinal.falhaEnvio}</span></p>
+      <Botao variante="secundario" href={linkWhatsapp} icone="whatsapp" origem="gerador" larguraTotal>{ctaFinal.falhaBotao}</Botao>
+    </div>
+  </template>
+  <script>
+    import "../../scripts/gerador";
+  </script>
+</section>
+
+<style>
+  .gerador {
+    container: gerador / inline-size;
+    min-width: 0;
+  }
+
+  /* O console: moldura chanfrada grande, fundo rebaixado, zonas separadas por linhas finas */
+  .console {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface-sunken);
+    --pad: clamp(20px, 7cqi, 32px);
+    display: flex;
+    flex-direction: column;
+  }
+  .console__zona {
+    margin: 0;
+    padding: var(--pad);
+  }
+  .console__zona + .console__zona { border-top: 1px solid var(--line); }
+
+  /* Cabeça */
+  .console__cabeca {
+    display: grid;
+    gap: var(--s-3);
+    padding-top: calc(var(--pad) + 4px);
+  }
+  .console__titulo {
+    max-width: 22ch;
+    font: 600 var(--t-h2)/1.15 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+  }
+  .console__inteira { white-space: nowrap; }
+  .console__texto {
+    max-width: 52ch;
+    color: var(--ink-muted);
+  }
+
+  /* Entrada */
+  .console__entrada {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .console__campos {
+    display: grid;
+    gap: var(--s-4);
+  }
+
+  /* Botão, leitura do "carregando" e aviso: um bloco só, sem espaço vazio quando não há aviso */
+  .console__acao { display: grid; }
+
+  /* Leitura do "carregando": mono, logo abaixo do botão */
+  .console__status {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-top: var(--s-4);
+    font: 400 var(--t-small)/1.4 var(--font-mono);
+    color: var(--ink);
+  }
+  .console__status::before {
+    content: "";
+    width: 12px;
+    height: 8px;
+    flex: none;
+    background: var(--ink-strong);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+
+  /* Avisos (role="alert"): ficam sempre no HTML, vazios até haver o que dizer */
+  .console__aviso:not(:empty) { margin-top: var(--s-4); }
+  .console__erro {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: var(--t-small);
+    line-height: 1.45;
+    color: var(--erro);
+  }
+  .console__erro :global(svg) { margin-top: 1px; }
+  .console__erro a { color: var(--ink-strong); text-decoration-color: var(--line-forte); }
+  .console__erro a:hover { color: var(--accent); text-decoration-color: currentColor; }
+  .console__falha { display: grid; gap: var(--s-4); }
+  .console__falha .console__erro { font: 500 var(--t-body)/1.45 var(--font-sans); color: var(--ink-strong); }
+  .console__falha .console__erro :global(svg) { margin-top: 3px; color: var(--erro); }
+
+  /* Saída: a headline gerada sobre a grade fina, que se dissolve para a direita */
+  .console__visor {
+    position: relative;
+    display: none;
+    overflow: hidden;
+    padding-block: calc(var(--pad) + 4px);
+  }
+  .console__visor-grade {
+    position: absolute;
+    inset: 0;
+    --grade-origem: left top;
+    --grade-mascara: radial-gradient(ellipse 120% 160% at 0% 0%, #000 15%, transparent 78%);
+  }
+  .console__resultado {
+    position: relative;
+    display: grid;
+    gap: var(--s-4);
+  }
+  /* Recebe o foco do script (não é um controle): sem contorno */
+  .console__resultado:focus { outline: none; }
+  .console__headline {
+    max-width: 24ch;
+    font: 600 clamp(1.625rem, 1rem + 3.4cqi, 2.25rem)/1.12 var(--font-display);
+    letter-spacing: -0.025em;
+    color: var(--ink-strong);
+    /* A frase vem da IA, com tamanho variável: "pretty" evita a linha curta no meio */
+    text-wrap: pretty;
+  }
+  /* Digitando: o texto inteiro já está no lugar (nada pula) e as letras acendem em ordem */
+  .console__headline :global(.console__letra) { opacity: 0; }
+  .console__headline :global(.console__letra[data-on]) { opacity: 1; }
+  .console__headline :global(.console__letra[data-cursor]) { position: relative; }
+  .console__headline :global(.console__letra[data-cursor]::after) {
+    content: "";
+    position: absolute;
+    top: 0.1em;
+    bottom: 0.06em;
+    left: calc(100% + 1px);
+    width: 2px;
+    background: var(--ink-strong);
+  }
+
+  /* Depois do resultado */
+  .console__depois {
+    display: none;
+    gap: var(--s-5);
+  }
+  .console__depois-cabeca { display: grid; gap: var(--s-2); }
+  .console__depois-titulo {
+    max-width: 26ch;
+    font: 500 var(--t-h3)/1.3 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+  }
+  .console__depois-texto { max-width: 56ch; font-size: var(--t-small); line-height: 1.55; color: var(--ink-muted); }
+  .console__lead { display: grid; gap: var(--s-4); }
+  .console__lead .console__acao { margin-top: var(--s-1); }
+  /* O link da política segue o texto; o ciano do bloco é só o botão */
+  .console__lead :global(.check__texto a) { color: var(--ink-strong); text-decoration-color: var(--line-forte); }
+  .console__lead :global(.check__texto a:hover) { color: var(--accent); text-decoration-color: currentColor; }
+
+  /* Enviado: o ciano passa do botão para a marca de confirmação */
+  .console__enviado { display: none; }
+  .console__confirmacao {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--s-4);
+    font: 500 var(--t-h3)/1.35 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+  }
+  .console__confirmacao:focus { outline: none; }
+  .console__check {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--accent);
+    --cor-fundo: var(--surface-sunken);
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    color: var(--accent);
+  }
+
+  /* Rodapé: a leitura do bloco em mono */
+  .console__rodape {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 0;
+    padding: 14px calc(var(--pad) + 8px) 16px calc(var(--pad) + 22px);
+    list-style: none;
+    font: 500 var(--t-label)/1.5 var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .console__rodape::before {
+    content: "";
+    position: absolute;
+    top: calc(14px + 0.75em - 4px);
+    left: var(--pad);
+    width: 12px;
+    height: 8px;
+    background: var(--line-forte);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+    transition: background-color var(--dur) var(--ease-saida);
+  }
+  .console__rodape li { text-wrap: balance; }
+  .console__sep { margin-inline: 0.6em; }
+
+  /* ---------- Estados ---------- */
+  [data-estado="carregando"] .console__status { display: flex; }
+  [data-estado="carregando"] .console__rodape::before,
+  [data-estado="resultado"] .console__rodape::before,
+  [data-estado="enviado"] .console__rodape::before { background: var(--ink-strong); }
+
+  [data-estado="resultado"] .console__texto,
+  [data-estado="enviado"] .console__texto,
+  [data-estado="resultado"] .console__entrada,
+  [data-estado="enviado"] .console__entrada { display: none; }
+
+  [data-estado="resultado"] .console__visor,
+  [data-estado="enviado"] .console__visor { display: block; }
+  [data-estado="resultado"] .console__depois { display: grid; }
+  [data-estado="enviado"] .console__enviado { display: block; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .console__visor,
+    .console__enviado,
+    .console__aviso > :global(*),
+    .console__status { animation: console-entra var(--dur-lenta) var(--ease-saida) both; }
+    .console__depois {
+      transition:
+        opacity var(--dur-lenta) var(--ease-saida),
+        translate var(--dur-lenta) var(--ease-saida),
+        visibility 0s linear 0s;
+    }
+    /* Enquanto a headline é digitada, o pedido do WhatsApp espera, já com o espaço reservado */
+    [data-digitando] .console__depois {
+      opacity: 0;
+      translate: 0 8px;
+      visibility: hidden;
+      transition: none;
+    }
+  }
+  @keyframes console-entra {
+    from { opacity: 0; translate: 0 6px; filter: blur(4px); }
+  }
+
+  /* Console largo (tablet, antes de dividir a dobra com o Hero): campos lado a lado */
+  @container gerador (min-width: 600px) {
+    .console__campos { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4) var(--s-5); }
+    .console__entrada :global(.botao--cheio),
+    .console__lead :global(.botao--cheio) { justify-self: start; width: auto; padding-inline: 28px 26px; }
+    .console__falha :global(.botao--cheio) { justify-self: start; width: auto; }
+  }
+</style>
