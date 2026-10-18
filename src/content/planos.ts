@@ -2,6 +2,9 @@
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
+  // Copy 2.5: o custo de esperar, lido antes dos preços
+  custo:
+    "Cada semana sem uma página que vende é mais uma semana explicando a mesma coisa, mandando o preço e torcendo para alguém responder.",
   rotulo: "PLANOS",
   titulo: "Escolha o seu plano",
   texto: "Preços abertos, sem surpresa. Todos os planos incluem a copy de conversão.",
