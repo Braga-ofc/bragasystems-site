@@ -3,6 +3,7 @@
   Topo fixo (copy §1): logo, links da home e o WhatsApp sempre a um toque.
   Computador (≥ 960 px): links em linha. Celular: os links vão para um menu (scripts/menu.ts)
   e o botão de WhatsApp continua visível; abaixo de 380 px ele fica só com o ícone.
+  Sem JavaScript, o botão do menu some e os links aparecem numa linha abaixo da barra.
 */
 import Botao from "../ui/Botao.astro";
 import Icone from "../ui/Icone.astro";
@@ -11,9 +12,14 @@ import { topo } from "../../content/home";
 import { site } from "../../config/site";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
 
-// As âncoras apontam para a home (/#metodo), para funcionarem em qualquer página; "Quem sou" é página.
-const links = topo.links.map((l) => ({ texto: l.texto, href: "href" in l ? l.href : `/#${l.ancora}` }));
+// Na home, as âncoras só rolam (#metodo): sem recarregar a página nem perder os ?utm_ do endereço.
+// Nas outras páginas, levam de volta à home (/#metodo). "Quem sou" é página.
 const caminho = Astro.url.pathname.replace(/\/$/, "") || "/";
+const naHome = caminho === "/";
+const links = topo.links.map((l) => ({
+  texto: l.texto,
+  href: "href" in l ? l.href : naHome ? `#${l.ancora}` : `/#${l.ancora}`,
+}));
 const atual = (href: string) => (href === caminho ? "page" : undefined);
 ---
 <header class="topo">
@@ -51,6 +57,20 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
       </ul>
     </nav>
   </div>
+  {/* Véu sobre a página enquanto o menu está aberto: tocar nele fecha (scripts/menu.ts) */}
+  <div class="topo__veu" aria-hidden="true" data-menu-veu></div>
+
+  {/* Sem JavaScript o menu não abre: o botão some e os links ficam numa linha logo abaixo da barra */}
+  <noscript>
+    <style is:inline>
+      header.topo .topo__menu { display: none; }
+      @media (max-width: 959.98px) {
+        header.topo .topo__barra { flex-wrap: wrap; }
+        header.topo .topo__nav { display: block; order: 3; flex: 1 0 100%; }
+        header.topo .topo__links { flex-wrap: wrap; gap: 0 var(--s-4); }
+      }
+    </style>
+  </noscript>
 </header>
 
 <script>
@@ -179,9 +199,13 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
   .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--abrir) { opacity: 0; rotate: 45deg; }
   .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--fechar) { opacity: 1; rotate: 0deg; }
 
-  /* Painel do menu no celular: logo abaixo do topo, sem travar a rolagem da página */
+  /*
+    Painel do menu no celular: uma camada acima da página, logo abaixo do topo. A sombra e o véu
+    separam o painel do conteúdo; a rolagem continua livre e fecha o menu (scripts/menu.ts).
+  */
   .topo__painel {
     position: absolute;
+    z-index: 1; /* acima do véu */
     top: 100%;
     left: 0;
     right: 0;
@@ -190,15 +214,35 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
     overscroll-behavior: contain;
     background: var(--surface-sunken);
     border-bottom: 1px solid var(--line);
-    box-shadow: 0 28px 48px -20px var(--surface-sunken);
+    box-shadow: 0 24px 48px -12px rgb(0 0 0 / 0.6);
   }
   .topo__painel[hidden] { display: none; }
+
+  /* Véu: escurece a página abaixo do painel, do topo até o fim da tela */
+  .topo__veu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: calc(100dvh - 100%);
+    background: color-mix(in srgb, var(--surface-sunken) 60%, transparent);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @media (max-width: 959.98px) {
+    .topo__painel:not([hidden]) + .topo__veu { display: block; }
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     .topo__painel:not([hidden]) { animation: topo-painel-abre var(--dur) var(--ease-saida); }
+    .topo__painel:not([hidden]) + .topo__veu { animation: topo-veu-entra var(--dur) var(--ease-saida); }
   }
   @keyframes topo-painel-abre {
     from { clip-path: inset(0 0 100% 0); }
     to { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes topo-veu-entra {
+    from { opacity: 0; }
   }
 
   .topo__painel-links {
@@ -235,7 +279,7 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
     .topo__barra { min-height: 71px; gap: 0; }
     .topo__logo { width: 148px; }
     .topo__nav { display: block; }
-    .topo__menu, .topo__painel { display: none; }
+    .topo__menu, .topo__painel, .topo__veu { display: none; }
     /* Divisória fina entre os links e o botão */
     .topo__acoes {
       gap: 0;

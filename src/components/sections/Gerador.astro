@@ -47,7 +47,14 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
     </div>
 
     {/* Entrada: o que vende e para quem */}
-    <form class="console__zona console__entrada" method="post" action="/api/gerar-headline" novalidate data-gerador-form>
+    <form
+      class="console__zona console__entrada"
+      method="post"
+      action="/api/gerar-headline"
+      novalidate
+      data-gerador-form
+      data-erro-vazio={gerador.erros.campoVazio}
+    >
       <div class="console__campos">
         <Campo
           id="gerador-vende"
@@ -92,7 +99,8 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
       >
         <div class="console__campos">
           <Campo id="gerador-nome" nome="nome" rotulo={gerador.depois.nome} autocomplete="name" maxlength={80} obrigatorio />
-          <Campo id="gerador-whatsapp" nome="whatsapp" tipo="telefone" rotulo={gerador.depois.whatsapp} maxlength={15} obrigatorio />
+          {/* Sem limite de tamanho: a máscara corta em 11 dígitos depois de tirar o +55 (scripts/formulario.ts). */}
+          <Campo id="gerador-whatsapp" nome="whatsapp" tipo="telefone" rotulo={gerador.depois.whatsapp} obrigatorio />
         </div>
         <Campo id="gerador-consentimento" nome="consentimento" tipo="consentimento" obrigatorio>
           <Fragment set:html={comLinkPrivacidade(gerador.depois.consentimento)} />
@@ -122,9 +130,6 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
     <p class="sr-only" aria-live="polite" data-anuncio></p>
   </div>
 
-  <template data-modelo="campoVazio">
-    <p class="console__erro"><Icone nome="alerta" tamanho={16} /><span>{gerador.erros.campoVazio}</span></p>
-  </template>
   <template data-modelo="limite">
     <p class="console__erro">
       <Icone nome="alerta" tamanho={16} />

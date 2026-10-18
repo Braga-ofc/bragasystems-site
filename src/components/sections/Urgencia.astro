@@ -1,11 +1,12 @@
 ---
 /*
   §14 Urgência. Com vagas, o bloco é um instrumento: o medidor das 5 vagas, grande, numa janela
-  chanfrada, e a leitura logo abaixo ("Restam {X}." na tinta forte, o fato fixo apagado).
-  Quando o medidor entra na tela, ele religa e as vagas acendem uma a uma (a mesma entrada do
-  medidor do hero, refeita só aqui). Sem vagas ou na falha do contador, vale a versão "agenda
-  limitada", com a mensagem geral do WhatsApp: a de fundador não serve sem vaga.
-  As duas versões têm h2; só a do estado atual fica visível (mapa técnico, arquivo 03).
+  chanfrada, e a leitura logo abaixo ("Restam {X}." na tinta forte, o fato fixo apagado; com 1 vaga,
+  "Resta 1."). Quando o medidor entra na tela, ele religa e as vagas acendem uma a uma (a mesma
+  entrada do medidor do hero, refeita só aqui). Sem vagas ou na falha do contador, vale a versão
+  "agenda limitada", com a mensagem geral do WhatsApp (a de fundador não serve sem vaga), num
+  módulo do mesmo painel: a mesma janela chanfrada, com o título e o botão na mesma coluna.
+  As versões têm h2; só a do estado atual fica visível (mapa técnico, arquivo 03).
 */
 import Secao from "../ui/Secao.astro";
 import Botao from "../ui/Botao.astro";
@@ -21,9 +22,12 @@ interface Props {
 const { vagas } = Astro.props;
 
 // "Só 5 vagas de fundador." e "Restam {X}.": cada frase numa linha. O texto continua o da copy.
-const frases = urgencia.titulo.split(/(?<=\.)\s+/);
-const fato = frases.length > 1 ? frases.slice(0, -1).join(" ") : "";
-const leitura = frases[frases.length - 1];
+function dividir(titulo: string) {
+  const frases = titulo.split(/(?<=\.)\s+/);
+  return { fato: frases.length > 1 ? frases.slice(0, -1).join(" ") : "", leitura: frases[frases.length - 1] };
+}
+const plural = dividir(urgencia.titulo);
+const singular = dividir(urgencia.tituloUmaVaga);
 ---
 <Secao class="urgencia">
   <div class="urgencia__com" data-quando-vagas="com">
@@ -31,8 +35,11 @@ const leitura = frases[frases.length - 1];
       <div class="urgencia__janela chanfrado" data-urgencia-medidor>
         <MedidorVagas tamanho="lg" />
       </div>
-      <h2 class="urgencia__titulo">
-        {fato && <span class="urgencia__fato">{fato}</span>}{fato && " "}<span class="urgencia__leitura" set:html={comVagas(rich(leitura), vagas)} />
+      <h2 class="urgencia__titulo" data-quando-n="plural">
+        {plural.fato && <span class="urgencia__fato">{plural.fato}</span>}{plural.fato && " "}<span class="urgencia__leitura" set:html={comVagas(rich(plural.leitura), vagas)} />
+      </h2>
+      <h2 class="urgencia__titulo" data-quando-n="singular">
+        {singular.fato && <span class="urgencia__fato">{singular.fato}</span>}{singular.fato && " "}<span class="urgencia__leitura" set:html={rich(singular.leitura)} />
       </h2>
     </div>
 
@@ -45,36 +52,48 @@ const leitura = frases[frases.length - 1];
   </div>
 
   <div class="urgencia__sem" data-quando-vagas="esgotado falha">
-    <h2 class="urgencia__titulo urgencia__titulo--sem">{urgencia.semVagas.titulo}</h2>
-    <div class="urgencia__acao">
-      <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
+    <div class="urgencia__modulo chanfrado">
+      <h2 class="urgencia__titulo urgencia__titulo--sem">{urgencia.semVagas.titulo}</h2>
+      <div class="urgencia__acao">
+        <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
+      </div>
     </div>
   </div>
 
   {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
   <script>
-    // Religa o medidor quando ele entra na tela: as vagas acendem uma a uma, uma vez só.
-    // Só apaga antes o que ainda está abaixo da tela; sem JavaScript ou com movimento
-    // reduzido, o medidor já aparece aceso.
+    /*
+      Religa o medidor quando ele entra na tela: as vagas acendem uma a uma, uma vez só.
+      Quem diz se há vagas é o contador. Se a página chega sem número (carregando ou falha), o
+      bloco com o medidor está escondido e não dá para medir: a decisão espera o evento
+      "vagas:estado". Só apaga antes o que está abaixo da tela; sem JavaScript ou com movimento
+      reduzido, o medidor já aparece aceso.
+    */
+    const raiz = document.documentElement;
     const janela = document.querySelector<HTMLElement>("[data-urgencia-medidor]");
     const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (
-      janela &&
-      !semMovimento &&
-      "IntersectionObserver" in window &&
-      janela.getBoundingClientRect().top > window.innerHeight
-    ) {
-      janela.dataset.urgenciaMedidor = "pendente";
-      const observador = new IntersectionObserver(
-        (entradas) => {
-          if (!entradas.some((entrada) => entrada.isIntersecting)) return;
-          observador.disconnect();
-          janela.dataset.urgenciaMedidor = "ligado";
-        },
-        { rootMargin: "0px 0px -15% 0px", threshold: 1 },
-      );
-      observador.observe(janela);
+    if (janela && !semMovimento && "IntersectionObserver" in window) {
+      let decidido = false;
+      const decidir = () => {
+        if (decidido || raiz.dataset.vagasEstado !== "com-vagas") return;
+        decidido = true;
+        document.removeEventListener("vagas:estado", decidir);
+        if (janela.getBoundingClientRect().top <= window.innerHeight) return;
+        janela.dataset.urgenciaMedidor = "pendente";
+        const observador = new IntersectionObserver(
+          (entradas) => {
+            if (!entradas.some((entrada) => entrada.isIntersecting)) return;
+            observador.disconnect();
+            janela.dataset.urgenciaMedidor = "ligado";
+          },
+          { rootMargin: "0px 0px -15% 0px", threshold: 1 },
+        );
+        observador.observe(janela);
+      };
+      // O HTML já pode vir com o estado do build; senão, espera o contador aplicar o dele.
+      decidir();
+      document.addEventListener("vagas:estado", decidir);
     }
   </script>
 </Secao>

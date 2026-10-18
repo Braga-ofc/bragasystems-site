@@ -4,13 +4,18 @@
   Sem mudar o layout: mede cada letra já desenhada, trava a largura dela num inline-block (palavras
   sem quebra), embaralha e resolve da esquerda para a direita em ~700 ms. No fim, o título volta a
   ser um nó de texto só. Enquanto anima, o h1 leva o texto real no aria-label e as letras ficam
-  escondidas dos leitores de tela. Não anima com movimento reduzido, se as fontes demorarem mais
-  de 1 s ou se a quebra de linha mudar ao montar as letras.
+  escondidas dos leitores de tela. Espera só a fonte do título (pré-carregada no Base), não as
+  outras, e só começa logo que a headline aparece: se ela já está na tela há mais de 400 ms (rede
+  lenta, a página ainda chegando), não roda, porque embaralhar um texto já lido parece falha.
+  Também não anima com movimento reduzido, se a fonte do título demorar mais de 1 s ou se a quebra
+  de linha mudar ao montar as letras.
 */
 const DURACAO = 700;
 const ESPERA_INICIAL = 90; // tudo embaralhado antes da primeira letra resolver
 const TROCA = 45; // intervalo entre sorteios das letras ainda embaralhadas
-const PRAZO_FONTES = 1000;
+const PRAZO_FONTE = 1000;
+const JANELA = 400; // tempo máximo da headline na tela antes do primeiro quadro do efeito
+const MAIOR_PASSO = 50; // com o processador ocupado, o efeito avança no máximo isso por quadro, sem pular para o fim
 const SIMBOLOS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=/<>";
 
 interface Letra {
@@ -20,6 +25,25 @@ interface Letra {
 }
 
 const sortear = (lista: string[]) => lista[Math.floor(Math.random() * lista.length)];
+
+/**
+  Instante da primeira pintura da página, em que a headline já aparece. Com o processador ocupado,
+  o navegador registra essa marca com atraso, por isso espera por ela. Sem a API, devolve null.
+*/
+function primeiraPintura(): Promise<number | null> {
+  const registrada = performance.getEntriesByName("first-contentful-paint")[0];
+  if (registrada) return Promise.resolve(registrada.startTime);
+  if (!PerformanceObserver.supportedEntryTypes?.includes("paint")) return Promise.resolve(null);
+  return new Promise((resolver) => {
+    const observador = new PerformanceObserver((lista) => {
+      const pintura = lista.getEntriesByName("first-contentful-paint")[0];
+      if (!pintura) return;
+      observador.disconnect();
+      resolver(pintura.startTime);
+    });
+    observador.observe({ type: "paint", buffered: true });
+  });
+}
 
 /** Símbolos com largura parecida com a da letra, para o embaralhado não invadir a vizinha. */
 function parecidos(largura: number, medidas: Array<[string, number]>): string[] {
@@ -120,13 +144,15 @@ function decifrar(titulo: HTMLElement) {
     l.el.textContent = sortear(l.candidatos);
   }
   const total = letras.length;
-  let inicio = -1;
+  let anterior = -1;
+  let decorrido = 0;
   let ultimaTroca = 0;
   let resolvidas = 0;
 
   const quadro = (agora: number) => {
-    if (inicio < 0) inicio = agora;
-    const decorrido = agora - inicio;
+    // Conta o tempo quadro a quadro: uma tarefa longa no meio não resolve tudo de uma vez.
+    if (anterior >= 0) decorrido += Math.min(agora - anterior, MAIOR_PASSO);
+    anterior = agora;
     const alvo = Math.min(total, Math.floor((Math.max(0, decorrido - ESPERA_INICIAL) / (DURACAO - ESPERA_INICIAL)) * total));
     for (; resolvidas < alvo; resolvidas++) {
       const l = letras[resolvidas];
@@ -152,20 +178,26 @@ const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").match
 if (titulo && !semMovimento && "fonts" in document) {
   const estilo = getComputedStyle(titulo);
   const fonte = `${estilo.fontWeight} ${estilo.fontSize} ${estilo.fontFamily}`;
-  const prazo = new Promise<false>((resolver) => window.setTimeout(() => resolver(false), PRAZO_FONTES));
-  const fontesProntas = document.fonts
+  const prazo = new Promise<false>((resolver) => window.setTimeout(() => resolver(false), PRAZO_FONTE));
+  // Só a fonte do título: as outras (texto, rótulos, pesos de baixo da dobra) não mexem na headline.
+  const fontePronta = document.fonts
     .load(fonte)
-    .then(() => document.fonts.ready)
     .then(() => true as const)
     .catch(() => false as const);
 
-  Promise.race([fontesProntas, prazo]).then((pronto) => {
-    if (!pronto) return;
-    const caixa = titulo.getBoundingClientRect();
-    // Só vale a pena se o título está na tela (ex.: quem abre direto em /#planos não vê nada).
-    if (caixa.bottom <= 0 || caixa.top >= window.innerHeight) return;
-    requestAnimationFrame(() => decifrar(titulo));
-  });
+  Promise.race([fontePronta, prazo])
+    .then((pronto) => (pronto ? primeiraPintura() : undefined))
+    .then((pintura) => {
+      if (pintura === undefined) return;
+      requestAnimationFrame(() => {
+        // A headline já está na tela há tempo demais: fica como está.
+        if (pintura !== null && performance.now() - pintura > JANELA) return;
+        const caixa = titulo.getBoundingClientRect();
+        // Só vale a pena se o título está na tela (ex.: quem abre direto em /#planos não vê nada).
+        if (caixa.bottom <= 0 || caixa.top >= window.innerHeight) return;
+        decifrar(titulo);
+      });
+    });
 }
 
 export {};

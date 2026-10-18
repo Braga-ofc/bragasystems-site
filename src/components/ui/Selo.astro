@@ -1,10 +1,16 @@
 ---
 /*
-  Selo de vagas (copy §2) e selo RECOMENDADO (copy §9).
-  O estado das vagas é aplicado pelo script do contador (etapa 5) trocando data-estado
-  e o número; os três textos já vêm no HTML para a página não "pular".
-  Com estado="auto" (a home), quem decide é o <html data-vagas-estado> do contador.
+  Selo de vagas (copy §2) e selo RECOMENDADO (copy §9). Os textos vêm do content:
+  hero.selo (com vagas, com 1 vaga, esgotado, falha) e performance.selo.
+  O estado das vagas é aplicado pelo script do contador trocando o <html data-vagas-estado> e o
+  número; todas as variantes já vêm no HTML para a página não "pular".
+  Com estado="auto" (a home), quem decide é o contador: a forma de 1 vaga ("resta 1") usa
+  data-quando-n. Com estado fixo (a /amostra), sai só o texto daquele estado e daquele número.
 */
+import { hero } from "../../content/home";
+import { performance } from "../../content/planos";
+import { comVagas, rich } from "../../lib/texto";
+
 interface Props {
   tipo?: "vagas" | "recomendado";
   estado?: "com-vagas" | "esgotado" | "falha" | "auto";
@@ -12,15 +18,26 @@ interface Props {
   class?: string;
 }
 const { tipo = "vagas", estado = "com-vagas", vagas = 5, class: classe } = Astro.props;
+
+const auto = estado === "auto";
+const comNumero = comVagas(rich(hero.selo.comVagas), vagas);
+const comUma = rich(hero.selo.comUmaVaga);
 ---
 {tipo === "recomendado" ? (
-  <span class:list={["selo", "selo--recomendado", "chanfrado", classe]}>Recomendado</span>
+  <span class:list={["selo", "selo--recomendado", "chanfrado", classe]}>{performance.selo}</span>
 ) : (
-  <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={estado === "auto" ? undefined : estado}>
+  <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={auto ? undefined : estado}>
     <span class="selo__marca" aria-hidden="true"></span>
-    <span class="selo__texto" data-quando="com-vagas">5 vagas de fundador · 25% off · restam <strong class="num" data-vagas>{vagas}</strong></span>
-    <span class="selo__texto" data-quando="esgotado">Vagas de fundador esgotadas</span>
-    <span class="selo__texto" data-quando="falha">Vagas de fundador limitadas</span>
+    {auto ? (
+      <>
+        <span class="selo__texto" data-quando="com-vagas" data-quando-n="plural" set:html={comNumero} />
+        <span class="selo__texto" data-quando="com-vagas" data-quando-n="singular" set:html={comUma} />
+      </>
+    ) : (
+      <span class="selo__texto" data-quando="com-vagas" set:html={vagas === 1 ? comUma : comNumero} />
+    )}
+    <span class="selo__texto" data-quando="esgotado">{hero.selo.esgotado}</span>
+    <span class="selo__texto" data-quando="falha">{hero.selo.falha}</span>
   </span>
 )}
 
@@ -38,29 +55,33 @@ const { tipo = "vagas", estado = "com-vagas", vagas = 5, class: classe } = Astro
     white-space: nowrap;
   }
   .selo--vagas { --cor-borda: var(--line-forte); --cor-fundo: var(--surface); color: var(--ink); }
-  .selo--vagas strong { font-weight: 500; color: var(--ink-strong); }
+  .selo--vagas :global([data-vagas]) { color: var(--ink-strong); }
 
-  /* A cunha: o "núcleo" do símbolo, em 45° */
+  /* A cunha: o "núcleo" do símbolo, em 45°. Ciano só quando há vagas contadas. */
   .selo__marca {
     width: 12px;
     height: 8px;
     flex: none;
     background: var(--accent);
     clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+    transition: background-color var(--dur) var(--ease-saida);
   }
 
   .selo__texto { display: none; }
   [data-estado="com-vagas"] > [data-quando="com-vagas"],
   [data-estado="esgotado"] > [data-quando="esgotado"],
   [data-estado="falha"] > [data-quando="falha"] { display: inline; }
-  [data-estado="esgotado"] .selo__marca { background: var(--ink-muted); }
+  [data-estado="esgotado"] .selo__marca,
+  [data-estado="falha"] .selo__marca { background: var(--ink-muted); }
 
-  /* Modo automático: segue o estado do contador na página */
+  /* Modo automático: segue o estado do contador na página (carregando = sem leitura, como a falha) */
   :global(:root[data-vagas-estado="com-vagas"]) .selo--vagas:not([data-estado]) > [data-quando="com-vagas"],
   :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) > [data-quando="esgotado"],
   :global(:root[data-vagas-estado="falha"]) .selo--vagas:not([data-estado]) > [data-quando="falha"],
   :global(:root[data-vagas-estado="carregando"]) .selo--vagas:not([data-estado]) > [data-quando="falha"] { display: inline; }
-  :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) .selo__marca { background: var(--ink-muted); }
+  :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) .selo__marca,
+  :global(:root[data-vagas-estado="falha"]) .selo--vagas:not([data-estado]) .selo__marca,
+  :global(:root[data-vagas-estado="carregando"]) .selo--vagas:not([data-estado]) .selo__marca { background: var(--ink-muted); }
 
   .selo--recomendado {
     --c: 6px;

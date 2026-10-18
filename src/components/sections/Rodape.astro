@@ -15,10 +15,12 @@ interface Contato {
   icone: "whatsapp" | "instagram" | "facebook";
   /** Sem endereço (Facebook, por enquanto), a linha sai só como texto. */
   href?: string;
+  /** Origem do clique de WhatsApp na medição (data-origem). */
   origem?: string;
 }
 const contatos: Contato[] = [
-  { rotulo: rodape.whatsappRotulo, valor: site.whatsappExibicao, icone: "whatsapp", href: montarLinkWhatsapp("topo"), origem: "topo" },
+  // A §21 não tem mensagem própria para o rodapé: usa a do topo, mas o clique conta como "rodape".
+  { rotulo: rodape.whatsappRotulo, valor: site.whatsappExibicao, icone: "whatsapp", href: montarLinkWhatsapp("topo"), origem: "rodape" },
   { rotulo: rodape.instagramRotulo, valor: site.instagram.usuario, icone: "instagram", href: site.instagram.url },
   { rotulo: rodape.facebookRotulo, valor: site.facebook.nome, icone: "facebook", href: site.facebook.url || undefined },
 ];
@@ -68,9 +70,23 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
 
 <style>
   .rodape {
+    position: relative;
     background: var(--surface-sunken);
-    border-top: 1px solid var(--line);
     color: var(--ink);
+  }
+  /* A mesma divisória das seções (ui/Secao): linha da largura do conteúdo com o início em 45° */
+  .rodape::before {
+    --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--borda-lateral);
+    right: var(--borda-lateral);
+    height: 9px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
   }
   .rodape__conteudo {
     width: min(100% - 2 * var(--gutter), var(--largura-max));

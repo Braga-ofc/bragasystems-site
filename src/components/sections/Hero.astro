@@ -87,10 +87,15 @@ const { vagas } = Astro.props;
     .hero__leitura :global(.hero__selo) { letter-spacing: 0.01em; padding-inline: 10px 12px; gap: 8px; }
   }
 
+  /*
+    Headline em display, 4 linhas no celular (contrato, FIRST VIEWPORT). A frase quebra em 4 linhas
+    enquanto a coluna tem entre ~8,0 e ~8,8 vezes o tamanho da letra; por isso, só aqui, o tamanho
+    acompanha a largura da tela (≈ coluna ÷ 8,4 de 320 a 540 px) e para nos 56 px do tokens.json.
+  */
   .hero__titulo {
     margin-top: var(--s-6);
     max-width: 16ch;
-    font-size: var(--t-display);
+    font-size: clamp(2rem, 11.4vw - 0.1875rem, 3.5rem);
     font-weight: 600;
     line-height: 1.04;
     letter-spacing: -0.03em;

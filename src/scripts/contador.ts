@@ -3,12 +3,13 @@
   A página já vem com o número do build em <html data-vagas-build>. Aqui o navegador lê o
   valor ao vivo uma vez, com no máximo 3 segundos, e troca só se vier outro número.
   Sem build e sem resposta ao vivo, aplica o estado "falha".
-  Fora do domínio oficial, ?vagas=0..5 ou ?vagas=falha simula os estados para teste.
+  Só nos endereços de teste (localhost, 127.0.0.1 e *.workers.dev), ?vagas=0..5 ou ?vagas=falha
+  simula os estados. Depois de aplicar o estado, avisa a página com o evento "vagas:estado"
+  (detail: { estado, vagas }), para quem depende dele (o medidor da Urgência) não correr na frente.
 */
-import { enderecoVagas, estadoDe, validarVagas, vagasMax, type EstadoVagas } from "../lib/supabase";
+import { enderecoVagas, estadoDe, validarVagas, type EstadoVagas } from "../lib/supabase";
 
 const raiz = document.documentElement;
-const dominiosOficiais = ["bragasystems.com.br", "www.bragasystems.com.br"];
 const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function aplicar(vagas: number | null, estado: EstadoVagas = estadoDe(vagas)) {
@@ -16,16 +17,17 @@ function aplicar(vagas: number | null, estado: EstadoVagas = estadoDe(vagas)) {
   raiz.dataset.vagasEstado = estado;
   if (vagas === null) {
     delete raiz.dataset.vagasN;
-    return;
+  } else {
+    raiz.dataset.vagasN = String(vagas);
+    document.querySelectorAll<HTMLElement>("[data-vagas]").forEach((el) => {
+      if (anterior === null || anterior === vagas || semMovimento) {
+        el.textContent = String(vagas);
+      } else {
+        contar(el, anterior, vagas);
+      }
+    });
   }
-  raiz.dataset.vagasN = String(vagas);
-  document.querySelectorAll<HTMLElement>("[data-vagas]").forEach((el) => {
-    if (anterior === null || anterior === vagas || semMovimento) {
-      el.textContent = String(vagas);
-    } else {
-      contar(el, anterior, vagas);
-    }
-  });
+  document.dispatchEvent(new CustomEvent("vagas:estado", { detail: { estado, vagas } }));
 }
 
 /** Number ticker: o número anda um a um até o valor novo (recriado em TS; ideia do Magic UI, MIT). */
@@ -40,13 +42,19 @@ function contar(el: HTMLElement, de: number, ate: number) {
   window.setTimeout(tique, 120);
 }
 
+/** Endereço de teste: a máquina local ou o link do Cloudflare (*.workers.dev). Nunca o domínio oficial. */
+function enderecoDeTeste(): boolean {
+  // "bragasystems.com.br." (com ponto no fim) é o mesmo site: o ponto sai antes de comparar.
+  const host = location.hostname.toLowerCase().replace(/\.+$/, "");
+  return host === "localhost" || host === "127.0.0.1" || host.endsWith(".workers.dev");
+}
+
 function simulacao(): number | "falha" | undefined {
-  if (dominiosOficiais.includes(location.hostname)) return undefined;
+  if (!enderecoDeTeste()) return undefined;
   const valor = new URLSearchParams(location.search).get("vagas");
-  if (valor === null) return undefined;
   if (valor === "falha") return "falha";
-  const n = Number(valor);
-  return Number.isInteger(n) && n >= 0 && n <= vagasMax ? n : undefined;
+  // Só um dígito de 0 a 5: "", " ", "0x3", "1e0" e "2.0" não simulam nada.
+  return valor !== null && /^[0-5]$/.test(valor) ? Number(valor) : undefined;
 }
 
 async function lerAoVivo(): Promise<number | null> {

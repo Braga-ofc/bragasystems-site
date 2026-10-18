@@ -4,13 +4,14 @@
   validação, erros dos campos, botão carregando, UTM e envio com prazo.
   Nenhum dado pessoal vai para a URL, o console ou a medição.
 */
-import { montarLinkWhatsapp } from "../lib/whatsapp";
+import { montarLinkWhatsapp, semCodigoPais, soDigitos, whatsappValido } from "../lib/whatsapp";
 
 type Controle = HTMLInputElement | HTMLSelectElement;
 
 /* ---------- Peças compartilhadas ---------- */
 
-export const soDigitos = (valor: string) => valor.replace(/\D/g, "");
+// A regra do número mora em lib/whatsapp.ts, para o servidor usar a mesma na próxima etapa.
+export { soDigitos, whatsappValido };
 
 /** (61) 9999-9999 ou (61) 99999-9999, conforme a quantidade de dígitos. */
 export function formatarWhatsapp(d: string): string {
@@ -23,30 +24,48 @@ export function formatarWhatsapp(d: string): string {
   return `(${ddd}) ${resto.slice(0, 5)}-${resto.slice(5)}`;
 }
 
-/** Com DDD: 10 ou 11 dígitos e DDD entre 11 e 99. */
-export function whatsappValido(d: string): boolean {
-  const ddd = Number(d.slice(0, 2));
-  return (d.length === 10 || d.length === 11) && ddd >= 11 && ddd <= 99;
-}
-
-/** Máscara leve enquanto digita, sem perder a posição do cursor. */
+/**
+ * Máscara leve enquanto digita, sem perder a posição do cursor.
+ * Aceita o número com +55 ou 0 na frente (digitado tecla por tecla ou colado) e deixa
+ * apagar para trás e para a frente passando pelos separadores.
+ */
 export function ligarMascara(input: HTMLInputElement) {
   let anteriores = soDigitos(input.value);
+  // Seleção de antes da tecla: apagar uma seleção só de separadores não come dígito.
+  let selecao = { inicio: 0, fim: 0 };
+  input.addEventListener("beforeinput", () => {
+    selecao = { inicio: input.selectionStart ?? 0, fim: input.selectionEnd ?? 0 };
+  });
+
   input.addEventListener("input", (evento) => {
+    const tipo = (evento as InputEvent).inputType ?? "";
     const valor = input.value;
     const cursor = input.selectionStart ?? valor.length;
     let digitos = soDigitos(valor);
     let antesDoCursor = soDigitos(valor.slice(0, cursor)).length;
 
-    // Apagou só um separador: apaga também o dígito antes dele, senão o cursor trava.
-    if ((evento as InputEvent).inputType === "deleteContentBackward" && digitos === anteriores && antesDoCursor > 0) {
-      digitos = digitos.slice(0, antesDoCursor - 1) + digitos.slice(antesDoCursor);
-      antesDoCursor -= 1;
+    // Apagou só um separador: apaga também o dígito vizinho, senão o cursor trava.
+    if (digitos === anteriores && selecao.inicio === selecao.fim) {
+      if (tipo === "deleteContentBackward" && antesDoCursor > 0) {
+        digitos = digitos.slice(0, antesDoCursor - 1) + digitos.slice(antesDoCursor);
+        antesDoCursor -= 1;
+      } else if (tipo === "deleteContentForward" && antesDoCursor < digitos.length) {
+        digitos = digitos.slice(0, antesDoCursor) + digitos.slice(antesDoCursor + 1);
+      }
     }
-    // Colou com o código do país (+55): fica só o DDD e o número.
-    if (digitos.length > 11 && digitos.startsWith("55")) {
-      digitos = digitos.slice(2);
-      antesDoCursor = Math.max(0, antesDoCursor - 2);
+    selecao = { inicio: 0, fim: 0 };
+
+    // Código do país (55) e zeros antes do DDD saem antes de cortar em 11 dígitos.
+    const limpo = semCodigoPais(digitos);
+    digitos = limpo.digitos;
+    antesDoCursor = Math.max(0, antesDoCursor - limpo.removidos);
+
+    // Número completo: mais um dígito digitado não entra, como um limite de tamanho.
+    if (digitos.length > 11 && tipo === "insertText" && anteriores.length === 11) {
+      const voltar = Math.max(0, cursor - 1);
+      input.value = formatarWhatsapp(anteriores);
+      input.setSelectionRange(voltar, voltar);
+      return;
     }
     digitos = digitos.slice(0, 11);
     antesDoCursor = Math.min(antesDoCursor, digitos.length);
@@ -176,6 +195,14 @@ function iniciarFormulario(form: HTMLFormElement) {
   let enviando = false;
 
   ligarMascara(whatsapp);
+
+  // Voltar do /obrigado traz a página da memória (bfcache) como ficou: destrava o envio.
+  window.addEventListener("pageshow", (evento) => {
+    if (!evento.persisted) return;
+    enviando = false;
+    if (botao) definirCarregando(botao, false);
+    modulo?.classList.remove("feixe--continuo");
+  });
 
   // Cada regra devolve a mensagem de erro, ou "" quando o campo está certo.
   const regras: [Controle, () => string][] = [

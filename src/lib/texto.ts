@@ -18,7 +18,13 @@ export function comVagas(html: string, vagas: number): string {
   return html.replace("{X}", `<span class="num" data-vagas>${vagas}</span>`);
 }
 
-/** Texto da copy com [Política de Privacidade] virando link para /privacidade. */
+/**
+ * Texto da copy com [Política de Privacidade] virando link para /privacidade.
+ * Abre em nova aba: quem está no meio do formulário ou do gerador não perde o que digitou.
+ */
 export function comLinkPrivacidade(texto: string): string {
-  return rich(texto).replace("[Política de Privacidade]", '<a href="/privacidade">Política de Privacidade</a>');
+  return rich(texto).replace(
+    "[Política de Privacidade]",
+    '<a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>',
+  );
 }

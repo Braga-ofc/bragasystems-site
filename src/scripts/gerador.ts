@@ -20,11 +20,6 @@ type Estado = "inicial" | "carregando" | "resultado" | "enviado";
 
 const semMovimento = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** 2 a 80 caracteres e nenhum link (a função confere de novo no servidor). */
-function textoValido(valor: string): boolean {
-  return valor.length >= 2 && valor.length <= 80 && !/(https?:\/\/|www\.|\.(com|net|org|io|br)\b)/i.test(valor);
-}
-
 /**
  * Digita a headline: o texto inteiro já ocupa o lugar (nada pula) e as letras acendem
  * da esquerda para a direita em cerca de 1 s. O leitor de tela recebe a frase inteira.
@@ -97,6 +92,8 @@ function iniciar(raiz: HTMLElement) {
   const anuncio = raiz.querySelector<HTMLElement>("[data-anuncio]");
   const textoCarregando = raiz.querySelector(".console__status")?.textContent?.trim() ?? "";
   const msg = {
+    // Só o campo vazio para aqui; tamanho e links a função confere no servidor (vira a mensagem de erro).
+    gerarVazio: formGerar.dataset.erroVazio ?? "",
     vazio: formLead.dataset.erroVazio ?? "",
     whatsapp: formLead.dataset.erroWhatsapp ?? "",
     consentimento: formLead.dataset.erroConsentimento ?? "",
@@ -116,23 +113,10 @@ function iniciar(raiz: HTMLElement) {
 
   /* ---------- 1. Gerar a headline ---------- */
 
-  const marcar = (campo: HTMLInputElement, invalido: boolean) => {
-    if (invalido) {
-      campo.setAttribute("aria-invalid", "true");
-      campo.closest(".campo")?.classList.add("campo--erro");
-    } else {
-      limparErroCampo(campo);
-    }
-  };
-
+  // O erro fica ligado ao campo (aria-describedby do Campo) e some assim que ele ganha texto.
   for (const campo of [vende, paraQuem]) {
     campo.addEventListener("input", () => {
-      if (campo.getAttribute("aria-invalid") !== "true") return;
-      if (!textoValido(campo.value.trim())) return;
-      marcar(campo, false);
-      if (avisoGeracao && ![vende, paraQuem].some((c) => c.getAttribute("aria-invalid") === "true")) {
-        mostrarAviso(avisoGeracao, null);
-      }
+      if (campo.getAttribute("aria-invalid") === "true" && campo.value.trim()) limparErroCampo(campo);
     });
   }
 
@@ -142,11 +126,14 @@ function iniciar(raiz: HTMLElement) {
     if (avisoGeracao) mostrarAviso(avisoGeracao, null);
 
     const valores = { vende: vende.value.trim(), paraQuem: paraQuem.value.trim() };
-    const invalidos = [vende, paraQuem].filter((campo) => !textoValido(campo.value.trim()));
-    for (const campo of [vende, paraQuem]) marcar(campo, invalidos.includes(campo));
-    if (invalidos.length) {
-      if (avisoGeracao) mostrarAviso(avisoGeracao, modelo("campoVazio"));
-      invalidos[0].focus();
+    const vazios = [vende, paraQuem].filter((campo) => !campo.value.trim());
+    for (const campo of [vende, paraQuem]) {
+      if (vazios.includes(campo)) mostrarErroCampo(campo, msg.gerarVazio);
+      else limparErroCampo(campo);
+    }
+    // O foco no primeiro campo vazio faz o leitor de tela ler o rótulo e o erro ligado a ele.
+    if (vazios.length) {
+      vazios[0].focus();
       return;
     }
 
@@ -267,6 +254,17 @@ function iniciar(raiz: HTMLElement) {
     definirEstado("enviado");
     confirmacao?.focus({ preventScroll: true });
     confirmacao?.scrollIntoView({ block: "nearest", behavior: semMovimento() ? "auto" : "smooth" });
+  });
+
+  // Voltar do navegador traz a página da memória (bfcache) como ficou: nada fica travado em "carregando".
+  window.addEventListener("pageshow", (evento) => {
+    if (!evento.persisted) return;
+    ocupado = false;
+    processando(false, botaoGerar);
+    processando(false, botaoLead);
+    vende.readOnly = paraQuem.readOnly = false;
+    if (anuncio) anuncio.textContent = "";
+    if (raiz.dataset.estado === "carregando") definirEstado("inicial");
   });
 }
 

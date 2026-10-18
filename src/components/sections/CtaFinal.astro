@@ -25,7 +25,7 @@ const [microResposta, microFundador] = ctaFinal.microcopy;
 ---
 <Secao id="contato" tema="elevado">
   <div class="cta">
-    <div class="cta-texto" data-revela>
+    <div class="cta-texto">
       <h2 class="cta-titulo">
         <span class="cta-titulo__cena">{tituloCena}</span>
         {tituloPergunta && <span class="cta-titulo__pergunta">{tituloPergunta}</span>}
@@ -35,7 +35,7 @@ const [microResposta, microFundador] = ctaFinal.microcopy;
       </div>
     </div>
 
-    <div class="cta-modulo chanfrado feixe" data-modulo data-revela>
+    <div class="cta-modulo chanfrado feixe" data-modulo>
       <form
         class="cta-form"
         method="post"
@@ -50,7 +50,8 @@ const [microResposta, microFundador] = ctaFinal.microcopy;
         <div class="cta-form__corpo">
           <div class="cta-form__par">
             <Campo id="cta-nome" nome="nome" rotulo={ctaFinal.campos.nome} autocomplete="name" maxlength={80} obrigatorio />
-            <Campo id="cta-whatsapp" nome="whatsapp" tipo="telefone" rotulo={ctaFinal.campos.whatsapp} maxlength={15} obrigatorio />
+            {/* Sem limite de tamanho: a máscara corta em 11 dígitos depois de tirar o +55 (scripts/formulario.ts). */}
+            <Campo id="cta-whatsapp" nome="whatsapp" tipo="telefone" rotulo={ctaFinal.campos.whatsapp} obrigatorio />
           </div>
           <Campo
             id="cta-tipo"
