@@ -5,7 +5,9 @@
   de fundador; esgotado, só o cheio. As duas variantes já vêm no HTML (data-quando-vagas); fora de
   uma página com o contador, as duas apareceriam juntas.
   O Performance é o único destaque ciano da seção: fundo grafite, borda ciano, brilho, selo,
-  botão preenchido e o feixe que dá 2 voltas na borda ao entrar na tela e para.
+  botão preenchido e o feixe que dá 1 volta na borda ao entrar na tela e para.
+  O brilho é uma camada parada atrás do cartão (.plano__brilho), e não um filtro no cartão:
+  assim o feixe, que se redesenha a cada quadro, não obriga o navegador a refazer o desfoque.
 */
 import Botao from "./Botao.astro";
 import Icone from "./Icone.astro";
@@ -48,6 +50,7 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
   data-plano={plano.id}
   data-feixe={destaque ? "" : undefined}
 >
+  {destaque && <span class="plano__brilho" aria-hidden="true"></span>}
   {destaque && <Selo tipo="recomendado" class="plano__selo" />}
 
   <div class="plano__corpo">
@@ -125,7 +128,7 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
 
 <script>
   /*
-    Feixe na borda do Performance ao entrar na tela: 2 voltas e para
+    Feixe na borda do Performance ao entrar na tela: 1 volta e para
     (Border Beam do Magic UI, MIT, recriado em CSS no global.css). Sem movimento reduzido, nada liga.
   */
   const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -166,7 +169,30 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
     --cor-borda: var(--accent);
     --cor-fundo: var(--surface-raised);
     padding-top: calc(var(--pad) + var(--s-3));
-    filter: drop-shadow(0 16px 40px var(--brilho));
+  }
+
+  /*
+    Brilho do Performance: o recorte chanfrado em --brilho, desfocado e um pouco abaixo, atrás das
+    camadas de borda e fundo. Fica parado numa camada própria; o feixe anima por cima sem tocar nele.
+  */
+  .plano__brilho {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    translate: 0 16px;
+    filter: blur(20px);
+    will-change: transform;
+  }
+  .plano__brilho::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--brilho);
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+  @media (forced-colors: active) {
+    .plano__brilho { display: none; }
   }
 
   /* Selo RECOMENDADO preso na borda de cima, como a etiqueta do módulo */

@@ -2,6 +2,8 @@
 /*
   §9 Planos. Preço aberto como leitura do painel: três módulos na mesma linha, o Performance no
   centro, maior e elevado (é o único destaque ciano da seção); no celular ele vem primeiro.
+  O Performance vem primeiro também no HTML, para a ordem do Tab e do leitor de tela seguir a da
+  tela no celular e no tablet; só no computador a grade o leva para o centro.
   Abaixo, o Plano Contínuo como uma faixa de linha, sem botão, e a linha de pagamento.
   Vagas (mapa técnico, arquivo 03): com vagas e na falha, riscado cheio + fundador; esgotado,
   só o cheio. Quem troca é o CartaoPlano; aqui só a nota de fundador some no esgotado.
@@ -11,6 +13,9 @@ import Rotulo from "../ui/Rotulo.astro";
 import CartaoPlano from "../ui/CartaoPlano.astro";
 import { continuo, pagamento, planos, secaoPlanos } from "../../content/planos";
 import { rich } from "../../lib/texto";
+
+// Performance primeiro, depois os outros na ordem da copy (Essencial, Signature).
+const ordem = [...planos.filter((p) => p.destaque), ...planos.filter((p) => !p.destaque)];
 
 // "+ PLANO CONTÍNUO · R$ 147/mês": o nome em rótulo e o preço em leitura. O texto não muda.
 const sep = continuo.nome.indexOf(" · ");
@@ -30,15 +35,15 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
       </div>
     </header>
 
-    <ul class="planos__lista" role="list" data-revela>
-      {planos.map((plano) => (
+    <ul class="planos__lista" role="list">
+      {ordem.map((plano) => (
         <li class:list={["planos__item", plano.destaque && "planos__item--destaque"]}>
           <CartaoPlano plano={plano} />
         </li>
       ))}
     </ul>
 
-    <div class="planos__extra" data-revela>
+    <div class="planos__extra">
       <div class="planos-continuo chanfrado">
         <div class="planos-continuo__cabeca">
           <h3 class="planos-continuo__nome">
@@ -97,7 +102,6 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
   }
   .planos__item { display: flex; min-width: 0; }
   .planos__item > :global(.plano) { flex: 1; }
-  .planos__item--destaque { order: -1; }
 
   /* Faixa do Plano Contínuo: moldura de linha, sem botão, um complemento e não um quarto cartão */
   .planos__extra { display: grid; gap: var(--s-4); }
@@ -166,16 +170,17 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
   }
 
   /*
-    Computador: Essencial | Performance | Signature. O do meio mais largo e mais alto: os dois de fora
-    recuam igual em cima e embaixo (mesma altura entre si, botões alinhados) e ele fica elevado.
+    Computador: Essencial | Performance | Signature. O do meio, mais largo e mais alto, vai para a
+    coluna 2; os outros ocupam as colunas livres na ordem do HTML. Os dois de fora ficam na altura do
+    próprio conteúdo (sem vão antes da entrega) e alinhados por baixo: as três entregas e os três
+    botões na mesma linha, e o Performance sobe acima deles.
   */
   @media (min-width: 1024px) {
     .planos__lista {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr) minmax(0, 1fr);
-      align-items: stretch;
+      align-items: end;
       gap: var(--s-5);
     }
-    .planos__item { margin-block: var(--s-8); }
-    .planos__item--destaque { order: 0; grid-column: auto; margin-block: 0; }
+    .planos__item--destaque { grid-column: 2; grid-row: 1; }
   }
 </style>
