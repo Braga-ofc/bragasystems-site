@@ -1,0 +1,25 @@
+---
+// Etapa 1: página provisória só para testar a publicação no Cloudflare.
+// A home completa (§1 a §18) entra na Etapa 3.
+import Base from "../layouts/Base.astro";
+import logo from "../assets/logo/logo-horizontal-escuro.svg?raw";
+import { montarLinkWhatsapp } from "../lib/whatsapp";
+---
+<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão">
+  <main class="provisoria">
+    <div class="logo" set:html={logo} />
+    <p class="rotulo">SITE EM CONSTRUÇÃO</p>
+    <h1>Seu cliente chega no WhatsApp pronto para fechar.</h1>
+    <a class="botao" href={montarLinkWhatsapp("topo")}>Falar no WhatsApp</a>
+  </main>
+</Base>
+
+<style>
+  :global(body) { margin: 0; background: #0B0F14; color: #D6DDE6; font-family: "Inter", system-ui, sans-serif; }
+  .provisoria { min-height: 100svh; display: grid; place-content: center; justify-items: start; gap: 24px; padding: 32px 24px; max-width: 640px; margin: 0 auto; box-sizing: border-box; }
+  .logo :global(svg) { width: min(280px, 70vw); height: auto; display: block; }
+  .rotulo { margin: 24px 0 0; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .18em; color: #35D5E8; }
+  h1 { margin: 0; font-family: "Space Grotesk", system-ui, sans-serif; font-weight: 600; font-size: clamp(30px, 7vw, 48px); line-height: 1.1; text-wrap: balance; }
+  .botao { display: inline-block; padding: 14px 22px; background: #35D5E8; color: #0B0F14; font-weight: 600; text-decoration: none; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+  .botao:focus-visible { outline: 2px solid #D6DDE6; outline-offset: 4px; }
+</style>

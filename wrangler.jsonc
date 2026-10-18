@@ -1,0 +1,18 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	// Nome do projeto no Cloudflare Workers. O link de teste fica bragasystems-site.<sua-conta>.workers.dev
+	"name": "bragasystems-site",
+	"compatibility_date": "2026-10-12",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"main": "@astrojs/cloudflare/entrypoints/server",
+	"assets": {
+		"directory": "./dist",
+		"binding": "ASSETS",
+		// Endereço que não existe mostra a nossa página 404.
+		"not_found_handling": "404-page"
+	},
+	"observability": {
+		"enabled": true
+	}
+	// Segredos (chaves) NÃO entram aqui: ficam no painel do Cloudflare como Secret.
+}

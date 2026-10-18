@@ -1,0 +1,9 @@
+# SEGREDOS (só no servidor). Em produção ficam em
+# Cloudflare → Workers → bragasystems-site → Settings → Variables and Secrets (tipo Secret).
+# Nunca coloque valores reais neste arquivo de exemplo, no GitHub ou no chat.
+SUPABASE_SECRET_KEY=
+ANTHROPIC_API_KEY=
+TURNSTILE_SECRET_KEY=
+RESEND_API_KEY=
+IP_HASH_SALT=
+AVISO_EMAIL_PARA=bragasystemsofc@gmail.com
