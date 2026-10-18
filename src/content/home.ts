@@ -137,7 +137,7 @@ export const projetos = {
     solucao:
       "landing page completa com manifesto, portfólio, método, processo, investimento e perguntas frequentes, tudo levando ao WhatsApp.",
     botao: "Ver o site no ar",
-    url: "https://ebencreative.netlify.app",
+    url: "https://ebencreative.com.br",
     frase: "O resultado ficou muito alinhado com o que eu buscava.",
     depoimento:
       "Gostei muito do processo de criação do site da EBEN Creative Studio. Ele conseguiu entender a proposta da marca e traduzir isso em um site com identidade, boa organização visual e uma comunicação alinhada ao posicionamento que quero construir para a empresa. Além da estética, achei importante o cuidado com a estrutura e a forma como as informações foram apresentadas, tornando a navegação mais clara e profissional. O resultado ficou muito alinhado com o que eu buscava e contribuiu para transmitir a imagem que quero que a EBEN tenha no mercado.",
