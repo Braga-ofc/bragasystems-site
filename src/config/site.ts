@@ -5,8 +5,10 @@ export const site = {
   whatsapp: "5561995752594",
   whatsappExibicao: "(61) 99575-2594",
   instagram: { usuario: "@braga.systems", url: "https://www.instagram.com/braga.systems" },
-  // Pendente: link completo da página do Facebook.
-  facebook: { nome: "Braga Systems", url: "" },
+  // Link de compartilhamento enviado pelo Gustavo em 18/10. Se a página ganhar nome de usuário, trocar pelo endereço curto.
+  facebook: { nome: "Braga Systems", url: "https://www.facebook.com/share/1C2o7B1Q8C/" },
   cidade: "Brasília – DF",
+  // Entra no rodapé depois da formalização (copy §18).
+  cnpj: "",
   emailAvisos: "bragasystemsofc@gmail.com",
 } as const;

@@ -1,0 +1,48 @@
+---
+/*
+  §15 Dúvidas frequentes. Leitura calma, sem ciano: o título fica preso à esquerda no computador
+  (4/12) enquanto a lista corre à direita (8/12). No celular, título e lista empilhados.
+  As perguntas vêm de content/faq.ts, a mesma fonte do FAQPage do SEO.
+*/
+import Secao from "../ui/Secao.astro";
+import Acordeao from "../ui/Acordeao.astro";
+import { faq, faqTitulo } from "../../content/faq";
+---
+<Secao id="duvidas" class="faq">
+  <div class="faq__grade">
+    <h2 class="faq__titulo">{faqTitulo}</h2>
+    <div class="faq__lista">
+      <Acordeao itens={faq} />
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .faq__grade { display: grid; min-width: 0; }
+
+  .faq__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .faq__lista { min-width: 0; margin-top: var(--s-6); }
+
+  @media (min-width: 960px) {
+    .faq__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: start;
+    }
+    /* Preso abaixo do topo fixo (72 px no computador) enquanto a lista passa */
+    .faq__titulo {
+      grid-column: 1 / span 4;
+      position: sticky;
+      top: calc(72px + var(--s-6));
+      max-width: 10ch;
+    }
+    .faq__lista { grid-column: 5 / -1; margin-top: 0; }
+  }
+</style>

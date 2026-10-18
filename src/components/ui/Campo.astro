@@ -73,7 +73,8 @@ const descricao = [ajuda && idAjuda, idErro].filter(Boolean).join(" ");
             aria-invalid={erro ? "true" : undefined}
             aria-describedby={descricao}
           >
-            <option value="" disabled selected={!valor}>{placeholder ?? "Escolha uma opção"}</option>
+            {/* Primeira opção vazia: o rótulo acima já diz o que escolher; nenhum texto fora da copy. */}
+            <option value="" disabled selected={!valor} hidden>{placeholder}</option>
             {opcoes.map((o) => <option value={o} selected={o === valor}>{o}</option>)}
           </select>
           <Icone nome="seta-baixo" class="campo__seta" />
@@ -101,20 +102,33 @@ const descricao = [ajuda && idAjuda, idErro].filter(Boolean).join(" ");
 )}
 
 <style>
-  .campo { display: grid; gap: var(--s-2); min-width: 0; }
+  .campo {
+    /* Contorno com 3:1 ou mais contra o campo e contra o que está em volta (WCAG 1.4.11),
+       no escuro e no claro; o hover sobe um degrau e o foco é o ciano. */
+    --campo-borda: color-mix(in srgb, var(--ink-muted) 75%, var(--line-forte));
+    --campo-borda-hover: var(--ink-muted);
+    display: grid;
+    gap: var(--s-2);
+    min-width: 0;
+  }
   .campo__rotulo { font: 500 var(--t-small)/1.4 var(--font-sans); color: var(--ink-strong); }
   .campo__ajuda { font-size: var(--t-small); color: var(--ink-muted); }
 
   .campo__moldura {
     --c: var(--chanfro-sm);
-    --cor-borda: var(--line-forte);
+    --cor-borda: var(--campo-borda);
     --cor-fundo: var(--surface-sunken);
     display: block;
   }
-  .campo__moldura:hover { --cor-borda: var(--ink-muted); }
+  .campo__moldura:hover { --cor-borda: var(--campo-borda-hover); }
   .campo__moldura:focus-within { --cor-borda: var(--accent); --espessura: 2px; }
   .campo--erro .campo__moldura { --cor-borda: var(--erro); }
-  .campo--erro .campo__moldura:focus-within { --cor-borda: var(--erro); }
+  /* Com erro, a borda fica vermelha e o foco ganha o contorno ciano, como na caixa de consentimento */
+  .campo--erro .campo__moldura:focus-within {
+    --cor-borda: var(--erro);
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
 
   .campo__controle {
     display: block;
@@ -174,7 +188,7 @@ const descricao = [ajuda && idAjuda, idErro].filter(Boolean).join(" ");
     height: 22px;
     margin: 0;
     appearance: none;
-    border: 1.5px solid var(--line-forte);
+    border: 1.5px solid var(--campo-borda);
     background: var(--surface-sunken) center / 16px no-repeat;
     cursor: pointer;
     transition: background-color var(--dur-rapida) var(--ease-saida), border-color var(--dur-rapida) var(--ease-saida);
@@ -182,9 +196,17 @@ const descricao = [ajuda && idAjuda, idErro].filter(Boolean).join(" ");
   :global(.tema-claro) .check__caixa {
     --marca: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
   }
-  .check__caixa:hover { border-color: var(--ink-muted); }
+  .check__caixa:hover { border-color: var(--campo-borda-hover); }
   .check__caixa:checked { background-color: var(--accent); background-image: var(--marca); border-color: var(--accent); }
   .check__caixa:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .campo--erro .check__caixa { border-color: var(--erro); }
   .check__texto :global(a) { color: var(--accent); }
+
+  /* Alto contraste do Windows: a moldura vira borda real (global.css); aqui, foco e caixa marcada */
+  @media (forced-colors: active) {
+    .campo__moldura:focus-within { outline: 2px solid Highlight; outline-offset: 2px; }
+    .check__caixa { forced-color-adjust: none; border-color: CanvasText; background: Canvas; }
+    .check__caixa:checked { border-color: Highlight; background: Highlight; box-shadow: inset 0 0 0 3px Canvas; }
+    .check__caixa:focus-visible { outline-color: Highlight; }
+  }
 </style>

@@ -1,0 +1,188 @@
+---
+/*
+  §13 Sobre. Uma ficha de quem faz: a foto profissional do Gustavo num encaixe chanfrado do
+  painel, com marcas de enquadramento em 90° nos cantos retos. No celular a foto vem acima do
+  nome; no computador, em 4:5 à esquerda, com o texto centrado na altura dela.
+  O único ciano é o botão do WhatsApp. Sem números (anos, projetos): copy §13.
+*/
+import Secao from "../ui/Secao.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import Botao from "../ui/Botao.astro";
+import { Image } from "astro:assets";
+import foto from "../../assets/gustavo/gustavo-braga-sentado.jpg";
+import { sobre } from "../../content/home";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+---
+<Secao id="sobre" tema="elevado" class="sobre">
+  <div class="sobre__grade">
+    <div class="sobre__retrato chanfrado">
+      <Image
+        class="sobre__foto"
+        src={foto}
+        alt="Gustavo Braga, fundador da BRAGA SYSTEMS, sentado de camisa preta com as mãos entrelaçadas"
+        widths={[320, 480, 640, 880]}
+        sizes="(min-width: 960px) 440px, (min-width: 720px) 240px, min(320px, 100vw)"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="sobre__marca sobre__marca--topo" aria-hidden="true"></span>
+      <span class="sobre__marca sobre__marca--base" aria-hidden="true"></span>
+    </div>
+
+    <header class="sobre__cabeca">
+      <Rotulo>{sobre.rotulo}</Rotulo>
+      <h2 class="sobre__titulo">{sobre.titulo}</h2>
+    </header>
+
+    <div class="sobre__corpo">
+      {sobre.paragrafos.map((paragrafo) => <p class="sobre__texto">{paragrafo}</p>)}
+      <div class="sobre__acoes">
+        <Botao variante="secundario" href="/quem-sou" icone="seta">{sobre.botaoHistoria}</Botao>
+        <Botao href={montarLinkWhatsapp("sobre")} icone="whatsapp" origem="sobre">{sobre.botaoWhatsapp}</Botao>
+      </div>
+    </div>
+  </div>
+</Secao>
+
+<style>
+  /* Celular: a foto acima do nome; o texto embaixo, na largura toda */
+  .sobre__grade {
+    --retrato: min(320px, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "retrato"
+      "cabeca"
+      "corpo";
+    row-gap: var(--s-6);
+    min-width: 0;
+  }
+
+  /* ---------- O encaixe do retrato ---------- */
+  .sobre__retrato {
+    --c: var(--chanfro);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    --marca: 10px;
+    --marca-recuo: 8px;
+    grid-area: retrato;
+    width: var(--retrato);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  /* A foto segue o recorte chanfrado do encaixe, por dentro da borda fina */
+  .sobre__foto {
+    position: absolute;
+    inset: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    object-fit: cover;
+    object-position: 50% 20%;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+
+  /* Marcas de enquadramento em 90°, nos dois cantos retos do encaixe */
+  .sobre__marca {
+    position: absolute;
+    width: var(--marca);
+    height: var(--marca);
+    pointer-events: none;
+  }
+  .sobre__marca--topo {
+    top: var(--marca-recuo);
+    right: var(--marca-recuo);
+    border-top: 1px solid var(--line-forte);
+    border-right: 1px solid var(--line-forte);
+  }
+  .sobre__marca--base {
+    bottom: var(--marca-recuo);
+    left: var(--marca-recuo);
+    border-bottom: 1px solid var(--line-forte);
+    border-left: 1px solid var(--line-forte);
+  }
+
+  /* ---------- O texto ---------- */
+  .sobre__cabeca {
+    grid-area: cabeca;
+    align-self: end;
+    display: grid;
+    gap: var(--s-3);
+    justify-items: start;
+    min-width: 0;
+  }
+  .sobre__titulo {
+    max-width: 16ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .sobre__corpo {
+    grid-area: corpo;
+    display: grid;
+    gap: var(--s-4);
+    min-width: 0;
+  }
+  .sobre__texto {
+    max-width: 60ch;
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .sobre__acoes {
+    display: grid;
+    gap: var(--s-3);
+    margin-top: var(--s-4);
+  }
+  .sobre__acoes :global(.botao) { width: 100%; }
+
+  @media (min-width: 640px) {
+    .sobre__acoes { display: flex; flex-wrap: wrap; }
+    .sobre__acoes :global(.botao) { width: auto; }
+  }
+
+  /* Tablet: a foto à esquerda, nome e texto ao lado */
+  @media (min-width: 720px) {
+    .sobre__grade {
+      --retrato: 240px;
+      grid-template-columns: var(--retrato) minmax(0, 1fr);
+      grid-template-areas:
+        "retrato cabeca"
+        "retrato corpo";
+      grid-template-rows: auto 1fr;
+      column-gap: var(--s-7);
+      row-gap: var(--s-5);
+    }
+    .sobre__retrato { --c: var(--chanfro-lg); --marca: 14px; --marca-recuo: 12px; }
+  }
+
+  /*
+    Computador: o encaixe em 4:5 nas colunas 1–5 e o texto nas 6–12, centrado na altura dele
+    (as linhas de cima e de baixo da grade são folgas iguais). Se o texto for mais alto, como
+    perto de 960 px, é o encaixe que se centra nele.
+  */
+  @media (min-width: 960px) {
+    .sobre__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      grid-template-rows: 1fr auto auto 1fr;
+      grid-template-areas: none;
+      column-gap: var(--s-5);
+    }
+    .sobre__retrato {
+      grid-column: 1 / span 5;
+      grid-row: 1 / -1;
+      align-self: center;
+      --marca: 18px;
+      --marca-recuo: 16px;
+    }
+    .sobre__retrato { width: auto; }
+    /* O texto começa na coluna 6, recuado: os dois botões cabem lado a lado em 1440 */
+    .sobre__cabeca { grid-column: 6 / -1; grid-row: 2; padding-left: var(--s-7); }
+    .sobre__corpo { grid-column: 6 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-7); }
+    .sobre__titulo { max-width: 20ch; }
+  }
+</style>

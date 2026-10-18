@@ -1,34 +1,120 @@
 ---
-// Página provisória até a home completa (§1 a §18) entrar na etapa 3.
+// Home de venda (copy oficial §1 a §18). Topo e rodapé vêm do layout Base.
 import Base from "../layouts/Base.astro";
-import Botao from "../components/ui/Botao.astro";
-import Selo from "../components/ui/Selo.astro";
-import logo from "../assets/logo/logo-horizontal-escuro.svg?raw";
-import { montarLinkWhatsapp } from "../lib/whatsapp";
+import Hero from "../components/sections/Hero.astro";
+import Gerador from "../components/sections/Gerador.astro";
+import Dor from "../components/sections/Dor.astro";
+import Proposta from "../components/sections/Proposta.astro";
+import Metodo from "../components/sections/Metodo.astro";
+import Beneficios from "../components/sections/Beneficios.astro";
+import Projetos from "../components/sections/Projetos.astro";
+import Planos from "../components/sections/Planos.astro";
+import Processo from "../components/sections/Processo.astro";
+import Objecoes from "../components/sections/Objecoes.astro";
+import Garantia from "../components/sections/Garantia.astro";
+import Sobre from "../components/sections/Sobre.astro";
+import Urgencia from "../components/sections/Urgencia.astro";
+import Faq from "../components/sections/Faq.astro";
+import CtaFinal from "../components/sections/CtaFinal.astro";
+import Ps from "../components/sections/Ps.astro";
+import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
+
+// Número de vagas do último build: a página já carrega com ele (mapa técnico, arquivo 03).
+const vagasBuild = await lerVagasNoBuild();
+const vagas = vagasBuild ?? vagasMax;
 ---
-<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão">
-  <main class="provisoria">
-    <div class="logo" set:html={logo} />
-    <Selo />
-    <h1>Seu cliente chega no WhatsApp pronto para fechar.</h1>
-    <p class="sub">Landing pages e sites personalizados, com copy de conversão inclusa, para negócios que vendem serviços de alto valor e fecham pelo WhatsApp.</p>
-    <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="topo">Falar no WhatsApp</Botao>
+<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild}>
+  <main id="conteudo">
+    <div class="abertura">
+      <Hero vagas={vagas} />
+      <Gerador />
+    </div>
+    <Dor />
+    <Proposta />
+    <Metodo />
+    <Beneficios />
+    <Projetos vagas={vagas} />
+    <Planos />
+    <Processo />
+    <Objecoes />
+    <Garantia />
+    <Sobre />
+    <Urgencia vagas={vagas} />
+    <Faq />
+    <CtaFinal />
+    <Ps vagas={vagas} />
   </main>
 </Base>
 
+<script>
+  import "../scripts/contador";
+</script>
+
 <style>
-  .provisoria {
-    min-height: 100svh;
+  /*
+    Primeira dobra: Hero e Gerador dividem a mesma faixa sobre a grade do painel.
+    Celular: empilhados. A partir de 1024 px: 12 colunas, a oferta em 1–7 e o console em 8–12,
+    alinhados ao topo; cabe em 1440×900 com o topo de 72 px.
+  */
+  .abertura {
+    --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);
+    position: relative;
+    isolation: isolate;
+    overflow-x: clip;
     display: grid;
-    place-content: center;
-    justify-items: start;
-    gap: var(--s-5);
-    width: min(100% - 2 * var(--gutter), 680px);
-    margin-inline: auto;
-    padding-block: var(--s-8);
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-8);
+    /* Topo em múltiplo de 32 px: o conteúdo começa numa linha da grade */
+    padding: var(--s-8) var(--borda-lateral) var(--secao-respiro);
   }
-  .logo { margin-bottom: var(--s-5); }
-  .logo :global(svg) { width: min(240px, 64vw); height: auto; }
-  h1 { font-size: var(--t-display); line-height: 1.05; letter-spacing: -0.03em; }
-  .sub { font-size: var(--t-body-lg); color: var(--ink-muted); max-width: 52ch; }
+
+  /*
+    Grade fina de 32 px na cor das linhas, que se dissolve nas bordas: a mesma do utilitário .grade
+    (Grid Pattern do Magic UI, MIT, recriado em CSS), aqui como camada de fundo para não mascarar o
+    conteúdo. A primeira linha vertical cai na margem do conteúdo e as horizontais no topo dele.
+  */
+  .abertura::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    --grade-cor: color-mix(in srgb, var(--line) 55%, transparent);
+    background-image:
+      linear-gradient(to right, var(--grade-cor) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grade-cor) 1px, transparent 1px);
+    background-size: 32px 32px;
+    /* Em background-position, 100% desconta a largura do ladrilho: daí os 32px de volta */
+    background-position: max(var(--gutter), (100% - var(--largura-max) + 32px) / 2) 0;
+    -webkit-mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
+  }
+
+  /* Fim da dobra: a mesma linha com corte em 45° que separa as seções (ui/Secao) */
+  .abertura::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: var(--borda-lateral);
+    right: var(--borda-lateral);
+    height: 9px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
+  }
+
+  @media (min-width: 1024px) {
+    .abertura {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: start;
+    }
+    .abertura::before {
+      -webkit-mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
+      mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
+    }
+    .abertura > :global(.hero) { grid-column: 1 / span 7; }
+    .abertura > :global(.gerador) { grid-column: 8 / span 5; }
+  }
 </style>

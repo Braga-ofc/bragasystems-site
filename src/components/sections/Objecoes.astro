@@ -1,0 +1,157 @@
+---
+/*
+  §11 Quebra de objeções. Cada objeção é a fala do cliente, grande, entre as aspas da copy;
+  a resposta sai dela por um ramo em 45° e corre recuada ao longo de uma régua fina, como uma
+  resposta encadeada. No computador, uma grade de 2 colunas em degrau: o título ocupa a
+  primeira casa e a coluna da direita desce meio passo, para a leitura correr em zigue-zague.
+  Sem ciano: a dúvida fica em tons neutros, e a luz volta na Garantia, logo abaixo.
+  Vagas (mapa técnico, arquivo 03): a última resposta troca de texto quando as vagas esgotam.
+*/
+import Secao from "../ui/Secao.astro";
+import { objecoes } from "../../content/home";
+import { aspas, rich } from "../../lib/texto";
+
+// A aspa de abertura da copy fica pendurada na margem, para a pergunta alinhar pela letra.
+function pendurar(pergunta: string) {
+  const texto = aspas(pergunta);
+  const aspa = texto.startsWith("\u201C") ? "\u201C" : "";
+  return { aspa, resto: texto.slice(aspa.length) };
+}
+---
+<Secao class="objecoes">
+  <div class="objecoes__grade">
+    <h2 class="objecoes__titulo">{objecoes.titulo}</h2>
+
+    <ul class="objecoes__lista" role="list" data-revela>
+      {objecoes.itens.map((item) => {
+        const pergunta = pendurar(item.pergunta);
+        return (
+          <li class="objecao">
+            <h3 class="objecao__pergunta">
+              {pergunta.aspa && <span class="objecao__aspa">{pergunta.aspa}</span>}{pergunta.resto}
+            </h3>
+            <div class="objecao__resposta">
+              <svg class="objecao__ramo" width="25" height="24" viewBox="0 0 25 24" fill="none" aria-hidden="true">
+                <path d="M0.5 0L24.5 24" stroke="currentColor" />
+              </svg>
+              {"respostaSemVagas" in item ? (
+                <>
+                  <p data-quando-vagas="com falha" set:html={rich(item.resposta)} />
+                  <p data-quando-vagas="esgotado" set:html={rich(item.respostaSemVagas)} />
+                </>
+              ) : (
+                <p set:html={rich(item.resposta)} />
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</Secao>
+
+<style>
+  .objecoes__grade { display: grid; min-width: 0; }
+
+  .objecoes__titulo {
+    position: relative;
+    z-index: 1;
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .objecoes__lista {
+    display: grid;
+    min-width: 0;
+    margin: var(--s-7) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Uma objeção: a fala, o ramo em 45° e a resposta ao longo da régua */
+  .objecao {
+    --ramo: 24px;
+    display: grid;
+    align-content: start;
+    row-gap: var(--ramo);
+    min-width: 0;
+    padding-block: var(--s-6) var(--s-7);
+    border-top: 1px solid var(--line);
+  }
+  .objecao:last-child { padding-bottom: 0; }
+
+  .objecao__pergunta {
+    max-width: 22ch;
+    font-size: var(--t-h2);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+  }
+  /* A aspa fica na margem; a letra da pergunta alinha com a régua da coluna */
+  .objecao__aspa {
+    margin-left: -0.38em; /* a largura da aspa reta da Space Grotesk */
+    color: var(--ink-muted);
+  }
+
+  .objecao__resposta {
+    position: relative;
+    min-width: 0;
+    margin-left: var(--ramo);
+    padding-left: var(--s-4);
+    border-left: 1px solid var(--line);
+  }
+  /* O ramo desce do pé da pergunta em 45° e encontra o topo da régua */
+  .objecao__ramo {
+    position: absolute;
+    top: calc(-1 * var(--ramo));
+    left: calc(-1 * var(--ramo) - 1px);
+    width: calc(var(--ramo) + 1px);
+    height: var(--ramo);
+    color: var(--line);
+    overflow: visible;
+  }
+  .objecao__resposta p {
+    max-width: 58ch;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .objecao__resposta :global(strong) { font-weight: 600; color: var(--ink-strong); }
+
+  @media (min-width: 720px) {
+    .objecao__resposta { padding-left: var(--s-5); }
+    .objecao__resposta p { font-size: var(--t-body-lg); line-height: 1.6; }
+  }
+
+  /*
+    Computador: 2 colunas em degrau. O título e a lista dividem a mesma linha da grade;
+    a primeira casa da lista fica vazia e é ali que o título aparece. A coluna da direita
+    desce meio passo, então cada linha da grade lê da esquerda alta para a direita baixa.
+  */
+  @media (min-width: 960px) {
+    .objecoes__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    .objecoes__titulo { grid-area: 1 / 1 / 2 / span 5; align-self: start; }
+    .objecoes__lista {
+      grid-area: 1 / 1 / 2 / -1;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      row-gap: var(--s-7);
+      margin-top: 0;
+    }
+    .objecao {
+      grid-column: span 6;
+      padding-block: var(--s-6) 0;
+    }
+    /* A primeira objeção abre a coluna da direita, ao lado do título */
+    .objecao:first-child { grid-column: 7 / span 6; }
+    /* Coluna da direita: 1ª, 3ª e 5ª objeções, meio passo abaixo */
+    .objecao:nth-child(odd) { margin-top: var(--s-9); }
+    .objecao__pergunta { max-width: none; }
+  }
+</style>

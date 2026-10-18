@@ -1,0 +1,237 @@
+---
+/*
+  Rodapé (copy §18): marca e slogan, contatos como leituras do painel (rótulo em mono, valor ao lado)
+  e a linha de base com local, links e direitos. O ano sai do build; o CNPJ só entra quando existir.
+*/
+import Icone from "../ui/Icone.astro";
+import logo from "../../assets/logo/logo-vertical-escuro.svg?raw";
+import { rodape } from "../../content/home";
+import { site } from "../../config/site";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+interface Contato {
+  rotulo: string;
+  valor: string;
+  icone: "whatsapp" | "instagram" | "facebook";
+  /** Sem endereço (Facebook, por enquanto), a linha sai só como texto. */
+  href?: string;
+  /** Origem do clique de WhatsApp na medição (data-origem). */
+  origem?: string;
+}
+const contatos: Contato[] = [
+  // A §21 não tem mensagem própria para o rodapé: usa a do topo, mas o clique conta como "rodape".
+  { rotulo: rodape.whatsappRotulo, valor: site.whatsappExibicao, icone: "whatsapp", href: montarLinkWhatsapp("topo"), origem: "rodape" },
+  { rotulo: rodape.instagramRotulo, valor: site.instagram.usuario, icone: "instagram", href: site.instagram.url },
+  { rotulo: rodape.facebookRotulo, valor: site.facebook.nome, icone: "facebook", href: site.facebook.url || undefined },
+];
+const cnpj: string = site.cnpj;
+const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear()));
+---
+<footer class="rodape">
+  <div class="rodape__conteudo">
+    <div class="rodape__marca">
+      <div class="rodape__logo" set:html={logo} />
+      <p class="rodape__slogan">{rodape.slogan}</p>
+    </div>
+
+    <ul class="rodape__contatos" role="list">
+      {contatos.map((c) => (
+        <li>
+          {c.href ? (
+            <a class="rodape__contato" href={c.href} target="_blank" rel="noopener" data-origem={c.origem}>
+              <Icone nome={c.icone} class="rodape__icone" />
+              <span class="rodape__rotulo">{c.rotulo}</span>
+              <span class="rodape__valor num">{c.valor}</span>
+              <Icone nome="externo" tamanho={16} class="rodape__externo" />
+            </a>
+          ) : (
+            <span class="rodape__contato">
+              <Icone nome={c.icone} class="rodape__icone" />
+              <span class="rodape__rotulo">{c.rotulo}</span>
+              <span class="rodape__valor">{c.valor}</span>
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+
+    <div class="rodape__base">
+      <p class="rodape__local">
+        <span>{rodape.local[0]}</span><span class="rodape__ponto" aria-hidden="true"></span><span>{rodape.local[1]}</span>
+      </p>
+      {cnpj && <p class="rodape__cnpj">{rodape.cnpjRotulo} <span class="num">{cnpj}</span></p>}
+      <ul class="rodape__links" role="list">
+        {rodape.links.map((l) => <li><a class="rodape__link" href={l.href}>{l.texto}</a></li>)}
+      </ul>
+      <p class="rodape__direitos num">{direitos}</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    position: relative;
+    background: var(--surface-sunken);
+    color: var(--ink);
+  }
+  /* A mesma divisória das seções (ui/Secao): linha da largura do conteúdo com o início em 45° */
+  .rodape::before {
+    --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--borda-lateral);
+    right: var(--borda-lateral);
+    height: 9px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
+  }
+  .rodape__conteudo {
+    width: min(100% - 2 * var(--gutter), var(--largura-max));
+    margin-inline: auto;
+    padding-block: var(--s-8) var(--s-6);
+    display: grid;
+    gap: var(--s-7);
+  }
+
+  /* Marca: logo vertical e o slogan como assinatura */
+  .rodape__marca { display: grid; gap: var(--s-5); align-content: start; }
+  .rodape__logo { width: 112px; }
+  .rodape__logo :global(svg) { width: 100%; height: auto; }
+  .rodape__slogan {
+    max-width: 20ch;
+    font: 500 var(--t-h2)/1.2 var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--ink-strong);
+    text-wrap: balance;
+  }
+
+  /* Contatos: linhas de leitura do painel, divididas por traços finos */
+  .rodape__contatos {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--line);
+  }
+  .rodape__contatos li { border-bottom: 1px solid var(--line); }
+  .rodape__contato {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 16px;
+    grid-template-areas:
+      "icone rotulo externo"
+      "icone valor externo";
+    align-items: center;
+    column-gap: var(--s-4);
+    row-gap: 2px;
+    min-height: 64px;
+    padding-block: var(--s-3);
+    color: var(--ink-strong);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rodape__contato :global(.rodape__icone) { grid-area: icone; color: var(--ink-muted); transition: color var(--dur) var(--ease-saida); }
+  .rodape__rotulo {
+    grid-area: rotulo;
+    font: 500 var(--t-label)/1.3 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .rodape__valor {
+    grid-area: valor;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font: 500 var(--t-body)/1.4 var(--font-sans);
+    color: var(--ink-strong);
+    text-decoration: underline transparent 1px;
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--dur) var(--ease-saida);
+  }
+  .rodape__contato :global(.rodape__externo) {
+    grid-area: externo;
+    color: var(--ink-muted);
+    transition: translate var(--dur) var(--ease-saida), color var(--dur) var(--ease-saida);
+  }
+  a.rodape__contato:hover :global(.rodape__icone) { color: var(--ink-strong); }
+  a.rodape__contato:hover .rodape__valor { text-decoration-color: var(--line-forte); }
+  a.rodape__contato:hover :global(.rodape__externo) { translate: 2px -2px; color: var(--accent); }
+  a.rodape__contato:active .rodape__valor { color: var(--ink); }
+
+  /* Linha de base: local, links e direitos */
+  .rodape__base {
+    display: grid;
+    gap: var(--s-4);
+    margin-top: calc(-1 * var(--s-7));
+    padding-top: var(--s-6);
+    font-size: var(--t-small);
+    line-height: 1.5;
+    color: var(--ink-muted);
+  }
+  /* Local: as duas partes empilhadas no celular; numa linha, separadas por um ponto quadrado */
+  .rodape__local {
+    display: grid;
+    gap: var(--s-1);
+    font: 500 var(--t-label)/1.5 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .rodape__ponto { display: none; width: 3px; height: 3px; background: currentColor; flex: none; }
+  .rodape__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--s-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rodape__links li { display: inline-flex; align-items: center; gap: var(--s-3); }
+  .rodape__links li + li::before { content: ""; width: 3px; height: 3px; background: var(--ink-muted); }
+  .rodape__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ink);
+    text-decoration: underline var(--line-forte) 1px;
+    text-underline-offset: 0.3em;
+    transition: color var(--dur) var(--ease-saida), text-decoration-color var(--dur) var(--ease-saida);
+  }
+  .rodape__link:hover { color: var(--ink-strong); text-decoration-color: var(--accent); }
+
+  @media (min-width: 480px) {
+    .rodape__local { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-3); }
+    .rodape__ponto { display: block; }
+  }
+
+  @media (min-width: 720px) {
+    .rodape__contato {
+      grid-template-columns: 20px 120px minmax(0, 1fr) 16px;
+      grid-template-areas: "icone rotulo valor externo";
+      min-height: 56px;
+    }
+    .rodape__logo { width: 128px; }
+  }
+
+  @media (min-width: 960px) {
+    .rodape__conteudo {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      row-gap: var(--s-8);
+      padding-block: var(--s-9) var(--s-6);
+    }
+    .rodape__marca { grid-column: 1 / span 5; }
+    .rodape__contatos { grid-column: 7 / span 6; align-self: end; }
+    .rodape__base {
+      grid-column: 1 / -1;
+      margin-top: 0;
+      padding-top: var(--s-5);
+      border-top: 1px solid var(--line);
+      grid-template-columns: auto auto 1fr auto;
+      align-items: center;
+      column-gap: var(--s-6);
+    }
+    .rodape__direitos { grid-column: -2; }
+  }
+</style>

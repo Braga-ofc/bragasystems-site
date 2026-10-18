@@ -1,0 +1,189 @@
+---
+/*
+  §10 Como funciona. As 5 etapas como um trilho medido: segmentos em paralelogramo, cortados em 45°
+  como as vagas do medidor, que clareiam da primeira etapa até "No ar". Computador: 5 colunas
+  sobre o trilho; celular: trilho vertical à esquerda. Os números de 1 a 5 vêm da sequência da copy.
+  "Faça a conta" fecha num módulo grafite; o único ciano do bloco é "um único cliente a mais".
+*/
+import Secao from "../ui/Secao.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import Icone from "../ui/Icone.astro";
+import { processo } from "../../content/home";
+import { rich } from "../../lib/texto";
+
+// Quanto cada segmento do trilho clareia: da cor das linhas (etapa 1) até perto do texto secundário.
+const total = processo.etapas.length;
+const mistura = (i: number) => Math.round((i / Math.max(total - 1, 1)) * 80);
+---
+<Secao>
+  <div class="processo">
+    <header class="processo__cabeca">
+      <Rotulo>{processo.rotulo}</Rotulo>
+      <h2 class="processo__titulo">{processo.titulo}</h2>
+    </header>
+
+    <ol class="processo__etapas" role="list" data-revela>
+      {processo.etapas.map((etapa, i) => (
+        <li class="processo__etapa" style={`--mistura:${mistura(i)}%`}>
+          <span class="processo__trilho" aria-hidden="true"></span>
+          <span class="processo__numero num">{i + 1}</span>
+          <h3 class="processo__nome">{etapa.titulo}</h3>
+          <p class="processo__texto">{etapa.texto}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="processo__fecho">
+      <p class="processo__nota"><Icone nome="check" tamanho={18} />{processo.nota}</p>
+      <div class="processo__conta chanfrado" data-revela>
+        <p set:html={rich(processo.conta)} />
+      </div>
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .processo { display: grid; gap: var(--s-7); }
+
+  .processo__cabeca { display: grid; gap: var(--s-4); justify-items: start; }
+  .processo__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  /*
+    Etapas. Celular: trilho vertical à esquerda, um segmento por etapa, com os cortes em 45°
+    entre eles; o texto ao lado.
+  */
+  .processo__etapas {
+    --alt: 8px;
+    --fenda: 3px; /* o corte entre dois segmentos, como no medidor de vagas */
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .processo__etapa {
+    --cor-trilho: color-mix(in srgb, var(--ink-muted) var(--mistura), var(--line));
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: var(--s-1);
+    padding: 0 0 var(--s-6) calc(var(--alt) + var(--s-5));
+  }
+  .processo__etapa:last-child { padding-bottom: 0; }
+
+  .processo__trilho {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--alt);
+    background: var(--cor-trilho);
+    clip-path: polygon(0 var(--alt), 100% 0, 100% calc(100% - var(--alt)), 0 100%);
+  }
+  /* Os segmentos se encaixam: cada um começa no corte do anterior, deixando só a fenda em 45° */
+  .processo__etapa + .processo__etapa .processo__trilho { top: calc(var(--fenda) - var(--alt)); }
+
+  .processo__numero {
+    font: 500 var(--t-label)/1.6 var(--font-mono);
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+  }
+  .processo__nome { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; }
+  .processo__texto { max-width: 34ch; margin-top: var(--s-1); color: var(--ink-muted); }
+
+  /* Fecho: a regra do processo e a conta */
+  .processo__fecho { display: grid; gap: var(--s-6); }
+  .processo__nota {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-height: 44px;
+    padding-block: var(--s-3);
+    border-block: 1px solid var(--line);
+    font-weight: 500;
+    color: var(--ink-strong);
+  }
+  .processo__nota :global(svg) { color: var(--ink-muted); }
+
+  .processo__conta {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface-raised);
+    padding: var(--s-6) var(--s-5);
+  }
+  .processo__conta p {
+    max-width: 40ch;
+    font: 500 var(--t-h3)/1.45 var(--font-display);
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  /* "Faça a conta:" abre o módulo em linha própria */
+  .processo__conta p :global(strong:first-child) {
+    display: block;
+    margin-bottom: var(--s-3);
+    font-weight: 600;
+    color: var(--ink-strong);
+  }
+  /* "um único cliente a mais": o único ciano do bloco */
+  .processo__conta p :global(strong:not(:first-child)) { font-weight: 600; color: var(--accent); }
+
+  /* Tablet: cada etapa vira uma linha de leitura (número, nome, texto) ao lado do trilho */
+  @media (min-width: 720px) {
+    .processo__etapa {
+      grid-template-columns: 3ch minmax(0, 13rem) minmax(0, 1fr);
+      align-items: baseline;
+      column-gap: var(--s-5);
+      padding-bottom: var(--s-7);
+    }
+    .processo__texto { margin-top: 0; }
+    .processo__conta { padding: var(--s-7) var(--s-6); }
+    .processo__conta p { font-size: var(--t-h2); line-height: 1.38; }
+  }
+
+  /*
+    Computador: o trilho deita. 5 colunas sobre uma linha de segmentos em paralelogramo,
+    com o corte em 45° entre uma etapa e a próxima.
+  */
+  @media (min-width: 1024px) {
+    .processo { gap: var(--s-8); }
+    .processo__etapas {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      column-gap: var(--s-4);
+    }
+    .processo__etapa,
+    .processo__etapa:last-child {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+      row-gap: var(--s-1);
+      padding: calc(var(--alt) + var(--s-5)) 0 0;
+    }
+    .processo__trilho,
+    .processo__etapa + .processo__etapa .processo__trilho {
+      top: 0;
+      bottom: auto;
+      left: 0;
+      right: calc(var(--fenda) - var(--s-4) - var(--alt));
+      width: auto;
+      height: var(--alt);
+      clip-path: polygon(var(--alt) 0, 100% 0, calc(100% - var(--alt)) 100%, 0 100%);
+    }
+    .processo__etapa + .processo__etapa:last-child .processo__trilho { right: 0; }
+    .processo__numero { margin-bottom: var(--s-2); }
+    .processo__texto { max-width: 22ch; margin-top: var(--s-1); }
+
+    .processo__fecho {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: start;
+    }
+    .processo__nota { grid-column: 1 / span 4; }
+    .processo__conta { grid-column: 6 / span 7; }
+  }
+</style>

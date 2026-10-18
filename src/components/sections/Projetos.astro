@@ -1,0 +1,444 @@
+---
+/*
+  §8 Projetos. O case EBEN como um módulo preenchido do painel (a ficha) com a voz da cliente
+  presa a ele por um traço; ao lado, o próximo encaixe ainda livre: o cartão de fundador, com a
+  grade aparecendo por dentro e as vagas medidas ao vivo.
+  No topo da ficha, a tela: a gravação real do site da EBEN no computador (11 s, sem som), de
+  ponta a ponta no módulo, com o canto chanfrado dele. Sem aparelho desenhado em volta.
+  Vagas (mapa técnico, arquivo 03): o cartão aparece com {X} (e no singular com 1), sem número
+  na falha e some no esgotado; aí o case ocupa a largura toda e a voz da cliente vai para o lado
+  da ficha.
+*/
+import { Image } from "astro:assets";
+import Secao from "../ui/Secao.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import Botao from "../ui/Botao.astro";
+import MedidorVagas from "../ui/MedidorVagas.astro";
+import Icone from "../ui/Icone.astro";
+import Depoimento from "../ui/Depoimento.astro";
+import capaEben from "../../assets/cases/eben/site-eben-capa.jpg";
+import { projetos } from "../../content/home";
+import { comVagas, rich } from "../../lib/texto";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+interface Props {
+  /** Vagas do último build (ou o máximo, se não deu para ler). O contador atualiza ao vivo. */
+  vagas: number;
+}
+const { vagas } = Astro.props;
+const { eben, fundador } = projetos;
+---
+<Secao id="projetos" tema="elevado">
+  <div class="projetos">
+    <header class="projetos__cabeca">
+      <Rotulo>{projetos.rotulo}</Rotulo>
+      <h2 class="projetos__titulo">{projetos.titulo}</h2>
+    </header>
+
+    <div class="projetos__grade">
+      <article class="projetos-case" aria-labelledby="projetos-eben" data-revela>
+        <div class="projetos-case__corpo">
+          <div class="projetos-ficha chanfrado">
+            {/*
+              A tela é decorativa: quem lê o case tem o nome, o desafio, a solução e o botão.
+              A capa fica atrás do vídeo e só carrega perto da tela (lazy, no tamanho certo);
+              o vídeo (preload="none") só baixa quando o script manda tocar.
+            */}
+            <div class="projetos-tela-area">
+            <div class="projetos-tela" aria-hidden="true">
+              <Image
+                class="projetos-tela__capa"
+                src={capaEben}
+                alt=""
+                widths={[640, 960, 1280]}
+                sizes="(min-width: 1184px) 644px, (min-width: 960px) 58vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
+                format="webp"
+                quality={75}
+                loading="lazy"
+                decoding="async"
+              />
+              <video
+                class="projetos-tela__video"
+                width="1280"
+                height="800"
+                muted
+                loop
+                playsinline
+                preload="none"
+                disablepictureinpicture
+                disableRemotePlayback
+                aria-hidden="true"
+                data-tela-video
+              >
+                <source src="/videos/eben/site-eben.webm" type="video/webm; codecs=av01.0.05M.08" />
+                <source src="/videos/eben/site-eben.mp4" type="video/mp4" />
+              </video>
+            </div>
+              {/* Pausar e tocar (WCAG 2.2.2): só aparece quando o vídeo começa a tocar */}
+              <button
+                type="button"
+                class="projetos-tela__controle chanfrado"
+                aria-label={eben.videoPausar}
+                data-tela-controle
+                data-rotulo-pausar={eben.videoPausar}
+                data-rotulo-tocar={eben.videoTocar}
+                hidden
+              >
+                <Icone nome="pausar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--pausar" />
+                <Icone nome="tocar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--tocar" />
+              </button>
+            </div>
+
+            <div class="projetos-ficha__cabeca">
+              <h3 id="projetos-eben" class="projetos-ficha__nome">{eben.nome}</h3>
+              <p class="projetos-ficha__tipo">{eben.tipo}</p>
+            </div>
+
+            <dl class="projetos-ficha__dados">
+              <div class="projetos-ficha__linha">
+                <dt>{eben.desafioRotulo}</dt>
+                <dd>{eben.desafio}</dd>
+              </div>
+              <div class="projetos-ficha__linha">
+                <dt>{eben.solucaoRotulo}</dt>
+                <dd>{eben.solucao}</dd>
+              </div>
+            </dl>
+
+            <div class="projetos-ficha__acao">
+              <Botao variante="secundario" href={eben.url} icone="externo" novaAba class="projetos-ficha__link">{eben.botao}</Botao>
+            </div>
+          </div>
+
+          <div class="projetos-case__voz">
+            <Depoimento texto={eben.depoimento} destaque={eben.frase} autora={eben.autora} cargo={eben.cargo} />
+          </div>
+        </div>
+      </article>
+
+      <div class="projetos-fundador chanfrado" data-quando-vagas="com falha" data-revela>
+        <span class="projetos-fundador__grade grade" aria-hidden="true"></span>
+        <div class="projetos-fundador__conteudo">
+          <div class="projetos-fundador__leitura">
+            <MedidorVagas tamanho="sm" />
+            <span class="projetos-fundador__traco" aria-hidden="true"></span>
+          </div>
+          <h3 class="projetos-fundador__titulo">{fundador.titulo}</h3>
+          <p class="projetos-fundador__texto" data-quando-vagas="com" data-quando-n="plural" set:html={comVagas(rich(fundador.texto), vagas)} />
+          <p class="projetos-fundador__texto" data-quando-vagas="com" data-quando-n="singular" set:html={rich(fundador.textoUmaVaga)} />
+          <p class="projetos-fundador__texto" data-quando-vagas="falha" set:html={rich(fundador.textoSemNumero)} />
+          <Botao href={montarLinkWhatsapp("fundador")} icone="whatsapp" origem="fundador" larguraTotal>{fundador.botao}</Botao>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
+  <script>
+    // A tela do case: o vídeo toca só enquanto pelo menos 40% dele aparece e para quando sai.
+    // Não toca sozinho com movimento reduzido, com economia de dados ou com a aba escondida;
+    // aí fica a capa que está atrás dele. Se o navegador recusar o play(), também fica a capa.
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("[data-tela-video]"));
+    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const conexao = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const visiveis = new Set<HTMLVideoElement>();
+    // Quem pausou pelo botão decide: o vídeo não volta a tocar sozinho ao reaparecer na tela
+    const pausadosPeloVisitante = new Set<HTMLVideoElement>();
+    const PARTE_VISIVEL = 0.4;
+
+    function controleDe(video: HTMLVideoElement) {
+      return video.closest(".projetos-tela-area")?.querySelector<HTMLButtonElement>("[data-tela-controle]") ?? null;
+    }
+
+    function marcarControle(video: HTMLVideoElement) {
+      const controle = controleDe(video);
+      if (!controle) return;
+      const tocando = !video.paused;
+      controle.dataset.estado = tocando ? "tocando" : "pausado";
+      controle.setAttribute("aria-label", (tocando ? controle.dataset.rotuloPausar : controle.dataset.rotuloTocar) ?? "");
+    }
+
+    function atualizar(video: HTMLVideoElement) {
+      const tocar =
+        visiveis.has(video) && !pausadosPeloVisitante.has(video) && !semMovimento.matches && !conexao?.saveData && !document.hidden;
+      if (tocar) video.play().catch(() => {});
+      else if (!video.paused) video.pause();
+    }
+
+    for (const video of videos) {
+      const controle = controleDe(video);
+      video.addEventListener("playing", () => {
+        if (controle) controle.hidden = false;
+        marcarControle(video);
+      });
+      video.addEventListener("pause", () => marcarControle(video));
+      controle?.addEventListener("click", () => {
+        if (video.paused) {
+          pausadosPeloVisitante.delete(video);
+          video.play().catch(() => {});
+        } else {
+          pausadosPeloVisitante.add(video);
+          video.pause();
+        }
+      });
+    }
+
+    if (videos.length && "IntersectionObserver" in window) {
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          for (const entrada of entradas) {
+            const video = entrada.target as HTMLVideoElement;
+            if (entrada.isIntersecting && entrada.intersectionRatio >= PARTE_VISIVEL) visiveis.add(video);
+            else visiveis.delete(video);
+            atualizar(video);
+          }
+        },
+        { threshold: [0, PARTE_VISIVEL] },
+      );
+      for (const video of videos) observador.observe(video);
+
+      const todos = () => videos.forEach(atualizar);
+      semMovimento.addEventListener("change", todos);
+      document.addEventListener("visibilitychange", todos);
+    }
+  </script>
+</Secao>
+
+<style>
+  .projetos { display: grid; gap: var(--s-7); }
+
+  .projetos__cabeca { display: grid; gap: var(--s-4); justify-items: start; }
+  .projetos__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+
+  .projetos__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-7);
+    align-items: start;
+  }
+
+  /* ---------- O case ---------- */
+  .projetos-case {
+    container: projetos-case / inline-size;
+    min-width: 0;
+  }
+  .projetos-case__corpo { display: grid; }
+
+  /* A ficha: módulo com cabeçalho, leitura do desafio e da solução, e a saída para o site no ar */
+  .projetos-ficha {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    --pad: var(--s-5);
+    container: projetos-ficha / inline-size;
+    display: grid;
+  }
+  .projetos-ficha > :not(.projetos-tela-area) { padding-inline: var(--pad); }
+
+  /*
+    A tela: o vídeo vai de ponta a ponta dentro da borda do módulo e herda o chanfro de cima
+    (mesmo recorte do preenchimento do .chanfrado). Proporção fixa de 16:10, sem pulo de layout.
+    A capa e o vídeo ocupam a mesma célula; o vídeo, transparente até ter imagem, fica por cima.
+  */
+  .projetos-tela {
+    --ci: calc(var(--c) - var(--espessura) * 0.586);
+    display: grid;
+    margin: var(--espessura) var(--espessura) 0;
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--line);
+    clip-path: polygon(var(--ci) 0, 100% 0, 100% 100%, 0 100%, 0 var(--ci));
+    overflow: hidden;
+  }
+  .projetos-tela > :global(*) {
+    grid-area: 1 / 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  .projetos-tela-area { position: relative; }
+
+  /* Pausar e tocar: quadrado chanfrado de 44 px no canto da tela, neutro (o ciano do bloco é o botão do fundador) */
+  .projetos-tela__controle {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: color-mix(in srgb, var(--surface-sunken) 82%, transparent);
+    position: absolute;
+    right: var(--s-3);
+    bottom: var(--s-3);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-strong);
+    cursor: pointer;
+  }
+  .projetos-tela__controle[hidden] { display: none; }
+  .projetos-tela__controle:hover { --cor-borda: var(--ink-muted); }
+  .projetos-tela__controle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .projetos-tela__controle :global(.projetos-tela__icone) { grid-area: 1 / 1; }
+  .projetos-tela__controle:not([data-estado="pausado"]) :global(.projetos-tela__icone--tocar),
+  .projetos-tela__controle[data-estado="pausado"] :global(.projetos-tela__icone--pausar) { display: none; }
+
+  /* iOS em modo de economia recusa o play() e desenharia um botão de play por cima: some com ele */
+  .projetos-tela__video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+
+  .projetos-ficha__cabeca {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--pad) var(--s-5);
+    border-bottom: 1px solid var(--line);
+  }
+  .projetos-ficha__nome { font-size: var(--t-h2); font-weight: 500; line-height: 1.15; }
+  .projetos-ficha__tipo {
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+  .projetos-ficha__dados { margin: 0; display: grid; }
+  .projetos-ficha__linha {
+    max-width: 64ch;
+    padding-block: var(--s-5);
+    line-height: 1.65;
+  }
+  .projetos-ficha__linha + .projetos-ficha__linha { border-top: 1px solid var(--line); }
+  .projetos-ficha__linha dt,
+  .projetos-ficha__linha dd { display: inline; margin: 0; }
+  .projetos-ficha__linha dt { font-weight: 600; color: var(--ink-strong); }
+  .projetos-ficha__linha dt::after { content: " "; }
+  .projetos-ficha__linha dd { color: var(--ink); }
+
+  .projetos-ficha__acao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+    padding-block: var(--s-5) var(--pad);
+    border-top: 1px solid var(--line);
+  }
+
+  /*
+    A voz da cliente: um traço fino sai da ficha, desce ao lado da citação e vira em 90° até a cunha
+    da autora. O traço nasce na primeira linha da autoria e sobe; a voz corta o que passar do topo.
+  */
+  .projetos-case__voz {
+    --traco-x: var(--s-5);
+    --recuo: calc(var(--s-5) * 2);
+    overflow: hidden;
+    padding: var(--s-7) 0 2px var(--recuo);
+  }
+  .projetos-case__voz :global(.depoimento__autoria) { position: relative; }
+  .projetos-case__voz :global(.depoimento__autoria)::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--traco-x) - var(--recuo));
+    bottom: calc(100% - 12px);
+    bottom: calc(100% - 0.62lh); /* altura da cunha na primeira linha */
+    width: calc(var(--recuo) - var(--traco-x) - var(--s-2));
+    height: 300vh;
+    border-left: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    pointer-events: none;
+  }
+
+  /* ---------- O próximo encaixe: cartão de fundador ---------- */
+  .projetos-fundador {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-sunken);
+    min-width: 0;
+  }
+  /* Grade fina por dentro (utilitário .grade), saindo do canto de cima e se dissolvendo */
+  .projetos-fundador__grade {
+    --grade-cor: color-mix(in srgb, var(--line) 70%, transparent);
+    --grade-origem: right top;
+    --grade-mascara: radial-gradient(ellipse 95% 75% at 100% 0%, #000 10%, transparent 80%);
+    position: absolute;
+    inset: 1px;
+    pointer-events: none;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+  .projetos-fundador__conteudo {
+    position: relative;
+    display: grid;
+    gap: var(--s-5);
+    padding: var(--s-6) var(--s-5) var(--s-5);
+  }
+  .projetos-fundador__leitura { display: flex; align-items: center; gap: var(--s-3); }
+  .projetos-fundador__traco { flex: 1; height: 1px; background: var(--line); }
+  .projetos-fundador__titulo {
+    max-width: 16ch;
+    font-size: var(--t-h2);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .projetos-fundador__texto { max-width: 36ch; color: var(--ink); }
+  .projetos-fundador__texto :global([data-vagas]) { font-weight: 600; color: var(--ink-strong); }
+  .projetos-fundador__conteudo :global(.botao) { margin-top: var(--s-2); }
+
+  @media (min-width: 720px) {
+    .projetos-ficha { --pad: var(--s-6); }
+    .projetos-case__voz { --traco-x: var(--s-6); --recuo: calc(var(--s-6) + var(--s-6)); }
+    .projetos-fundador__conteudo { padding: var(--s-7) var(--s-6) var(--s-6); }
+  }
+
+  /* Ficha larga: o rótulo do desafio e da solução vira coluna, como uma leitura */
+  @container projetos-ficha (min-width: 560px) {
+    .projetos-ficha__linha {
+      display: grid;
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+    .projetos-ficha__linha dt,
+    .projetos-ficha__linha dd { display: block; }
+    .projetos-ficha__linha dt::after { content: none; }
+  }
+
+  /*
+    Case na largura toda (sem vagas): a voz da cliente vai para o lado da ficha. A ficha fica nos
+    mesmos 7/12 de quando há vagas, então a tela tem o mesmo tamanho nos dois estados.
+  */
+  @container projetos-case (min-width: 880px) {
+    .projetos-case__corpo {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: start;
+    }
+    /* Coluna de 5/12: o mesmo recuo da voz empilhada, para o texto não ficar estreito demais */
+    .projetos-case__voz {
+      --traco-x: var(--s-6);
+      --recuo: calc(var(--s-6) + var(--s-6));
+      padding-top: var(--s-6);
+    }
+  }
+
+  @media (min-width: 960px) {
+    .projetos { gap: var(--s-8); }
+    .projetos__grade {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--s-5);
+    }
+    .projetos-case { grid-column: 1 / span 7; }
+    /* Dupla classe: vence o position: relative do .chanfrado global */
+    .projetos-fundador.chanfrado {
+      grid-column: 8 / span 5;
+      position: sticky;
+      top: calc(72px + var(--s-5)); /* abaixo do topo fixo (72 px no computador) */
+    }
+  }
+
+  /* Esgotado: o cartão de fundador some e o case ocupa a largura toda */
+  :global(:root[data-vagas-estado="esgotado"]) .projetos-case { grid-column: 1 / -1; }
+</style>

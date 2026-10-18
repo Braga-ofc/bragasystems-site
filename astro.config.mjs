@@ -14,6 +14,9 @@ export default defineConfig({
   }),
   // O site não usa sessões: evita criar um KV no Cloudflare sem necessidade.
   session: false,
+  // CSS dentro do HTML: sem ida e volta extra antes da primeira pintura (a headline é o LCP).
+  // A home recebe sobretudo primeiras visitas, então o cache separado do CSS quase não ajuda.
+  build: { inlineStylesheets: "always" },
   integrations: [
     sitemap({
       filter: (page) => !["/obrigado", "/briefing", "/404", "/amostra"].some((p) => page.includes(p)),

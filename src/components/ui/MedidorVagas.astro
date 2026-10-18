@@ -1,0 +1,87 @@
+---
+/*
+  Medidor das 5 vagas de fundador: um paralelogramo em 45° por vaga, aceso quando ainda está livre.
+  O número aceso vem de <html data-vagas-n> (build e contador ao vivo). Três leituras:
+  - com vagas: N acesos em ciano, o resto cheio em --line;
+  - esgotado: os 5 cheios em --line (zero);
+  - sem leitura (falha ou carregando): os 5 vazados, só o contorno de 1 px em --line-forte,
+    para não parecer "zero" ao lado de "Vagas de fundador limitadas".
+  É só visual: o texto do selo é quem informa.
+*/
+import { vagasMax } from "../../lib/supabase";
+
+interface Props {
+  tamanho?: "sm" | "lg";
+  class?: string;
+}
+const { tamanho = "sm", class: classe } = Astro.props;
+---
+<span class:list={["medidor", `medidor--${tamanho}`, classe]} aria-hidden="true">
+  {Array.from({ length: vagasMax }, (_, i) => <span class="medidor__seg" style={`--i:${i}`} />)}
+</span>
+
+<style>
+  .medidor {
+    --alt: 8px;
+    --larg: 18px;
+    display: inline-flex;
+    gap: 3px;
+    flex: none;
+  }
+  .medidor--lg { --alt: 18px; --larg: 44px; gap: 6px; }
+
+  /*
+    O recorte tem sempre 10 pontos: o paralelogramo e, por dentro, um furo (regra evenodd).
+    Cheio, o furo é um ponto no centro; vazado, ele abre até 1 px da borda (nas bordas em 45°,
+    1 px de traço pede √2 na horizontal). Com o mesmo número de pontos, o navegador anima a troca:
+    quando a leitura chega, o segmento se preenche de fora para dentro.
+  */
+  .medidor__seg {
+    width: var(--larg);
+    height: var(--alt);
+    background: var(--line);
+    clip-path: polygon(
+      evenodd,
+      var(--alt) 0, 100% 0, calc(100% - var(--alt)) 100%, 0 100%, var(--alt) 0,
+      50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%
+    );
+    transition:
+      background-color var(--dur) var(--ease-saida),
+      filter var(--dur) var(--ease-saida),
+      clip-path var(--dur-lenta) var(--ease-saida);
+  }
+
+  /* Acende as primeiras N: N = vagas restantes */
+  :global(:root[data-vagas-n="1"]) .medidor__seg:nth-child(-n + 1),
+  :global(:root[data-vagas-n="2"]) .medidor__seg:nth-child(-n + 2),
+  :global(:root[data-vagas-n="3"]) .medidor__seg:nth-child(-n + 3),
+  :global(:root[data-vagas-n="4"]) .medidor__seg:nth-child(-n + 4),
+  :global(:root[data-vagas-n="5"]) .medidor__seg:nth-child(-n + 5) {
+    background: var(--accent);
+    filter: drop-shadow(0 0 6px var(--brilho));
+  }
+
+  /* Sem leitura (falha ou carregando): vazado, diferente do esgotado */
+  :global(:root[data-vagas-estado="falha"]) .medidor__seg,
+  :global(:root[data-vagas-estado="carregando"]) .medidor__seg {
+    background: var(--line-forte);
+    clip-path: polygon(
+      evenodd,
+      var(--alt) 0, 100% 0, calc(100% - var(--alt)) 100%, 0 100%, var(--alt) 0,
+      calc(var(--alt) + 0.414px) 1px, calc(100% - 2.414px) 1px,
+      calc(100% - var(--alt) - 0.414px) calc(100% - 1px), 2.414px calc(100% - 1px),
+      calc(var(--alt) + 0.414px) 1px
+    );
+  }
+
+  /* Ao carregar, as vagas acendem uma a uma, como um instrumento ligando */
+  @media (prefers-reduced-motion: no-preference) {
+    .medidor__seg { animation: medidor-ligar 360ms var(--ease-saida) backwards; animation-delay: calc(240ms + var(--i) * 90ms); }
+  }
+  @keyframes medidor-ligar { from { background: var(--line); filter: none; } }
+
+  /* Alto contraste: os fundos viram cor do sistema; o medidor é decorativo e fica como está */
+  @media (forced-colors: active) {
+    .medidor__seg { forced-color-adjust: none; }
+  }
+</style>

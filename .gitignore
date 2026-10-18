@@ -16,3 +16,10 @@ worker-configuration.d.ts
 # sistema
 .DS_Store
 *.log
+
+# impeccable: rascunhos locais (o contrato de direção em .impeccable/surfaces vai para o Git)
+.impeccable/questions/
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/build/
+.impeccable/config.local.json

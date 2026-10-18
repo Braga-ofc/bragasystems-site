@@ -1,0 +1,252 @@
+---
+/*
+  §16 CTA final + formulário curto. O fechamento da página: a pergunta do cliente em display
+  e o formulário num módulo grafite, o único botão ciano do bloco.
+  Envio em scripts/formulario.ts (função enviar-lead, mapa técnico arquivo 08).
+*/
+import Secao from "../ui/Secao.astro";
+import Campo from "../ui/Campo.astro";
+import Botao from "../ui/Botao.astro";
+import Icone from "../ui/Icone.astro";
+import { ctaFinal } from "../../content/home";
+import { comLinkPrivacidade } from "../../lib/texto";
+import { montarLinkWhatsapp } from "../../lib/whatsapp";
+
+// O título em dois tempos: a cena e a pergunta do cliente. O texto é o da copy, só dividido;
+// as aspas retas viram aspas tipográficas (no Space Grotesk, a reta abre com o desenho de fechar).
+const corte = ctaFinal.titulo.indexOf(': "');
+const tituloCena = corte >= 0 ? ctaFinal.titulo.slice(0, corte + 1) : ctaFinal.titulo;
+const tituloPergunta = corte >= 0 ? ctaFinal.titulo.slice(corte + 2).replace(/^"/, "\u201C").replace(/"$/, "\u201D") : "";
+
+// Códigos do tipo de projeto para a função enviar-lead, na mesma ordem das opções da copy.
+const codigos = ["landing", "site", "nao-sei"];
+const tipos = Object.fromEntries(ctaFinal.campos.tipo.opcoes.map((opcao, i) => [opcao, codigos[i]]));
+const [microResposta, microFundador] = ctaFinal.microcopy;
+---
+<Secao id="contato" tema="elevado">
+  <div class="cta">
+    <div class="cta-texto">
+      <h2 class="cta-titulo">
+        <span class="cta-titulo__cena">{tituloCena}</span>
+        {tituloPergunta && <span class="cta-titulo__pergunta">{tituloPergunta}</span>}
+      </h2>
+      <div class="cta-paragrafos">
+        {ctaFinal.paragrafos.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+
+    <div class="cta-modulo chanfrado feixe" data-modulo>
+      <form
+        class="cta-form"
+        method="post"
+        action="/api/enviar-lead"
+        novalidate
+        data-formulario
+        data-erro-vazio={ctaFinal.erros.campoVazio}
+        data-erro-whatsapp={ctaFinal.erros.whatsappInvalido}
+        data-erro-consentimento={ctaFinal.erros.semConsentimento}
+        data-tipos={JSON.stringify(tipos)}
+      >
+        <div class="cta-form__corpo">
+          <div class="cta-form__par">
+            <Campo id="cta-nome" nome="nome" rotulo={ctaFinal.campos.nome} autocomplete="name" maxlength={80} obrigatorio />
+            {/* Sem limite de tamanho: a máscara corta em 11 dígitos depois de tirar o +55 (scripts/formulario.ts). */}
+            <Campo id="cta-whatsapp" nome="whatsapp" tipo="telefone" rotulo={ctaFinal.campos.whatsapp} obrigatorio />
+          </div>
+          <Campo
+            id="cta-tipo"
+            nome="tipo_projeto"
+            tipo="selecao"
+            rotulo={ctaFinal.campos.tipo.rotulo}
+            opcoes={[...ctaFinal.campos.tipo.opcoes]}
+            obrigatorio
+          />
+          <Campo
+            id="cta-investimento"
+            nome="investimento"
+            tipo="selecao"
+            rotulo={ctaFinal.campos.investimento.rotulo}
+            opcoes={[...ctaFinal.campos.investimento.opcoes]}
+            obrigatorio
+          />
+          <Campo id="cta-consentimento" nome="consentimento" tipo="consentimento" obrigatorio>
+            <Fragment set:html={comLinkPrivacidade(ctaFinal.campos.consentimento)} />
+          </Campo>
+
+          {/* Próxima etapa: o widget do Turnstile entra aqui, logo antes do botão. */}
+          <div class="cta-envio">
+            <Botao tipo="submit" larguraTotal icone="seta">{ctaFinal.botao}</Botao>
+            <div class="cta-aviso" role="alert" data-aviso></div>
+          </div>
+        </div>
+
+        {/* Rodapé do módulo: a leitura em mono, como no console do gerador */}
+        <ul class="cta-micro">
+          <li>{microResposta}<span class="cta-micro__sep" aria-hidden="true" data-quando-vagas="com falha">·</span></li>
+          {/* Sem vagas, a promessa do preço de fundador sai da tela (rules.md: promessas sempre verdadeiras). */}
+          <li data-quando-vagas="com falha">{microFundador}</li>
+        </ul>
+
+        <template data-modelo="falha">
+          <div class="cta-falha">
+            <p class="cta-falha__texto"><Icone nome="alerta" tamanho={18} />{ctaFinal.falhaEnvio}</p>
+            <Botao variante="secundario" href={montarLinkWhatsapp("formulario")} icone="whatsapp" origem="formulario" larguraTotal>
+              {ctaFinal.falhaBotao}
+            </Botao>
+          </div>
+        </template>
+      </form>
+    </div>
+  </div>
+  {/* O script fica dentro da seção: entre duas seções ele quebraria a linha divisória do Secao. */}
+  <script>
+    import "../../scripts/formulario";
+  </script>
+</Secao>
+
+<style>
+  .cta {
+    display: grid;
+    gap: var(--s-7);
+  }
+
+  /* Texto: a cena em tom de prata, a pergunta em display */
+  .cta-texto {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+  }
+  .cta-titulo {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .cta-titulo__cena {
+    max-width: 26ch;
+    font: 500 var(--t-h2)/1.25 var(--font-display);
+    letter-spacing: -0.015em;
+    color: var(--ink);
+  }
+  .cta-titulo__pergunta {
+    max-width: 14ch;
+    font: 600 var(--t-display)/1.04 var(--font-display);
+    letter-spacing: -0.03em;
+    color: var(--ink-strong);
+  }
+  /* Aspas penduradas: a letra, não o sinal, fica alinhada com o texto (só onde há margem) */
+  @media (min-width: 720px) {
+    .cta-titulo__pergunta { text-indent: -0.42em; }
+  }
+  .cta-paragrafos {
+    display: grid;
+    gap: var(--s-3);
+    max-width: 44ch;
+    font-size: var(--t-body-lg);
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .cta-paragrafos p + p { color: var(--ink-muted); }
+
+  /* Módulo do formulário: grafite, borda fina; os campos ficam rebaixados dentro dele */
+  .cta-modulo {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface-raised);
+    --pad: clamp(20px, 6.5cqi, 40px);
+    container-type: inline-size;
+  }
+
+  .cta-form__corpo {
+    display: grid;
+    gap: var(--s-5);
+    padding: calc(var(--pad) + 4px) var(--pad) var(--pad);
+  }
+  .cta-form__par {
+    display: grid;
+    gap: var(--s-5);
+  }
+  @container (min-width: 440px) {
+    .cta-form__par { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-4); }
+  }
+
+  /* O link da política segue o texto; o ciano do bloco é só o botão */
+  .cta-form :global(.check__texto a) { color: var(--ink-strong); text-decoration-color: var(--line-forte); }
+  .cta-form :global(.check__texto a:hover) { color: var(--accent); text-decoration-color: currentColor; }
+
+  .cta-envio {
+    display: grid;
+    margin-top: var(--s-1);
+  }
+
+  /* Rodapé de leitura: cunha em 45° e os dois compromissos em mono */
+  .cta-micro {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 0;
+    margin: 0;
+    padding: 14px calc(var(--pad) + 8px) 16px calc(var(--pad) + 22px);
+    border-top: 1px solid var(--line);
+    list-style: none;
+    font: 500 var(--t-label)/1.5 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .cta-micro::before {
+    content: "";
+    position: absolute;
+    top: calc(14px + 0.75em - 4px);
+    left: var(--pad);
+    width: 12px;
+    height: 8px;
+    background: var(--ink-muted);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+  .cta-micro li { text-wrap: balance; }
+  .cta-micro__sep { margin-inline: 0.6em; }
+
+  /* Falha no envio: a mensagem e o caminho pelo WhatsApp, logo abaixo do botão */
+  .cta-aviso:not(:empty) {
+    margin-top: var(--s-5);
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--line);
+  }
+  .cta-falha {
+    display: grid;
+    gap: var(--s-4);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cta-falha { animation: cta-entra var(--dur-lenta) var(--ease-saida) both; }
+  }
+  .cta-falha__texto {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font: 500 var(--t-body)/1.45 var(--font-sans);
+    color: var(--ink-strong);
+  }
+  .cta-falha__texto :global(svg) { margin-top: 2px; color: var(--erro); }
+
+  @keyframes cta-entra {
+    from { opacity: 0; translate: 0 6px; filter: blur(4px); }
+  }
+
+  /* Computador: texto 6/12 à esquerda, formulário 6/12 à direita */
+  @media (min-width: 960px) {
+    .cta {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: var(--s-5);
+      align-items: start;
+    }
+    .cta-texto {
+      grid-column: 1 / span 6;
+      gap: var(--s-6);
+      padding-right: var(--s-6);
+      /* A pergunta fica à vista enquanto o formulário passa */
+      position: sticky;
+      top: calc(72px + var(--s-7));
+    }
+    .cta-titulo { gap: var(--s-4); }
+    .cta-modulo { grid-column: 7 / span 6; }
+  }
+</style>

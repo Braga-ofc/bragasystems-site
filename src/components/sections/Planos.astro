@@ -1,0 +1,186 @@
+---
+/*
+  §9 Planos. Preço aberto como leitura do painel: três módulos na mesma linha, o Performance no
+  centro, maior e elevado (é o único destaque ciano da seção); no celular ele vem primeiro.
+  O Performance vem primeiro também no HTML, para a ordem do Tab e do leitor de tela seguir a da
+  tela no celular e no tablet; só no computador a grade o leva para o centro.
+  Abaixo, o Plano Contínuo como uma faixa de linha, sem botão, e a linha de pagamento.
+  Vagas (mapa técnico, arquivo 03): com vagas e na falha, riscado cheio + fundador; esgotado,
+  só o cheio. Quem troca é o CartaoPlano; aqui só a nota de fundador some no esgotado.
+*/
+import Secao from "../ui/Secao.astro";
+import Rotulo from "../ui/Rotulo.astro";
+import CartaoPlano from "../ui/CartaoPlano.astro";
+import { continuo, pagamento, planos, secaoPlanos } from "../../content/planos";
+import { rich } from "../../lib/texto";
+
+// Performance primeiro, depois os outros na ordem da copy (Essencial, Signature).
+const ordem = [...planos.filter((p) => p.destaque), ...planos.filter((p) => !p.destaque)];
+
+// "+ PLANO CONTÍNUO · R$ 147/mês": o nome em rótulo e o preço em leitura. O texto não muda.
+const sep = continuo.nome.indexOf(" · ");
+const contNome = sep > 0 ? continuo.nome.slice(0, sep) : continuo.nome;
+const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
+---
+<Secao id="planos">
+  <div class="planos">
+    <header class="planos__cabeca">
+      <div class="planos__titulos">
+        <Rotulo>{secaoPlanos.rotulo}</Rotulo>
+        <h2 class="planos__titulo">{secaoPlanos.titulo}</h2>
+      </div>
+      <div class="planos__intro">
+        <p class="planos__texto">{secaoPlanos.texto}</p>
+        <p class="planos__nota" data-quando-vagas="com falha">{secaoPlanos.nota}</p>
+      </div>
+    </header>
+
+    <ul class="planos__lista" role="list">
+      {ordem.map((plano) => (
+        <li class:list={["planos__item", plano.destaque && "planos__item--destaque"]}>
+          <CartaoPlano plano={plano} />
+        </li>
+      ))}
+    </ul>
+
+    <div class="planos__extra">
+      <div class="planos-continuo chanfrado">
+        <div class="planos-continuo__cabeca">
+          <h3 class="planos-continuo__nome">
+            {contNome}{contPreco && <><span class="planos-continuo__sep" aria-hidden="true"> · </span><span class="planos-continuo__preco num">{contPreco}</span></>}
+          </h3>
+          <span class="planos-continuo__opcional">{continuo.opcional}</span>
+        </div>
+        <p class="planos-continuo__texto">{continuo.texto}</p>
+      </div>
+      <p class="planos__pagamento num" set:html={rich(pagamento)} />
+    </div>
+  </div>
+</Secao>
+
+<style>
+  .planos { display: grid; gap: var(--s-7); }
+
+  /* Cabeçalho em duas metades: o título de um lado, a promessa de preço aberto do outro */
+  .planos__cabeca { display: grid; gap: var(--s-5); }
+  .planos__titulos { display: grid; gap: var(--s-4); justify-items: start; }
+  .planos__titulo {
+    max-width: 18ch;
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+  }
+  .planos__intro { display: grid; gap: var(--s-3); max-width: 46ch; }
+  .planos__texto { font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
+  .planos__nota {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-2);
+    font-size: var(--t-small);
+    line-height: 1.5;
+    color: var(--ink-muted);
+  }
+  /* Cunha em 45° no lugar de asterisco */
+  .planos__nota::before {
+    content: "";
+    width: 10px;
+    height: 7px;
+    flex: none;
+    background: var(--line-forte);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+
+  /* Os três módulos. Celular: empilhados, o Performance primeiro */
+  .planos__lista {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .planos__item { display: flex; min-width: 0; }
+  .planos__item > :global(.plano) { flex: 1; }
+
+  /* Faixa do Plano Contínuo: moldura de linha, sem botão, um complemento e não um quarto cartão */
+  .planos__extra { display: grid; gap: var(--s-4); }
+  .planos-continuo {
+    --c: var(--chanfro);
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface);
+    display: grid;
+    gap: var(--s-3);
+    padding: var(--s-5);
+  }
+  .planos-continuo__cabeca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-1) var(--s-3);
+  }
+  .planos-continuo__nome {
+    font: 500 var(--t-label)/1.5 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .planos-continuo__sep { color: var(--ink-muted); }
+  .planos-continuo__preco {
+    font-size: var(--t-small);
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--ink-strong);
+    white-space: nowrap;
+  }
+  .planos-continuo__opcional { font-size: var(--t-small); color: var(--ink-muted); }
+  .planos-continuo__texto { max-width: 64ch; color: var(--ink); }
+
+  .planos__pagamento {
+    padding-inline: var(--s-5);
+    font-size: var(--t-small);
+    line-height: 1.6;
+    color: var(--ink-muted);
+  }
+  .planos__pagamento :global(strong) { font-weight: 600; color: var(--ink-strong); }
+
+  /* Tablet: o Performance numa linha inteira, Essencial e Signature lado a lado embaixo */
+  @media (min-width: 720px) {
+    .planos__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6) var(--s-5); }
+    .planos__item--destaque { grid-column: 1 / -1; }
+    .planos-continuo { padding: var(--s-5) var(--s-6); }
+    .planos__pagamento { padding-inline: var(--s-6); }
+  }
+
+  @media (min-width: 960px) {
+    .planos { gap: var(--s-8); }
+    .planos__cabeca {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: end;
+    }
+    .planos__titulos { grid-column: 1 / span 6; }
+    .planos__intro { grid-column: 8 / span 5; }
+    .planos-continuo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2.18fr);
+      align-items: baseline;
+      column-gap: var(--s-6);
+    }
+    .planos-continuo__cabeca { flex-direction: column; gap: var(--s-1); }
+  }
+
+  /*
+    Computador: Essencial | Performance | Signature. O do meio, mais largo e mais alto, vai para a
+    coluna 2; os outros ocupam as colunas livres na ordem do HTML. Os dois de fora ficam na altura do
+    próprio conteúdo (sem vão antes da entrega) e alinhados por baixo: as três entregas e os três
+    botões na mesma linha, e o Performance sobe acima deles.
+  */
+  @media (min-width: 1024px) {
+    .planos__lista {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr) minmax(0, 1fr);
+      align-items: end;
+      gap: var(--s-5);
+    }
+    .planos__item--destaque { grid-column: 2; grid-row: 1; }
+  }
+</style>
