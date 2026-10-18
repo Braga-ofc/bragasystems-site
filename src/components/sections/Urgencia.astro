@@ -28,6 +28,7 @@ function dividir(titulo: string) {
 }
 const plural = dividir(urgencia.titulo);
 const singular = dividir(urgencia.tituloUmaVaga);
+const semVagas = dividir(urgencia.semVagas.titulo);
 ---
 <Secao class="urgencia">
   <div class="urgencia__com" data-quando-vagas="com">
@@ -53,7 +54,9 @@ const singular = dividir(urgencia.tituloUmaVaga);
 
   <div class="urgencia__sem" data-quando-vagas="esgotado falha">
     <div class="urgencia__modulo chanfrado">
-      <h2 class="urgencia__titulo urgencia__titulo--sem">{urgencia.semVagas.titulo}</h2>
+      <h2 class="urgencia__titulo urgencia__titulo--sem">
+        {semVagas.fato && <span class="urgencia__fato">{semVagas.fato}</span>}{semVagas.fato && " "}<span class="urgencia__leitura">{semVagas.leitura}</span>
+      </h2>
       <div class="urgencia__acao">
         <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
       </div>
@@ -150,22 +153,40 @@ const singular = dividir(urgencia.tituloUmaVaga);
   .urgencia__acao { margin-top: var(--s-3); }
   .urgencia__acao :global(.botao) { width: 100%; }
 
-  /* Sem vagas: só o título e o botão */
+  /*
+    Sem vagas (ou sem leitura): um módulo do mesmo painel. A janela chanfrada do instrumento, agora
+    sem segmentos, com a borda um passo mais forte; o título e o botão empilhados na mesma coluna.
+  */
+  .urgencia__modulo {
+    --c: var(--chanfro);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-sunken);
+    display: grid;
+    justify-items: start;
+    gap: var(--s-6);
+    min-width: 0;
+    padding: var(--s-5);
+  }
   .urgencia__titulo--sem { max-width: 22ch; margin-top: 0; }
-  .urgencia__sem .urgencia__acao { margin-top: var(--s-6); }
+  .urgencia__sem .urgencia__acao { justify-self: stretch; margin-top: 0; }
 
   @media (min-width: 640px) {
     .urgencia__acao :global(.botao) { width: auto; }
   }
 
+  @media (min-width: 640px) {
+    .urgencia__sem .urgencia__acao { justify-self: start; }
+  }
+
   @media (min-width: 720px) {
     .urgencia__janela { padding: var(--s-4); }
+    .urgencia__modulo { padding: var(--s-6); }
     .urgencia__janela :global(.medidor) { --alt: 28px; gap: var(--s-3); }
   }
 
   /*
     Computador: o instrumento e a leitura em 1–7; o texto e o botão em 9–12, assentados na
-    base da leitura. Sem vagas: o título em 1–8 e o botão na base, à direita.
+    base da leitura. Sem vagas: o módulo na mesma coluna do instrumento (1–7).
   */
   @media (min-width: 960px) {
     .urgencia__com,
@@ -186,12 +207,6 @@ const singular = dividir(urgencia.tituloUmaVaga);
     }
     .urgencia__corpo { grid-column: 9 / -1; margin-top: 0; }
 
-    .urgencia__sem { align-items: end; }
-    .urgencia__titulo--sem { grid-column: 1 / span 8; }
-    .urgencia__sem .urgencia__acao {
-      grid-column: 9 / -1;
-      justify-self: end;
-      margin-top: 0;
-    }
+    .urgencia__modulo { grid-column: 1 / span 7; gap: var(--s-7); padding: var(--s-7) var(--s-6); }
   }
 </style>

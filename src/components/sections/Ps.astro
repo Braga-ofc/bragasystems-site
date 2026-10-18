@@ -1,10 +1,17 @@
 ---
 /*
   §17 PS. Um pós-escrito de carta: o "PS:" pendurado na margem, uma régua fina com corte em 45°
-  descendo pela margem até o botão. Três variantes conforme o contador (mapa técnico, arquivo 03).
+  descendo pela margem até o botão. Variantes conforme o contador (mapa técnico, arquivo 03):
+  com vagas (e a forma de 1 vaga, copy 2.3), sem vagas (a frase sai e o botão vira o da §14) e falha.
+  Quem assina está ali: o retrato do Gustavo como uma presença apagada, em tons de cinza, que se
+  dissolve no preto (a parte escura da foto some no fundo pelo modo "lighten"). É decorativo
+  (alt vazio): o texto não depende dele. No celular fica atrás do texto, em cima e à direita;
+  no computador, ao lado do texto. Foto: src/assets/gustavo/gustavo-braga-retrato.webp (1024×1536).
 */
+import { Image } from "astro:assets";
 import Secao from "../ui/Secao.astro";
 import Botao from "../ui/Botao.astro";
+import retrato from "../../assets/gustavo/gustavo-braga-retrato.webp";
 import { ps } from "../../content/home";
 import { comVagas, rich } from "../../lib/texto";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
@@ -17,25 +24,70 @@ const { vagas } = Astro.props;
 // O espaço depois do "PS:" entra no próprio rótulo pendurado, para o texto alinhar na margem.
 const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<strong>$1 </strong>");
 ---
-<Secao largura="estreita">
-  <div class="ps" data-revela>
-    <p class="ps__texto" data-quando-vagas="com" set:html={pendurar(comVagas(rich(ps.texto), vagas))} />
-    <p class="ps__texto" data-quando-vagas="esgotado" set:html={pendurar(rich(ps.textoSemVagas))} />
-    <p class="ps__texto" data-quando-vagas="falha" set:html={pendurar(rich(ps.textoSemNumero))} />
+<Secao>
+  <div class="ps-palco">
+    <span class="ps__retrato" aria-hidden="true">
+      <Image
+        class="ps__foto"
+        src={retrato}
+        alt=""
+        widths={[360, 540, 720]}
+        sizes="(min-width: 1024px) 460px, min(68vw, 320px)"
+        quality={60}
+        loading="lazy"
+        decoding="async"
+      />
+    </span>
 
-    <div class="ps__acao">
-      <span class="ps__botao" data-quando-vagas="com falha">
-        <Botao href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{ps.botao}</Botao>
-      </span>
-      {/* Sem vagas, a mensagem de fundador não serve: vai a mensagem geral, como na Urgência (§14). */}
-      <span class="ps__botao" data-quando-vagas="esgotado">
-        <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{ps.botao}</Botao>
-      </span>
+    <div class="ps">
+      <p class="ps__texto" data-quando-vagas="com" data-quando-n="plural" set:html={pendurar(comVagas(rich(ps.texto), vagas))} />
+      <p class="ps__texto" data-quando-vagas="com" data-quando-n="singular" set:html={pendurar(rich(ps.textoUmaVaga))} />
+      <p class="ps__texto" data-quando-vagas="esgotado" set:html={pendurar(rich(ps.textoSemVagas))} />
+      <p class="ps__texto" data-quando-vagas="falha" set:html={pendurar(rich(ps.textoSemNumero))} />
+
+      <div class="ps__acao">
+        <span class="ps__botao" data-quando-vagas="com falha">
+          <Botao href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{ps.botao}</Botao>
+        </span>
+        {/* Sem vagas, o botão e a mensagem seguem os da Urgência (§14): a de fundador não serve sem vaga. */}
+        <span class="ps__botao" data-quando-vagas="esgotado">
+          <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{ps.botaoSemVagas}</Botao>
+        </span>
+      </div>
     </div>
   </div>
 </Secao>
 
 <style>
+  /* O palco do PS: o texto na frente, o retrato atrás (vem antes no HTML e não cria camada própria) */
+  .ps-palco { position: relative; }
+
+  /*
+    Celular e tablet: o retrato sobe até o topo da seção e encosta na borda direita da tela,
+    atrás das primeiras linhas, bem apagado.
+  */
+  .ps__retrato {
+    position: absolute;
+    top: calc(-1 * var(--secao-respiro));
+    right: calc(-1 * var(--gutter));
+    width: min(68vw, 320px);
+    aspect-ratio: 2 / 3;
+    pointer-events: none;
+  }
+  .ps__foto {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    object-position: 50% 12%;
+    /* Cinza, com o fundo verde-escuro da foto empurrado abaixo do preto do site: no "lighten", ele some */
+    filter: grayscale(1) contrast(1.35) brightness(0.92);
+    mix-blend-mode: lighten;
+    opacity: 0.2;
+    -webkit-mask-image: radial-gradient(ellipse 58% 50% at 54% 38%, #000 30%, transparent 100%);
+    mask-image: radial-gradient(ellipse 58% 50% at 54% 38%, #000 30%, transparent 100%);
+  }
+
   .ps {
     --ps-margem: 2.75rem;
     --ps-linha: 1.6;
@@ -92,5 +144,38 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
   @media (min-width: 640px) {
     .ps { --ps-margem: 3.5rem; font-size: var(--t-h3); }
     .ps__botao :global(.botao) { width: auto; }
+  }
+
+  /*
+    Computador: a carta em 1–7 e o retrato em 8–12, da borda de cima à de baixo da seção,
+    dissolvendo nas quatro bordas. Um pouco mais presente que no celular, sem chegar no texto.
+  */
+  @media (min-width: 1024px) {
+    .ps-palco {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+      align-items: center;
+    }
+    .ps { grid-column: 1 / span 7; grid-row: 1; }
+    .ps__retrato {
+      grid-column: 8 / -1;
+      grid-row: 1;
+      align-self: stretch;
+      position: relative;
+      top: auto;
+      right: auto;
+      width: auto;
+      aspect-ratio: auto;
+    }
+    .ps__foto {
+      position: absolute;
+      inset: calc(-1 * var(--secao-respiro)) 0;
+      height: calc(100% + 2 * var(--secao-respiro));
+      object-position: 50% 14%;
+      opacity: 0.26;
+      -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 46%, #000 38%, transparent 100%);
+      mask-image: radial-gradient(ellipse 50% 50% at 50% 46%, #000 38%, transparent 100%);
+    }
   }
 </style>
