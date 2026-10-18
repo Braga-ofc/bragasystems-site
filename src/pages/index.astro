@@ -26,6 +26,7 @@ const vagas = vagasBuild ?? vagasMax;
 <Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild}>
   <main id="conteudo">
     <div class="abertura">
+      <canvas class="abertura__nevoa" aria-hidden="true" data-nevoa></canvas>
       <Hero vagas={vagas} />
       <Gerador />
     </div>
@@ -48,6 +49,7 @@ const vagas = vagasBuild ?? vagasMax;
 
 <script>
   import "../scripts/contador";
+  import "../scripts/nevoa";
 </script>
 
 <style>
@@ -88,6 +90,31 @@ const vagas = vagasBuild ?? vagasMax;
     background-position: max(var(--gutter), (100% - var(--largura-max) + 32px) / 2) 0;
     -webkit-mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
     mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
+  }
+
+  /*
+    Névoa (scripts/nevoa.ts): luz viva atrás da grade, que acende devagar quando o primeiro quadro
+    fica pronto. Sem WebGL ela nunca acende e a dobra fica só com a grade.
+  */
+  .abertura__nevoa {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1200ms var(--ease-saida);
+  }
+  .abertura__nevoa:global(.is-acesa) { opacity: 1; }
+  /* Sem placa de vídeo: o mesmo núcleo de luz, parado, em gradientes */
+  .abertura:global(.is-estatica) {
+    background:
+      radial-gradient(ellipse 45% 40% at 78% 28%, rgb(11 124 140 / 0.22), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 70% 35%, rgb(32 40 51 / 0.55), transparent 75%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .abertura__nevoa { transition-duration: 1ms; }
   }
 
   /* Fim da dobra: a mesma linha com corte em 45° que separa as seções (ui/Secao) */

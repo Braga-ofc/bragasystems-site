@@ -37,8 +37,7 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
     <div class="topo__acoes">
       <Botao variante="secundario" icone="whatsapp" origem="topo" href={montarLinkWhatsapp("topo")}>{topo.botao}</Botao>
       <button class="topo__menu chanfrado" type="button" aria-expanded="false" aria-controls="topo-menu" aria-label="Menu" data-menu-botao>
-        <Icone nome="menu" class="topo__menu-icone topo__menu-icone--abrir" />
-        <Icone nome="fechar" class="topo__menu-icone topo__menu-icone--fechar" />
+        <span class="topo__menu-linhas" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>
     </div>
   </div>
@@ -195,14 +194,59 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
   .topo__menu:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .topo__menu[aria-expanded="true"] { --cor-fundo: var(--surface-sunken); }
 
-  /* Ícone menu ↔ fechar: troca com um giro de 45°, o ângulo da marca */
-  .topo__menu :global(.topo__menu-icone) {
-    grid-area: 1 / 1;
-    transition: opacity var(--dur-rapida) var(--ease-saida), rotate var(--dur) var(--ease-saida);
+  /*
+    Três linhas que viram um X em dois tempos: primeiro se encontram no meio, depois giram
+    (45° e 135°, os ângulos da marca). Ao fechar, a ordem se inverte. Ao passar o mouse, a linha
+    do meio recua. Variação do botão de menu de ArturCodeCraft (Uiverse, MIT), recriada em CSS.
+  */
+  .topo__menu-linhas {
+    --tempo: 170ms;
+    position: relative;
+    display: block;
+    width: 20px;
+    height: 14px;
   }
-  .topo__menu :global(.topo__menu-icone--fechar) { opacity: 0; rotate: -45deg; }
-  .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--abrir) { opacity: 0; rotate: 45deg; }
-  .topo__menu[aria-expanded="true"] :global(.topo__menu-icone--fechar) { opacity: 1; rotate: 0deg; }
+  .topo__menu-linhas > span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% - 0.875px);
+    height: 1.75px;
+    background: currentColor;
+    transform-origin: center;
+    transition:
+      translate var(--tempo) var(--ease-saida) var(--tempo),
+      rotate var(--tempo) var(--ease-saida),
+      scale var(--dur-rapida) var(--ease-saida),
+      background-color var(--dur) var(--ease-saida);
+  }
+  .topo__menu-linhas > span:nth-child(1) { translate: 0 -6px; }
+  .topo__menu-linhas > span:nth-child(3) { translate: 0 6px; }
+  .topo__menu-linhas > span:nth-child(2) { transform-origin: right center; }
+  .topo__menu:hover .topo__menu-linhas > span:nth-child(2) { scale: 0.55 1; }
+
+  .topo__menu[aria-expanded="true"] .topo__menu-linhas > span {
+    background-color: var(--accent);
+    transition:
+      translate var(--tempo) var(--ease-saida),
+      rotate var(--tempo) var(--ease-saida) var(--tempo),
+      scale var(--dur-rapida) var(--ease-saida),
+      background-color var(--dur) var(--ease-saida);
+  }
+  .topo__menu[aria-expanded="true"] .topo__menu-linhas > span:nth-child(1) { translate: 0 0; rotate: 45deg; }
+  .topo__menu[aria-expanded="true"] .topo__menu-linhas > span:nth-child(2) { scale: 0 1; }
+  .topo__menu[aria-expanded="true"] .topo__menu-linhas > span:nth-child(3) { translate: 0 0; rotate: 135deg; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .topo__menu-linhas > span,
+    .topo__menu[aria-expanded="true"] .topo__menu-linhas > span {
+      transition: background-color var(--dur-rapida) var(--ease-saida);
+    }
+  }
+  @media (forced-colors: active) {
+    .topo__menu-linhas > span,
+    .topo__menu[aria-expanded="true"] .topo__menu-linhas > span { background-color: ButtonText; }
+  }
 
   /*
     Painel do menu no celular: uma camada acima da página, logo abaixo do topo. A sombra e o véu
