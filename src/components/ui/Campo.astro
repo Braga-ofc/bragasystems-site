@@ -1,0 +1,190 @@
+---
+import Icone from "./Icone.astro";
+
+/*
+  Campo de formulário. Tipos: texto, telefone, selecao e consentimento.
+  O erro fica ligado ao campo por aria-describedby e é anunciado pelo script do formulário.
+*/
+interface Props {
+  tipo?: "texto" | "telefone" | "selecao" | "consentimento";
+  id: string;
+  nome: string;
+  rotulo?: string;
+  placeholder?: string;
+  opcoes?: string[];
+  obrigatorio?: boolean;
+  erro?: string;
+  ajuda?: string;
+  desativado?: boolean;
+  valor?: string;
+  autocomplete?: string;
+  maxlength?: number;
+}
+const {
+  tipo = "texto",
+  id,
+  nome,
+  rotulo,
+  placeholder,
+  opcoes = [],
+  obrigatorio = false,
+  erro,
+  ajuda,
+  desativado = false,
+  valor,
+  autocomplete,
+  maxlength,
+} = Astro.props;
+
+const idErro = `${id}-erro`;
+const idAjuda = `${id}-ajuda`;
+const descricao = [ajuda && idAjuda, idErro].filter(Boolean).join(" ");
+---
+{tipo === "consentimento" ? (
+  <div class:list={["campo", "campo--check", erro && "campo--erro"]}>
+    <label class="check" for={id}>
+      <input
+        class="check__caixa"
+        type="checkbox"
+        id={id}
+        name={nome}
+        required={obrigatorio}
+        disabled={desativado}
+        aria-invalid={erro ? "true" : undefined}
+        aria-describedby={idErro}
+      />
+      <span class="check__texto"><slot /></span>
+    </label>
+    <p class="campo__erro" id={idErro} hidden={!erro}><Icone nome="alerta" tamanho={16} />{erro}</p>
+  </div>
+) : (
+  <div class:list={["campo", erro && "campo--erro", desativado && "campo--desativado"]}>
+    <label class="campo__rotulo" for={id}>{rotulo}</label>
+    {ajuda && <p class="campo__ajuda" id={idAjuda}>{ajuda}</p>}
+    <span class="campo__moldura chanfrado">
+      {tipo === "selecao" ? (
+        <>
+          <select
+            class="campo__controle campo__controle--selecao"
+            id={id}
+            name={nome}
+            required={obrigatorio}
+            disabled={desativado}
+            aria-invalid={erro ? "true" : undefined}
+            aria-describedby={descricao}
+          >
+            <option value="" disabled selected={!valor}>{placeholder ?? "Escolha uma opção"}</option>
+            {opcoes.map((o) => <option value={o} selected={o === valor}>{o}</option>)}
+          </select>
+          <Icone nome="seta-baixo" class="campo__seta" />
+        </>
+      ) : (
+        <input
+          class="campo__controle"
+          id={id}
+          name={nome}
+          type={tipo === "telefone" ? "tel" : "text"}
+          inputmode={tipo === "telefone" ? "tel" : undefined}
+          autocomplete={autocomplete ?? (tipo === "telefone" ? "tel-national" : undefined)}
+          placeholder={placeholder}
+          value={valor}
+          maxlength={maxlength}
+          required={obrigatorio}
+          disabled={desativado}
+          aria-invalid={erro ? "true" : undefined}
+          aria-describedby={descricao}
+        />
+      )}
+    </span>
+    <p class="campo__erro" id={idErro} hidden={!erro}><Icone nome="alerta" tamanho={16} />{erro}</p>
+  </div>
+)}
+
+<style>
+  .campo { display: grid; gap: var(--s-2); min-width: 0; }
+  .campo__rotulo { font: 500 var(--t-small)/1.4 var(--font-sans); color: var(--ink-strong); }
+  .campo__ajuda { font-size: var(--t-small); color: var(--ink-muted); }
+
+  .campo__moldura {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-sunken);
+    display: block;
+  }
+  .campo__moldura:hover { --cor-borda: var(--ink-muted); }
+  .campo__moldura:focus-within { --cor-borda: var(--accent); --espessura: 2px; }
+  .campo--erro .campo__moldura { --cor-borda: var(--erro); }
+  .campo--erro .campo__moldura:focus-within { --cor-borda: var(--erro); }
+
+  .campo__controle {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 0 16px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-strong);
+    font-size: 1rem; /* 16px: evita o zoom automático no iPhone */
+    outline: none;
+    appearance: none;
+  }
+  .campo__controle::placeholder { color: var(--ink-muted); opacity: 1; }
+  .campo__controle--selecao { padding-right: 48px; cursor: pointer; }
+  .campo__controle--selecao:invalid { color: var(--ink-muted); }
+  .campo__controle option { background: var(--surface-raised); color: var(--ink); }
+  :global(.campo__seta) {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    translate: 0 -50%;
+    color: var(--ink-muted);
+    pointer-events: none;
+  }
+
+  .campo--desativado { opacity: 0.55; }
+  .campo--desativado .campo__controle { cursor: not-allowed; }
+
+  .campo__erro {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: var(--t-small);
+    line-height: 1.4;
+    color: var(--erro);
+  }
+  .campo__erro[hidden] { display: none; }
+  .campo__erro :global(svg) { margin-top: 1px; }
+
+  /* Caixa de consentimento: quadrada, sem cantos arredondados, como a marca */
+  .check {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 12px;
+    align-items: start;
+    min-height: 44px;
+    padding-block: 2px;
+    font-size: var(--t-small);
+    line-height: 1.5;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .check__caixa {
+    --marca: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B0F14' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    appearance: none;
+    border: 1.5px solid var(--line-forte);
+    background: var(--surface-sunken) center / 16px no-repeat;
+    cursor: pointer;
+    transition: background-color var(--dur-rapida) var(--ease-saida), border-color var(--dur-rapida) var(--ease-saida);
+  }
+  :global(.tema-claro) .check__caixa {
+    --marca: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='2.5' stroke-linecap='square'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  }
+  .check__caixa:hover { border-color: var(--ink-muted); }
+  .check__caixa:checked { background-color: var(--accent); background-image: var(--marca); border-color: var(--accent); }
+  .check__caixa:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .campo--erro .check__caixa { border-color: var(--erro); }
+  .check__texto :global(a) { color: var(--accent); }
+</style>

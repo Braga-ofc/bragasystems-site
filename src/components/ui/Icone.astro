@@ -1,0 +1,33 @@
+---
+// Ícones lineares da marca: traço único, pontas retas, ângulos de 0°, 45° e 90°.
+interface Props {
+  nome: "whatsapp" | "seta" | "seta-baixo" | "check" | "alerta";
+  tamanho?: number;
+  class?: string;
+}
+const { nome, tamanho = 20, class: classe } = Astro.props;
+const caminhos: Record<Props["nome"], string> = {
+  whatsapp: "M4 4.5h16v11.5H11l-5 4v-4H4z M8 8.75h8 M8 11.75h5",
+  seta: "M4.5 12h14 M13 6.5l5.5 5.5-5.5 5.5",
+  "seta-baixo": "M6.5 9.5l5.5 5.5 5.5-5.5",
+  check: "M5 12.5l4.5 4.5L19 7.5",
+  alerta: "M12 3.5l9 16H3z M12 9.5v4.5 M12 16.5v1",
+};
+---
+<svg
+  class:list={["icone", classe]}
+  width={tamanho}
+  height={tamanho}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  aria-hidden="true"
+  focusable="false"
+><path d={caminhos[nome]} /></svg>
+
+<style>
+  .icone { flex: none; display: block; }
+</style>

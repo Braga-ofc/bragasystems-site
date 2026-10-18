@@ -1,11 +1,19 @@
 ---
 import "../styles/fonts.css";
+import "../styles/tokens.css";
+import "../styles/global.css";
 
 interface Props {
   titulo: string;
   descricao?: string;
+  /** Páginas que não devem aparecer no Google (obrigado, briefing, 404, amostra). */
+  semIndexar?: boolean;
 }
-const { titulo, descricao = "Sites e landing pages personalizados, com copy de conversão inclusa, para negócios que vendem serviços de alto valor e fecham pelo WhatsApp." } = Astro.props;
+const {
+  titulo,
+  descricao = "Sites e landing pages personalizados, com copy de conversão inclusa, para negócios que vendem serviços de alto valor e fecham pelo WhatsApp.",
+  semIndexar = false,
+} = Astro.props;
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -14,6 +22,7 @@ const { titulo, descricao = "Sites e landing pages personalizados, com copy de c
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
     <meta name="description" content={descricao} />
+    {semIndexar && <meta name="robots" content="noindex" />}
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

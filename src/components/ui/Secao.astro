@@ -1,0 +1,41 @@
+---
+interface Props {
+  id?: string;
+  tema?: "escuro" | "elevado" | "claro";
+  largura?: "normal" | "estreita";
+  class?: string;
+}
+const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
+---
+<section id={id} class:list={["secao", `secao--${tema}`, tema === "claro" && "tema-claro", classe]}>
+  <div class:list={["secao__conteudo", largura === "estreita" && "secao__conteudo--estreita"]}>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .secao {
+    position: relative;
+    background: var(--surface);
+    color: var(--ink);
+    padding-block: var(--secao-respiro);
+  }
+  .secao--elevado { background: var(--surface-sunken); }
+  /* Linha de divisão com corte em 45° na esquerda, como as fendas do símbolo */
+  .secao + .secao::before {
+    --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--borda-lateral);
+    right: var(--borda-lateral);
+    height: 9px;
+    /* Linha fina com o início cortado em 45°, como as fendas do símbolo */
+    background:
+      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
+      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
+  }
+  .secao--claro + .secao::before, .secao + .secao--claro::before { display: none; }
+  .secao__conteudo { width: min(100% - 2 * var(--gutter), var(--largura-max)); margin-inline: auto; }
+  .secao__conteudo--estreita { width: min(100% - 2 * var(--gutter), 760px); }
+</style>

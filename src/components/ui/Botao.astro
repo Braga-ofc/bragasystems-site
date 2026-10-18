@@ -1,0 +1,118 @@
+---
+import Icone from "./Icone.astro";
+
+interface Props {
+  variante?: "primario" | "secundario";
+  href?: string;
+  tipo?: "button" | "submit";
+  icone?: "whatsapp" | "seta" | null;
+  carregando?: boolean;
+  desativado?: boolean;
+  larguraTotal?: boolean;
+  /** Origem do clique de WhatsApp (copy §21), usada na medição. */
+  origem?: string;
+  class?: string;
+}
+
+const {
+  variante = "primario",
+  href,
+  tipo = "button",
+  icone = null,
+  carregando = false,
+  desativado = false,
+  larguraTotal = false,
+  origem,
+  class: classe,
+} = Astro.props;
+
+const ehWhatsapp = href?.startsWith("https://wa.me/");
+const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "botao--cheio", classe];
+---
+{href ? (
+  <a
+    class:list={classes}
+    href={desativado ? undefined : href}
+    aria-disabled={desativado ? "true" : undefined}
+    aria-busy={carregando ? "true" : undefined}
+    target={ehWhatsapp ? "_blank" : undefined}
+    rel={ehWhatsapp ? "noopener" : undefined}
+    data-origem={origem}
+  >
+    <span class="botao__texto"><slot /></span>
+    {carregando ? <span class="botao__giro" aria-hidden="true" /> : icone && <Icone nome={icone} class="botao__icone" />}
+  </a>
+) : (
+  <button
+    class:list={classes}
+    type={tipo}
+    disabled={desativado}
+    aria-busy={carregando ? "true" : undefined}
+    data-origem={origem}
+  >
+    <span class="botao__texto"><slot /></span>
+    {carregando ? <span class="botao__giro" aria-hidden="true" /> : icone && <Icone nome={icone} class="botao__icone" />}
+  </button>
+)}
+
+<style>
+  .botao {
+    --c: var(--chanfro);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 22px 0 24px;
+    border: 0;
+    background: none;
+    font: 600 1rem/1.2 var(--font-sans);
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      --cor-borda var(--dur) var(--ease-saida),
+      --cor-fundo var(--dur) var(--ease-saida),
+      color var(--dur) var(--ease-saida),
+      translate var(--dur-rapida) var(--ease-saida);
+  }
+  .botao--cheio { display: flex; width: 100%; }
+
+  .botao--primario { --cor-borda: var(--accent); --cor-fundo: var(--accent); color: var(--on-accent); }
+  .botao--primario:hover { --cor-borda: var(--accent-hover); --cor-fundo: var(--accent-hover); color: var(--on-accent); }
+
+  .botao--secundario { --cor-borda: var(--line-forte); --cor-fundo: var(--surface); color: var(--ink-strong); }
+  .botao--secundario:hover { --cor-borda: var(--accent); color: var(--ink-strong); }
+
+  .botao:active { translate: 0 1px; }
+  .botao:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+  :global(.botao__icone) { transition: translate var(--dur) var(--ease-saida); }
+  .botao:hover :global(.botao__icone) { translate: 3px 0; }
+
+  /* Carregando: o texto fica, o ícone vira um quadrado girando */
+  .botao[aria-busy="true"] { cursor: progress; }
+  .botao__giro {
+    width: 14px;
+    height: 14px;
+    margin-inline: 3px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: girar 0.9s linear infinite;
+  }
+  @keyframes girar { to { rotate: 1turn; } }
+
+  /* Desativado */
+  .botao:disabled,
+  .botao[aria-disabled="true"] {
+    --cor-borda: var(--line);
+    --cor-fundo: var(--surface-raised);
+    color: var(--ink-muted);
+    cursor: not-allowed;
+    translate: none;
+  }
+  .botao:disabled :global(.botao__icone),
+  .botao[aria-disabled="true"] :global(.botao__icone) { translate: none; }
+</style>

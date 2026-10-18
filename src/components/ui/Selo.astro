@@ -1,0 +1,66 @@
+---
+/*
+  Selo de vagas (copy §2) e selo RECOMENDADO (copy §9).
+  O estado das vagas é aplicado pelo script do contador (etapa 5) trocando data-estado
+  e o número; os três textos já vêm no HTML para a página não "pular".
+*/
+interface Props {
+  tipo?: "vagas" | "recomendado";
+  estado?: "com-vagas" | "esgotado" | "falha";
+  vagas?: number;
+  class?: string;
+}
+const { tipo = "vagas", estado = "com-vagas", vagas = 5, class: classe } = Astro.props;
+---
+{tipo === "recomendado" ? (
+  <span class:list={["selo", "selo--recomendado", "chanfrado", classe]}>Recomendado</span>
+) : (
+  <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={estado}>
+    <span class="selo__marca" aria-hidden="true"></span>
+    <span class="selo__texto" data-quando="com-vagas">5 vagas de fundador · 25% off · restam <strong class="num" data-vagas>{vagas}</strong></span>
+    <span class="selo__texto" data-quando="esgotado">Vagas de fundador esgotadas</span>
+    <span class="selo__texto" data-quando="falha">Vagas de fundador limitadas</span>
+  </span>
+)}
+
+<style>
+  .selo {
+    --c: 7px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+    padding: 6px 14px 6px 12px;
+    font: 500 clamp(0.6875rem, 0.64rem + 0.2vw, 0.75rem)/1.3 var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .selo--vagas { --cor-borda: var(--line-forte); --cor-fundo: var(--surface); color: var(--ink); }
+  .selo--vagas strong { font-weight: 500; color: var(--ink-strong); }
+
+  /* A cunha: o "núcleo" do símbolo, em 45° */
+  .selo__marca {
+    width: 12px;
+    height: 8px;
+    flex: none;
+    background: var(--accent);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+  }
+
+  .selo__texto { display: none; }
+  [data-estado="com-vagas"] > [data-quando="com-vagas"],
+  [data-estado="esgotado"] > [data-quando="esgotado"],
+  [data-estado="falha"] > [data-quando="falha"] { display: inline; }
+  [data-estado="esgotado"] .selo__marca { background: var(--ink-muted); }
+
+  .selo--recomendado {
+    --c: 6px;
+    --cor-borda: var(--accent);
+    --cor-fundo: var(--accent);
+    min-height: 26px;
+    padding: 4px 12px;
+    color: var(--on-accent);
+    letter-spacing: 0.16em;
+  }
+</style>

@@ -1,0 +1,94 @@
+/*
+  Tokens do design system BRAGA SYSTEMS.
+  Fonte oficial: design-system/tokens.json (repositório da marca).
+  O tema escuro é o padrão do site; seções claras usam .tema-claro.
+*/
+:root {
+  /* Cores de marca */
+  --preto-profundo: #0B0F14;
+  --grafite: #202833;
+  --ciano-eletrico: #35D5E8;
+  --ciano-eletrico-forte: #6FE3F0;
+  --ciano-profundo: #0B7C8C;
+  --prata-fria: #D6DDE6;
+
+  /* Tema escuro (padrão) */
+  --surface: var(--preto-profundo);
+  --surface-raised: var(--grafite);
+  --surface-sunken: #080B0F;
+  --ink: var(--prata-fria);
+  --ink-strong: #F2F5F8;
+  --ink-muted: #8A96A6;
+  --accent: var(--ciano-eletrico);
+  --accent-hover: var(--ciano-eletrico-forte);
+  --on-accent: var(--preto-profundo);
+  --line: #2E3946;
+  --line-forte: #4A5768;
+  --erro: #FF8A80;
+  --sucesso: #6EE7B7;
+  --brilho: rgb(53 213 232 / 0.22);
+
+  /* Tipografia */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Escala: celular → computador (tokens.json: display 56, h1 40, h2 28) */
+  --t-display: clamp(2.25rem, 1.55rem + 3vw, 3.5rem);
+  --t-h1: clamp(1.875rem, 1.45rem + 1.8vw, 2.5rem);
+  --t-h2: clamp(1.5rem, 1.32rem + 0.75vw, 1.75rem);
+  --t-h3: 1.25rem;
+  --t-body-lg: 1.125rem;
+  --t-body: 1rem;
+  --t-small: 0.875rem;
+  --t-label: 0.75rem;
+
+  /* Espaçamento (base 4/8) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+  --s-10: 128px;
+
+  /* Layout */
+  --largura-max: 1120px;
+  --largura-texto: 68ch;
+  --gutter: clamp(20px, 5vw, 32px);
+  --secao-respiro: clamp(64px, 10vw, 128px);
+
+  /* Geometria: canto chanfrado em 45°, como o símbolo */
+  --chanfro-sm: 8px;
+  --chanfro: 12px;
+  --chanfro-lg: 20px;
+  --borda: 1px;
+
+  /* Movimento */
+  --dur-rapida: 150ms;
+  --dur: 240ms;
+  --dur-lenta: 400ms;
+  --ease-saida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Seções claras */
+.tema-claro {
+  --surface: #F5F7FA;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #E9EDF2;
+  --ink: var(--preto-profundo);
+  --ink-strong: #000000;
+  --ink-muted: #566170;
+  --accent: var(--ciano-profundo);
+  --accent-hover: #096A78;
+  --on-accent: #FFFFFF;
+  --line: #C9D1DB;
+  --line-forte: #8E9AA8;
+  --erro: #B42318;
+  --sucesso: #067647;
+  --brilho: rgb(11 124 140 / 0.16);
+  color-scheme: light;
+}

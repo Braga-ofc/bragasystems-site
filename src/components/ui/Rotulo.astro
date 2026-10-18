@@ -1,0 +1,29 @@
+---
+// Rótulo técnico da copy (ex.: PLANOS, PROCESSO): JetBrains Mono, caixa alta.
+interface Props { as?: "p" | "span"; destaque?: boolean; class?: string }
+const { as: Tag = "p", destaque = false, class: classe } = Astro.props;
+---
+<Tag class:list={["rotulo", destaque && "rotulo--destaque", classe]}>
+  <span class="rotulo__corte" aria-hidden="true"></span><slot />
+</Tag>
+
+<style>
+  .rotulo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font: 500 var(--t-label)/1.3 var(--font-mono);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .rotulo__corte {
+    width: 14px;
+    height: 1px;
+    background: currentColor;
+    rotate: -45deg;
+    flex: none;
+  }
+  .rotulo--destaque .rotulo__corte { background: var(--accent); height: 2px; }
+</style>

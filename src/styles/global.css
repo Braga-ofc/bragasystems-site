@@ -1,0 +1,104 @@
+/* Base do site: reset, tipografia e superfícies do navegador no tema da marca. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 88px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  line-height: 1.625;
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scrollbar-color: var(--line-forte) var(--surface);
+}
+
+::selection { background: var(--accent); color: var(--on-accent); }
+input, textarea, select { caret-color: var(--accent); }
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--ink-strong);
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+h1 { font-size: var(--t-h1); line-height: 1.15; font-weight: 600; }
+h2 { font-size: var(--t-h2); line-height: 1.2; font-weight: 500; }
+h3 { font-size: var(--t-h3); line-height: 1.3; font-weight: 500; letter-spacing: -0.01em; }
+p { margin: 0; text-wrap: pretty; }
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+a:hover { color: var(--accent-hover); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+img, svg, video { display: block; max-width: 100%; height: auto; }
+button, input, select, textarea { font: inherit; color: inherit; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Barra de rolagem fina, no tom das linhas da marca */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--line-forte); border: 2px solid var(--surface); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+  Canto chanfrado em 45° com borda fina.
+  O recorte fica só nas camadas de fundo (::before = borda, ::after = preenchimento),
+  então o conteúdo, a área de toque e o contorno de foco não são cortados.
+  Use as variáveis: --c (tamanho do chanfro), --cor-borda, --cor-fundo, --espessura.
+*/
+@property --cor-borda { syntax: "<color>"; inherits: true; initial-value: transparent; }
+@property --cor-fundo { syntax: "<color>"; inherits: true; initial-value: transparent; }
+
+.chanfrado {
+  --c: var(--chanfro);
+  --espessura: var(--borda);
+  position: relative;
+  isolation: isolate;
+  transition: --cor-borda var(--dur) var(--ease-saida), --cor-fundo var(--dur) var(--ease-saida);
+}
+.chanfrado::before,
+.chanfrado::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.chanfrado::before {
+  inset: 0;
+  background: var(--cor-borda);
+  clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+}
+.chanfrado::after {
+  --ci: calc(var(--c) - var(--espessura) * 0.586);
+  inset: var(--espessura);
+  background: var(--cor-fundo);
+  clip-path: polygon(var(--ci) 0, 100% 0, 100% calc(100% - var(--ci)), calc(100% - var(--ci)) 100%, 0 100%, 0 var(--ci));
+}
