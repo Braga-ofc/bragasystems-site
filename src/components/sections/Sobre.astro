@@ -1,27 +1,33 @@
 ---
 /*
-  §13 Sobre. Uma ficha de quem faz: o retrato é um encaixe do painel reservado para a foto
-  profissional (ainda não existe; a foto de perfil foi descartada para o site), com a grade
-  fina por dentro, o símbolo B em marca d'água e marcas de enquadramento em 90° nos cantos
-  retos. No celular o encaixe fica pequeno, ao lado do nome, como num crachá; no computador,
-  em 4:5 à esquerda, com o texto centrado na altura dele. O único ciano é o botão do WhatsApp.
-  Sem números (anos, projetos): copy §13.
+  §13 Sobre. Uma ficha de quem faz: a foto profissional do Gustavo num encaixe chanfrado do
+  painel, com marcas de enquadramento em 90° nos cantos retos. No celular a foto vem acima do
+  nome; no computador, em 4:5 à esquerda, com o texto centrado na altura dela.
+  O único ciano é o botão do WhatsApp. Sem números (anos, projetos): copy §13.
 */
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
 import Botao from "../ui/Botao.astro";
-import simbolo from "../../assets/logo/simbolo-escuro.svg?raw";
+import { Image } from "astro:assets";
+import foto from "../../assets/gustavo/gustavo-braga-sentado.jpg";
 import { sobre } from "../../content/home";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
 ---
 <Secao id="sobre" tema="elevado" class="sobre">
   <div class="sobre__grade">
-    {/* Espaço reservado da foto: só visual, sem texto (copy §13) */}
-    <div class="sobre__retrato chanfrado" aria-hidden="true">
-      <span class="sobre__fundo grade"></span>
-      <span class="sobre__simbolo" set:html={simbolo} />
-      <span class="sobre__marca sobre__marca--topo"></span>
-      <span class="sobre__marca sobre__marca--base"></span>
+    <div class="sobre__retrato chanfrado">
+      <Image
+        class="sobre__foto"
+        src={foto}
+        alt="Gustavo Braga, fundador da BRAGA SYSTEMS, sentado de camisa preta com as mãos entrelaçadas"
+        widths={[320, 480, 640, 880]}
+        sizes="(min-width: 960px) 440px, (min-width: 720px) 240px, min(320px, 100vw)"
+        quality={80}
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="sobre__marca sobre__marca--topo" aria-hidden="true"></span>
+      <span class="sobre__marca sobre__marca--base" aria-hidden="true"></span>
     </div>
 
     <header class="sobre__cabeca">
@@ -40,15 +46,16 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
 </Secao>
 
 <style>
-  /* Celular: o encaixe pequeno ao lado do nome; o texto embaixo, na largura toda */
+  /* Celular: a foto acima do nome; o texto embaixo, na largura toda */
   .sobre__grade {
-    --retrato: clamp(96px, 29vw, 132px);
+    --retrato: min(320px, 100%);
     display: grid;
-    grid-template-columns: var(--retrato) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
-      "retrato cabeca"
-      "corpo corpo";
-    column-gap: var(--s-5);
+      "retrato"
+      "cabeca"
+      "corpo";
+    row-gap: var(--s-6);
     min-width: 0;
   }
 
@@ -60,33 +67,21 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     --marca: 10px;
     --marca-recuo: 8px;
     grid-area: retrato;
-    align-self: end;
+    width: var(--retrato);
     aspect-ratio: 4 / 5;
     overflow: hidden;
   }
 
-  /* Grade fina por dentro (utilitário .grade), seguindo o recorte do encaixe */
-  .sobre__fundo {
-    --grade-passo: 16px;
-    --grade-cor: color-mix(in srgb, var(--line) 75%, transparent);
-    --grade-origem: center center;
-    --grade-mascara: radial-gradient(ellipse 85% 70% at 50% 50%, #000 15%, transparent 100%);
+  /* A foto segue o recorte chanfrado do encaixe, por dentro da borda fina */
+  .sobre__foto {
     position: absolute;
     inset: 1px;
-    pointer-events: none;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    object-fit: cover;
+    object-position: 50% 20%;
     clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
   }
-
-  /* O símbolo em marca d'água: cor e forma originais, só bem apagado */
-  .sobre__simbolo {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    opacity: 0.09;
-    pointer-events: none;
-  }
-  .sobre__simbolo :global(svg) { width: 52%; height: auto; }
 
   /* Marcas de enquadramento em 90°, nos dois cantos retos do encaixe */
   .sobre__marca {
@@ -130,7 +125,6 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     display: grid;
     gap: var(--s-4);
     min-width: 0;
-    margin-top: var(--s-6);
   }
   .sobre__texto {
     max-width: 60ch;
@@ -151,8 +145,18 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     .sobre__acoes :global(.botao) { width: auto; }
   }
 
+  /* Tablet: a foto à esquerda, nome e texto ao lado */
   @media (min-width: 720px) {
-    .sobre__grade { --retrato: 168px; column-gap: var(--s-6); }
+    .sobre__grade {
+      --retrato: 240px;
+      grid-template-columns: var(--retrato) minmax(0, 1fr);
+      grid-template-areas:
+        "retrato cabeca"
+        "retrato corpo";
+      grid-template-rows: auto 1fr;
+      column-gap: var(--s-7);
+      row-gap: var(--s-5);
+    }
     .sobre__retrato { --c: var(--chanfro-lg); --marca: 14px; --marca-recuo: 12px; }
   }
 
@@ -175,8 +179,7 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
       --marca: 18px;
       --marca-recuo: 16px;
     }
-    .sobre__fundo { --grade-passo: 32px; }
-    .sobre__simbolo :global(svg) { width: 38%; }
+    .sobre__retrato { width: auto; }
     /* O texto começa na coluna 6, recuado: os dois botões cabem lado a lado em 1440 */
     .sobre__cabeca { grid-column: 6 / -1; grid-row: 2; padding-left: var(--s-7); }
     .sobre__corpo { grid-column: 6 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-7); }
