@@ -35,7 +35,7 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
       <h2 class="sobre__titulo">{sobre.titulo}</h2>
     </header>
 
-    <div class="sobre__corpo" data-revela>
+    <div class="sobre__corpo">
       {sobre.paragrafos.map((paragrafo) => <p class="sobre__texto">{paragrafo}</p>)}
       <div class="sobre__acoes">
         <Botao variante="secundario" href="/quem-sou" icone="seta">{sobre.botaoHistoria}</Botao>

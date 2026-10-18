@@ -21,7 +21,7 @@ const linhas = Math.ceil(dor.itens.length / 2);
       <h2 class="dor__titulo">{dor.titulo}</h2>
     </header>
 
-    <ul class="dor__registro" role="list" style={`--linhas:${linhas}`} data-revela>
+    <ul class="dor__registro" role="list" style={`--linhas:${linhas}`}>
       {dor.itens.map((item, i) => (
         <li
           class:list={[
@@ -36,7 +36,7 @@ const linhas = Math.ceil(dor.itens.length / 2);
       ))}
     </ul>
 
-    <p class="dor__fechamento" data-revela>
+    <p class="dor__fechamento">
       <span class="dor__luz" aria-hidden="true"><span class="dor__cunha dor__cunha--acesa"></span></span>
       <span>{dor.fechamento}</span>
     </p>

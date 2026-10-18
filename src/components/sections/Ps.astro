@@ -32,7 +32,7 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
         src={retrato}
         alt=""
         widths={[360, 540, 720]}
-        sizes="(min-width: 1024px) 460px, min(68vw, 320px)"
+        sizes="(min-width: 1024px) 460px, min(74vw, 340px)"
         quality={60}
         loading="lazy"
         decoding="async"
@@ -59,18 +59,20 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
 </Secao>
 
 <style>
-  /* O palco do PS: o texto na frente, o retrato atrás (vem antes no HTML e não cria camada própria) */
-  .ps-palco { position: relative; }
-
   /*
-    Celular e tablet: o retrato sobe até o topo da seção e encosta na borda direita da tela,
-    atrás das primeiras linhas, bem apagado.
+    O palco do PS: o texto na frente, o retrato atrás (vem antes no HTML e não cria camada própria).
+    Celular e tablet: o retrato sobe até o topo da seção e encosta na borda direita da tela; o rosto
+    aparece no respiro acima da carta e a mão no queixo fica atrás das primeiras linhas, bem apagada.
   */
+  .ps-palco {
+    position: relative;
+    padding-top: clamp(72px, 22vw, 128px);
+  }
   .ps__retrato {
     position: absolute;
     top: calc(-1 * var(--secao-respiro));
     right: calc(-1 * var(--gutter));
-    width: min(68vw, 320px);
+    width: min(74vw, 340px);
     aspect-ratio: 2 / 3;
     pointer-events: none;
   }
@@ -79,13 +81,13 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
     height: 100%;
     max-width: none;
     object-fit: cover;
-    object-position: 50% 12%;
+    object-position: 50% 0;
     /* Cinza, com o fundo verde-escuro da foto empurrado abaixo do preto do site: no "lighten", ele some */
-    filter: grayscale(1) contrast(1.35) brightness(0.92);
+    filter: grayscale(1) contrast(1.25) brightness(0.95);
     mix-blend-mode: lighten;
-    opacity: 0.2;
-    -webkit-mask-image: radial-gradient(ellipse 58% 50% at 54% 38%, #000 30%, transparent 100%);
-    mask-image: radial-gradient(ellipse 58% 50% at 54% 38%, #000 30%, transparent 100%);
+    opacity: 0.22;
+    -webkit-mask-image: radial-gradient(ellipse 56% 46% at 52% 34%, #000 32%, transparent 100%);
+    mask-image: radial-gradient(ellipse 56% 46% at 52% 34%, #000 32%, transparent 100%);
   }
 
   .ps {
@@ -152,6 +154,7 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
   */
   @media (min-width: 1024px) {
     .ps-palco {
+      padding-top: 0;
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--s-5);
@@ -173,7 +176,7 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
       inset: calc(-1 * var(--secao-respiro)) 0;
       height: calc(100% + 2 * var(--secao-respiro));
       object-position: 50% 14%;
-      opacity: 0.26;
+      opacity: 0.24;
       -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 46%, #000 38%, transparent 100%);
       mask-image: radial-gradient(ellipse 50% 50% at 50% 46%, #000 38%, transparent 100%);
     }

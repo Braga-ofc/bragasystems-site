@@ -29,6 +29,8 @@ function dividir(titulo: string) {
 const plural = dividir(urgencia.titulo);
 const singular = dividir(urgencia.tituloUmaVaga);
 const semVagas = dividir(urgencia.semVagas.titulo);
+// O "1" da forma singular sai em números tabulares, como o {X} do plural (mesmo desenho do algarismo).
+const numero = (html: string) => html.replace(/\d+/, (n) => `<span class="num">${n}</span>`);
 ---
 <Secao class="urgencia">
   <div class="urgencia__com" data-quando-vagas="com">
@@ -40,7 +42,7 @@ const semVagas = dividir(urgencia.semVagas.titulo);
         {plural.fato && <span class="urgencia__fato">{plural.fato}</span>}{plural.fato && " "}<span class="urgencia__leitura" set:html={comVagas(rich(plural.leitura), vagas)} />
       </h2>
       <h2 class="urgencia__titulo" data-quando-n="singular">
-        {singular.fato && <span class="urgencia__fato">{singular.fato}</span>}{singular.fato && " "}<span class="urgencia__leitura" set:html={rich(singular.leitura)} />
+        {singular.fato && <span class="urgencia__fato">{singular.fato}</span>}{singular.fato && " "}<span class="urgencia__leitura" set:html={numero(rich(singular.leitura))} />
       </h2>
     </div>
 
@@ -172,9 +174,6 @@ const semVagas = dividir(urgencia.semVagas.titulo);
 
   @media (min-width: 640px) {
     .urgencia__acao :global(.botao) { width: auto; }
-  }
-
-  @media (min-width: 640px) {
     .urgencia__sem .urgencia__acao { justify-self: start; }
   }
 
