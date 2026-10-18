@@ -2,16 +2,20 @@
 /*
   §8 Projetos. O case EBEN como um módulo preenchido do painel (a ficha) com a voz da cliente
   presa a ele por um traço; ao lado, o próximo encaixe ainda livre: o cartão de fundador, com a
-  grade aparecendo por dentro e as vagas medidas ao vivo. Sem print do site, nada de mockup
-  falso: o case é tipográfico.
-  Vagas (mapa técnico, arquivo 03): o cartão aparece com {X}, sem número na falha e some no
-  esgotado; aí o case ocupa a largura toda e a voz da cliente vai para o lado da ficha.
+  grade aparecendo por dentro e as vagas medidas ao vivo.
+  No topo da ficha, a tela: a gravação real do site da EBEN no computador (11 s, sem som), de
+  ponta a ponta no módulo, com o canto chanfrado dele. Sem aparelho desenhado em volta.
+  Vagas (mapa técnico, arquivo 03): o cartão aparece com {X} (e no singular com 1), sem número
+  na falha e some no esgotado; aí o case ocupa a largura toda e a voz da cliente vai para o lado
+  da ficha.
 */
+import { Image } from "astro:assets";
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
 import Botao from "../ui/Botao.astro";
 import MedidorVagas from "../ui/MedidorVagas.astro";
 import Depoimento from "../ui/Depoimento.astro";
+import capaEben from "../../assets/cases/eben/site-eben-capa.jpg";
 import { projetos } from "../../content/home";
 import { comVagas, rich } from "../../lib/texto";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
@@ -22,9 +26,6 @@ interface Props {
 }
 const { vagas } = Astro.props;
 const { eben, fundador } = projetos;
-
-// Para onde o botão leva: o endereço do site no ar, sem o protocolo (vem do próprio link da copy).
-const enderecoCase = new URL(eben.url).host;
 ---
 <Secao id="projetos" tema="elevado">
   <div class="projetos">
@@ -37,6 +38,41 @@ const enderecoCase = new URL(eben.url).host;
       <article class="projetos-case" aria-labelledby="projetos-eben" data-revela>
         <div class="projetos-case__corpo">
           <div class="projetos-ficha chanfrado">
+            {/*
+              A tela é decorativa: quem lê o case tem o nome, o desafio, a solução e o botão.
+              A capa fica atrás do vídeo e só carrega perto da tela (lazy, no tamanho certo);
+              o vídeo (preload="none") só baixa quando o script manda tocar.
+            */}
+            <div class="projetos-tela" aria-hidden="true">
+              <Image
+                class="projetos-tela__capa"
+                src={capaEben}
+                alt=""
+                widths={[640, 960, 1280]}
+                sizes="(min-width: 1184px) 644px, (min-width: 960px) 58vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
+                format="webp"
+                quality={75}
+                loading="lazy"
+                decoding="async"
+              />
+              <video
+                class="projetos-tela__video"
+                width="1280"
+                height="800"
+                muted
+                loop
+                playsinline
+                preload="none"
+                disablepictureinpicture
+                disableremoteplayback
+                aria-hidden="true"
+                data-tela-video
+              >
+                <source src="/videos/eben/site-eben.webm" type="video/webm; codecs=av01.0.05M.08" />
+                <source src="/videos/eben/site-eben.mp4" type="video/mp4" />
+              </video>
+            </div>
+
             <div class="projetos-ficha__cabeca">
               <h3 id="projetos-eben" class="projetos-ficha__nome">{eben.nome}</h3>
               <p class="projetos-ficha__tipo">{eben.tipo}</p>
@@ -55,7 +91,6 @@ const enderecoCase = new URL(eben.url).host;
 
             <div class="projetos-ficha__acao">
               <Botao variante="secundario" href={eben.url} icone="externo" novaAba class="projetos-ficha__link">{eben.botao}</Botao>
-              <span class="projetos-ficha__endereco">{enderecoCase}</span>
             </div>
           </div>
 
@@ -73,13 +108,51 @@ const enderecoCase = new URL(eben.url).host;
             <span class="projetos-fundador__traco" aria-hidden="true"></span>
           </div>
           <h3 class="projetos-fundador__titulo">{fundador.titulo}</h3>
-          <p class="projetos-fundador__texto" data-quando-vagas="com" set:html={comVagas(rich(fundador.texto), vagas)} />
+          <p class="projetos-fundador__texto" data-quando-vagas="com" data-quando-n="plural" set:html={comVagas(rich(fundador.texto), vagas)} />
+          <p class="projetos-fundador__texto" data-quando-vagas="com" data-quando-n="singular" set:html={rich(fundador.textoUmaVaga)} />
           <p class="projetos-fundador__texto" data-quando-vagas="falha" set:html={rich(fundador.textoSemNumero)} />
           <Botao href={montarLinkWhatsapp("fundador")} icone="whatsapp" origem="fundador" larguraTotal>{fundador.botao}</Botao>
         </div>
       </div>
     </div>
   </div>
+
+  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
+  <script>
+    // A tela do case: o vídeo toca só enquanto pelo menos 40% dele aparece e para quando sai.
+    // Não toca sozinho com movimento reduzido, com economia de dados ou com a aba escondida;
+    // aí fica a capa que está atrás dele. Se o navegador recusar o play(), também fica a capa.
+    const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("[data-tela-video]"));
+    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const conexao = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const visiveis = new Set<HTMLVideoElement>();
+    const PARTE_VISIVEL = 0.4;
+
+    function atualizar(video: HTMLVideoElement) {
+      const tocar = visiveis.has(video) && !semMovimento.matches && !conexao?.saveData && !document.hidden;
+      if (tocar) video.play().catch(() => {});
+      else if (!video.paused) video.pause();
+    }
+
+    if (videos.length && "IntersectionObserver" in window) {
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          for (const entrada of entradas) {
+            const video = entrada.target as HTMLVideoElement;
+            if (entrada.isIntersecting && entrada.intersectionRatio >= PARTE_VISIVEL) visiveis.add(video);
+            else visiveis.delete(video);
+            atualizar(video);
+          }
+        },
+        { threshold: [0, PARTE_VISIVEL] },
+      );
+      for (const video of videos) observador.observe(video);
+
+      const todos = () => videos.forEach(atualizar);
+      semMovimento.addEventListener("change", todos);
+      document.addEventListener("visibilitychange", todos);
+    }
+  </script>
 </Secao>
 
 <style>
@@ -117,7 +190,33 @@ const enderecoCase = new URL(eben.url).host;
     container: projetos-ficha / inline-size;
     display: grid;
   }
-  .projetos-ficha > * { padding-inline: var(--pad); }
+  .projetos-ficha > :not(.projetos-tela) { padding-inline: var(--pad); }
+
+  /*
+    A tela: o vídeo vai de ponta a ponta dentro da borda do módulo e herda o chanfro de cima
+    (mesmo recorte do preenchimento do .chanfrado). Proporção fixa de 16:10, sem pulo de layout.
+    A capa e o vídeo ocupam a mesma célula; o vídeo, transparente até ter imagem, fica por cima.
+  */
+  .projetos-tela {
+    --ci: calc(var(--c) - var(--espessura) * 0.586);
+    display: grid;
+    margin: var(--espessura) var(--espessura) 0;
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--line);
+    clip-path: polygon(var(--ci) 0, 100% 0, 100% 100%, 0 100%, 0 var(--ci));
+    overflow: hidden;
+  }
+  .projetos-tela > :global(*) {
+    grid-area: 1 / 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    pointer-events: none;
+  }
+  /* iOS em modo de economia recusa o play() e desenharia um botão de play por cima: some com ele */
+  .projetos-tela__video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
 
   .projetos-ficha__cabeca {
     display: grid;
@@ -153,13 +252,6 @@ const enderecoCase = new URL(eben.url).host;
     gap: var(--s-3) var(--s-5);
     padding-block: var(--s-5) var(--pad);
     border-top: 1px solid var(--line);
-  }
-  .projetos-ficha__endereco {
-    min-width: 0;
-    overflow-wrap: anywhere;
-    font: 400 var(--t-label)/1.4 var(--font-mono);
-    letter-spacing: 0.06em;
-    color: var(--ink-muted);
   }
 
   /*
@@ -239,10 +331,13 @@ const enderecoCase = new URL(eben.url).host;
     .projetos-ficha__linha dt::after { content: none; }
   }
 
-  /* Case na largura toda (sem vagas): a voz da cliente vai para o lado da ficha */
+  /*
+    Case na largura toda (sem vagas): a voz da cliente vai para o lado da ficha. A ficha fica nos
+    mesmos 7/12 de quando há vagas, então a tela tem o mesmo tamanho nos dois estados.
+  */
   @container projetos-case (min-width: 880px) {
     .projetos-case__corpo {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       align-items: start;
     }
     .projetos-case__voz {

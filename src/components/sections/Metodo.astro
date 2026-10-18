@@ -4,9 +4,10 @@
   As 4 camadas são módulos ligados por um trilho de 1 px, com os números da copy como nós.
   Depois da camada 04 o trilho desce, dobra em 45° e corre reto até o nó do WhatsApp,
   o único ciano do circuito. Ao entrar na tela, o traço se desenha e um pulso de luz corre
-  uma vez de 01 até o WhatsApp (Animated Beam do Magic UI, MIT, recriado em CSS, com um
-  IntersectionObserver no próprio componente). Sem JavaScript ou com movimento reduzido,
-  o circuito já aparece desenhado e aceso.
+  uma vez de 01 até a camada 04; a saída (curva, linha e nó do WhatsApp) só se desenha e acende
+  quando o nó de destino entra na tela, para o fim do gesto acontecer à vista (Animated Beam do
+  Magic UI, MIT, recriado em CSS, com dois IntersectionObserver no próprio componente).
+  Sem JavaScript ou com movimento reduzido, o circuito já aparece desenhado e aceso.
 */
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
@@ -37,7 +38,7 @@ import { metodo } from "../../content/home";
       </ol>
 
       {/* Saída do circuito: desce, dobra em 45° e segue reta até o WhatsApp */}
-      <div class="metodo__saida" aria-hidden="true">
+      <div class="metodo__saida" aria-hidden="true" data-saida>
         <svg class="metodo__curva" width="25" height="41" viewBox="0 0 25 41" fill="none">
           <path class="metodo__curva-traco" d="M0.5 0V16.5L24.5 40.5" stroke="currentColor" pathLength="1" />
           <path class="metodo__curva-luz" d="M0.5 0V16.5L24.5 40.5" stroke-width="2" pathLength="1" />
@@ -50,28 +51,58 @@ import { metodo } from "../../content/home";
 
   {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
   <script>
-    // Liga o circuito do Método uma vez, quando ele entra na tela.
+    // Liga o circuito do Método uma vez, em dois tempos:
+    // 1. quando o circuito entra na tela, o trilho se desenha e o pulso corre pelos nós 01 a 04;
+    // 2. quando o nó do WhatsApp entra na tela, a saída se desenha e a luz chega até ele.
+    // Se os dois acontecem juntos, a saída espera o pulso chegar (mesmo ritmo de antes).
     // Só apaga antes o que ainda está abaixo da tela: nada pisca no carregamento,
     // e quem chega por /#metodo já encontra o circuito aceso.
     const circuito = document.querySelector<HTMLElement>("[data-circuito]");
+    const saida = circuito?.querySelector<HTMLElement>("[data-saida]");
     const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Momento, depois do acender do circuito, em que o pulso chega à saída (casa com o CSS).
+    const PULSO_NA_SAIDA = 560;
 
     if (
       circuito &&
+      saida &&
       !semMovimento &&
       "IntersectionObserver" in window &&
       circuito.getBoundingClientRect().top > window.innerHeight * 0.7
     ) {
       circuito.dataset.circuito = "pendente";
-      const observador = new IntersectionObserver(
+      saida.dataset.saida = "pendente";
+      let acesoEm = -1;
+      let saidaNaTela = false;
+
+      const acenderSaida = () => {
+        if (acesoEm < 0 || !saidaNaTela || saida.dataset.saida === "acesa") return;
+        const atraso = Math.max(0, Math.round(acesoEm + PULSO_NA_SAIDA - performance.now()));
+        saida.style.setProperty("--saida-atraso", `${atraso}ms`);
+        saida.dataset.saida = "acesa";
+      };
+
+      const observaCircuito = new IntersectionObserver(
         (entradas) => {
           if (!entradas.some((entrada) => entrada.isIntersecting)) return;
-          observador.disconnect();
+          observaCircuito.disconnect();
           circuito.dataset.circuito = "aceso";
+          acesoEm = performance.now();
+          acenderSaida();
         },
         { rootMargin: "0px 0px -30% 0px" },
       );
-      observador.observe(circuito);
+      const observaSaida = new IntersectionObserver(
+        (entradas) => {
+          if (!entradas.some((entrada) => entrada.isIntersecting)) return;
+          observaSaida.disconnect();
+          saidaNaTela = true;
+          acenderSaida();
+        },
+        { rootMargin: "0px 0px -15% 0px" },
+      );
+      observaCircuito.observe(circuito);
+      observaSaida.observe(saida);
     }
   </script>
 </Secao>
@@ -197,6 +228,7 @@ import { metodo } from "../../content/home";
 
   /* Saída: continua o trilho, dobra em 45° e corre até o nó do WhatsApp */
   .metodo__saida {
+    --saida-atraso: 0ms; /* o script ajusta para a luz não chegar antes do pulso */
     position: relative;
     height: 64px;
     color: var(--traco);
@@ -268,27 +300,30 @@ import { metodo } from "../../content/home";
   }
 
   /*
-    Entrada (~1,8 s, uma vez): o trilho desce, cada nó pisca quando o pulso passa,
-    a saída se desenha e a luz chega ao WhatsApp. Antes disso, o circuito fica em espera.
+    Entrada (uma vez, em dois tempos). Circuito (~1,3 s): o trilho desce, cada nó pisca quando o
+    pulso passa. Saída (~1,5 s, quando o nó do WhatsApp aparece): a curva e a linha se desenham e a
+    luz corre até o WhatsApp, que acende. Antes de cada tempo, a parte dele fica em espera.
   */
   @media (prefers-reduced-motion: no-preference) {
     [data-circuito="pendente"] .metodo__camadas::before { clip-path: inset(0 0 100% 0); }
-    [data-circuito="pendente"] .metodo__camada::before,
-    [data-circuito="pendente"] .metodo__linha { clip-path: inset(0 100% 0 0); }
-    [data-circuito="pendente"] .metodo__curva-traco { stroke-dashoffset: 1; }
+    [data-circuito="pendente"] .metodo__camada::before { clip-path: inset(0 100% 0 0); }
     [data-circuito="pendente"] .metodo__no { --cor-borda: var(--line); color: var(--ink-muted); }
-    [data-circuito="pendente"] .metodo__destino { --cor-borda: var(--line); color: var(--ink-muted); filter: none; }
+
+    [data-saida="pendente"] .metodo__linha { clip-path: inset(0 100% 0 0); }
+    [data-saida="pendente"] .metodo__curva-traco { stroke-dashoffset: 1; }
+    [data-saida="pendente"] .metodo__destino { --cor-borda: var(--line); color: var(--ink-muted); filter: none; }
 
     [data-circuito="aceso"] .metodo__camadas::before { animation: metodo-desce 700ms var(--ease-saida) both; }
     [data-circuito="aceso"] .metodo__camada::before { animation: metodo-abre var(--dur) calc(120ms + var(--i) * 140ms) var(--ease-saida) both; }
-    [data-circuito="aceso"] .metodo__curva-traco { animation: metodo-traco var(--dur) 560ms var(--ease-saida) both; }
-    [data-circuito="aceso"] .metodo__linha { animation: metodo-abre var(--dur-lenta) 720ms var(--ease-saida) both; }
-
     [data-circuito="aceso"] .metodo__camadas::after { animation: metodo-pulso 1000ms 250ms linear both; }
     [data-circuito="aceso"] .metodo__no { animation: metodo-no var(--dur-lenta) calc(300ms + var(--i) * 220ms) var(--ease-saida) both; }
-    [data-circuito="aceso"] .metodo__curva-luz { animation: metodo-luz-curva 140ms 1230ms linear both; }
-    [data-circuito="aceso"] .metodo__linha::after { animation: metodo-luz-linha 360ms 1340ms linear both; }
-    [data-circuito="aceso"] .metodo__destino { animation: metodo-destino var(--dur-lenta) 1620ms var(--ease-saida) both; }
+
+    /* Tempos da saída contados a partir de --saida-atraso (antes: 560, 720, 1230, 1340 e 1620 ms) */
+    [data-saida="acesa"] .metodo__curva-traco { animation: metodo-traco var(--dur) var(--saida-atraso) var(--ease-saida) both; }
+    [data-saida="acesa"] .metodo__linha { animation: metodo-abre var(--dur-lenta) calc(var(--saida-atraso) + 160ms) var(--ease-saida) both; }
+    [data-saida="acesa"] .metodo__curva-luz { animation: metodo-luz-curva 140ms calc(var(--saida-atraso) + 670ms) linear both; }
+    [data-saida="acesa"] .metodo__linha::after { animation: metodo-luz-linha 360ms calc(var(--saida-atraso) + 780ms) linear both; }
+    [data-saida="acesa"] .metodo__destino { animation: metodo-destino var(--dur-lenta) calc(var(--saida-atraso) + 1060ms) var(--ease-saida) both; }
   }
 
   @keyframes metodo-desce { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }

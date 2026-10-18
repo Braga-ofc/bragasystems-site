@@ -181,8 +181,8 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
     z-index: -2;
     pointer-events: none;
     translate: 0 16px;
-    filter: blur(20px);
-    will-change: transform;
+    filter: blur(40px); /* mesmo desfoque do drop-shadow(0 16px 40px) de antes, medido em pixel */
+    will-change: transform; /* camada própria: o feixe não refaz o desfoque a cada quadro */
   }
   .plano__brilho::before {
     content: "";
