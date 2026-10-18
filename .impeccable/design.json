@@ -1,0 +1,749 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T15:54:55Z",
+  "title": "Design System: BRAGA SYSTEMS",
+  "extensions": {
+    "colorMeta": {
+      "preto-profundo": {
+        "role": "neutral",
+        "displayName": "Preto Profundo",
+        "canonical": "oklch(16.7% 0.012 254)",
+        "tonalRamp": [
+          "oklch(15% 0.012 254)",
+          "oklch(25% 0.012 254)",
+          "oklch(37% 0.012 254)",
+          "oklch(49% 0.012 254)",
+          "oklch(61% 0.012 254)",
+          "oklch(73% 0.012 254)",
+          "oklch(85% 0.012 254)",
+          "oklch(95% 0.012 254)"
+        ]
+      },
+      "fundo-rebaixado": {
+        "role": "neutral",
+        "displayName": "Fundo Rebaixado",
+        "canonical": "oklch(14.8% 0.010 255)",
+        "tonalRamp": [
+          "oklch(15% 0.010 255)",
+          "oklch(25% 0.010 255)",
+          "oklch(37% 0.010 255)",
+          "oklch(49% 0.010 255)",
+          "oklch(61% 0.010 255)",
+          "oklch(73% 0.010 255)",
+          "oklch(85% 0.010 255)",
+          "oklch(95% 0.010 255)"
+        ]
+      },
+      "faixa-elevada": {
+        "role": "neutral",
+        "displayName": "Faixa Elevada",
+        "canonical": "color-mix(in srgb, #0B0F14 72%, #202833)",
+        "tonalRamp": [
+          "oklch(15% 0.023 256)",
+          "oklch(25% 0.023 256)",
+          "oklch(37% 0.023 256)",
+          "oklch(49% 0.023 256)",
+          "oklch(61% 0.023 256)",
+          "oklch(73% 0.023 256)",
+          "oklch(85% 0.023 256)",
+          "oklch(95% 0.023 256)"
+        ]
+      },
+      "grafite": {
+        "role": "neutral",
+        "displayName": "Grafite",
+        "canonical": "oklch(27.4% 0.023 256)",
+        "tonalRamp": [
+          "oklch(15% 0.023 256)",
+          "oklch(25% 0.023 256)",
+          "oklch(37% 0.023 256)",
+          "oklch(49% 0.023 256)",
+          "oklch(61% 0.023 256)",
+          "oklch(73% 0.023 256)",
+          "oklch(85% 0.023 256)",
+          "oklch(95% 0.023 256)"
+        ]
+      },
+      "linha": {
+        "role": "neutral",
+        "displayName": "Linha",
+        "canonical": "oklch(34.0% 0.027 253)",
+        "tonalRamp": [
+          "oklch(15% 0.027 253)",
+          "oklch(25% 0.027 253)",
+          "oklch(37% 0.027 253)",
+          "oklch(49% 0.027 253)",
+          "oklch(61% 0.027 253)",
+          "oklch(73% 0.027 253)",
+          "oklch(85% 0.027 253)",
+          "oklch(95% 0.027 253)"
+        ]
+      },
+      "linha-forte": {
+        "role": "neutral",
+        "displayName": "Linha Forte",
+        "canonical": "oklch(45.2% 0.032 255)",
+        "tonalRamp": [
+          "oklch(15% 0.032 255)",
+          "oklch(25% 0.032 255)",
+          "oklch(37% 0.032 255)",
+          "oklch(49% 0.032 255)",
+          "oklch(61% 0.032 255)",
+          "oklch(73% 0.032 255)",
+          "oklch(85% 0.032 255)",
+          "oklch(95% 0.032 255)"
+        ]
+      },
+      "tinta-apagada": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada",
+        "canonical": "oklch(66.9% 0.027 256)",
+        "tonalRamp": [
+          "oklch(15% 0.027 256)",
+          "oklch(25% 0.027 256)",
+          "oklch(37% 0.027 256)",
+          "oklch(49% 0.027 256)",
+          "oklch(61% 0.027 256)",
+          "oklch(73% 0.027 256)",
+          "oklch(85% 0.027 256)",
+          "oklch(95% 0.027 256)"
+        ]
+      },
+      "prata-fria": {
+        "role": "neutral",
+        "displayName": "Prata Fria",
+        "canonical": "oklch(89.5% 0.014 255)",
+        "tonalRamp": [
+          "oklch(15% 0.014 255)",
+          "oklch(25% 0.014 255)",
+          "oklch(37% 0.014 255)",
+          "oklch(49% 0.014 255)",
+          "oklch(61% 0.014 255)",
+          "oklch(73% 0.014 255)",
+          "oklch(85% 0.014 255)",
+          "oklch(95% 0.014 255)"
+        ]
+      },
+      "tinta-forte": {
+        "role": "neutral",
+        "displayName": "Tinta Forte",
+        "canonical": "oklch(96.9% 0.005 248)",
+        "tonalRamp": [
+          "oklch(15% 0.005 248)",
+          "oklch(25% 0.005 248)",
+          "oklch(37% 0.005 248)",
+          "oklch(49% 0.005 248)",
+          "oklch(61% 0.005 248)",
+          "oklch(73% 0.005 248)",
+          "oklch(85% 0.005 248)",
+          "oklch(95% 0.005 248)"
+        ]
+      },
+      "ciano-eletrico": {
+        "role": "primary",
+        "displayName": "Ciano Elétrico",
+        "canonical": "oklch(80.2% 0.127 207)",
+        "tonalRamp": [
+          "oklch(15% 0.127 207)",
+          "oklch(25% 0.127 207)",
+          "oklch(37% 0.127 207)",
+          "oklch(49% 0.127 207)",
+          "oklch(61% 0.127 207)",
+          "oklch(73% 0.127 207)",
+          "oklch(85% 0.127 207)",
+          "oklch(95% 0.127 207)"
+        ]
+      },
+      "ciano-eletrico-forte": {
+        "role": "primary",
+        "displayName": "Ciano Elétrico Forte",
+        "canonical": "oklch(85.3% 0.106 205)",
+        "tonalRamp": [
+          "oklch(15% 0.106 205)",
+          "oklch(25% 0.106 205)",
+          "oklch(37% 0.106 205)",
+          "oklch(49% 0.106 205)",
+          "oklch(61% 0.106 205)",
+          "oklch(73% 0.106 205)",
+          "oklch(85% 0.106 205)",
+          "oklch(95% 0.106 205)"
+        ]
+      },
+      "brilho": {
+        "role": "primary",
+        "displayName": "Brilho",
+        "canonical": "rgb(53 213 232 / 0.22)",
+        "tonalRamp": [
+          "oklch(15% 0.127 207)",
+          "oklch(25% 0.127 207)",
+          "oklch(37% 0.127 207)",
+          "oklch(49% 0.127 207)",
+          "oklch(61% 0.127 207)",
+          "oklch(73% 0.127 207)",
+          "oklch(85% 0.127 207)",
+          "oklch(95% 0.127 207)"
+        ]
+      },
+      "erro": {
+        "role": "error",
+        "displayName": "Erro",
+        "canonical": "oklch(75.9% 0.144 26)",
+        "tonalRamp": [
+          "oklch(15% 0.140 26)",
+          "oklch(25% 0.140 26)",
+          "oklch(37% 0.140 26)",
+          "oklch(49% 0.140 26)",
+          "oklch(61% 0.140 26)",
+          "oklch(73% 0.140 26)",
+          "oklch(85% 0.140 26)",
+          "oklch(95% 0.140 26)"
+        ]
+      },
+      "claro-fundo": {
+        "role": "neutral",
+        "displayName": "Claro Fundo",
+        "canonical": "oklch(97.5% 0.005 258)",
+        "tonalRamp": [
+          "oklch(15% 0.005 258)",
+          "oklch(25% 0.005 258)",
+          "oklch(37% 0.005 258)",
+          "oklch(49% 0.005 258)",
+          "oklch(61% 0.005 258)",
+          "oklch(73% 0.005 258)",
+          "oklch(85% 0.005 258)",
+          "oklch(95% 0.005 258)"
+        ]
+      },
+      "claro-elevado": {
+        "role": "neutral",
+        "displayName": "Claro Elevado",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(25% 0.000 90)",
+          "oklch(37% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(73% 0.000 90)",
+          "oklch(85% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "claro-rebaixado": {
+        "role": "neutral",
+        "displayName": "Claro Rebaixado",
+        "canonical": "oklch(94.4% 0.008 254)",
+        "tonalRamp": [
+          "oklch(15% 0.008 254)",
+          "oklch(25% 0.008 254)",
+          "oklch(37% 0.008 254)",
+          "oklch(49% 0.008 254)",
+          "oklch(61% 0.008 254)",
+          "oklch(73% 0.008 254)",
+          "oklch(85% 0.008 254)",
+          "oklch(95% 0.008 254)"
+        ]
+      },
+      "claro-linha": {
+        "role": "neutral",
+        "displayName": "Claro Linha",
+        "canonical": "oklch(85.8% 0.016 254)",
+        "tonalRamp": [
+          "oklch(15% 0.016 254)",
+          "oklch(25% 0.016 254)",
+          "oklch(37% 0.016 254)",
+          "oklch(49% 0.016 254)",
+          "oklch(61% 0.016 254)",
+          "oklch(73% 0.016 254)",
+          "oklch(85% 0.016 254)",
+          "oklch(95% 0.016 254)"
+        ]
+      },
+      "claro-linha-forte": {
+        "role": "neutral",
+        "displayName": "Claro Linha Forte",
+        "canonical": "oklch(68.1% 0.025 252)",
+        "tonalRamp": [
+          "oklch(15% 0.025 252)",
+          "oklch(25% 0.025 252)",
+          "oklch(37% 0.025 252)",
+          "oklch(49% 0.025 252)",
+          "oklch(61% 0.025 252)",
+          "oklch(73% 0.025 252)",
+          "oklch(85% 0.025 252)",
+          "oklch(95% 0.025 252)"
+        ]
+      },
+      "claro-tinta-apagada": {
+        "role": "neutral",
+        "displayName": "Claro Tinta Apagada",
+        "canonical": "oklch(48.9% 0.028 256)",
+        "tonalRamp": [
+          "oklch(15% 0.028 256)",
+          "oklch(25% 0.028 256)",
+          "oklch(37% 0.028 256)",
+          "oklch(49% 0.028 256)",
+          "oklch(61% 0.028 256)",
+          "oklch(73% 0.028 256)",
+          "oklch(85% 0.028 256)",
+          "oklch(95% 0.028 256)"
+        ]
+      },
+      "claro-tinta-forte": {
+        "role": "neutral",
+        "displayName": "Claro Tinta Forte",
+        "canonical": "#000000",
+        "tonalRamp": [
+          "oklch(15% 0.012 254)",
+          "oklch(25% 0.012 254)",
+          "oklch(37% 0.012 254)",
+          "oklch(49% 0.012 254)",
+          "oklch(61% 0.012 254)",
+          "oklch(73% 0.012 254)",
+          "oklch(85% 0.012 254)",
+          "oklch(95% 0.012 254)"
+        ]
+      },
+      "ciano-profundo": {
+        "role": "primary",
+        "displayName": "Ciano Profundo",
+        "canonical": "oklch(53.8% 0.091 211)",
+        "tonalRamp": [
+          "oklch(15% 0.091 211)",
+          "oklch(25% 0.091 211)",
+          "oklch(37% 0.091 211)",
+          "oklch(49% 0.091 211)",
+          "oklch(61% 0.091 211)",
+          "oklch(73% 0.091 211)",
+          "oklch(85% 0.091 211)",
+          "oklch(95% 0.091 211)"
+        ]
+      },
+      "ciano-profundo-forte": {
+        "role": "primary",
+        "displayName": "Ciano Profundo Forte",
+        "canonical": "oklch(48.2% 0.081 211)",
+        "tonalRamp": [
+          "oklch(15% 0.081 211)",
+          "oklch(25% 0.081 211)",
+          "oklch(37% 0.081 211)",
+          "oklch(49% 0.081 211)",
+          "oklch(61% 0.081 211)",
+          "oklch(73% 0.081 211)",
+          "oklch(85% 0.081 211)",
+          "oklch(95% 0.081 211)"
+        ]
+      },
+      "claro-brilho": {
+        "role": "primary",
+        "displayName": "Brilho Claro",
+        "canonical": "rgb(11 124 140 / 0.16)",
+        "tonalRamp": [
+          "oklch(15% 0.091 211)",
+          "oklch(25% 0.091 211)",
+          "oklch(37% 0.091 211)",
+          "oklch(49% 0.091 211)",
+          "oklch(61% 0.091 211)",
+          "oklch(73% 0.091 211)",
+          "oklch(85% 0.091 211)",
+          "oklch(95% 0.091 211)"
+        ]
+      },
+      "claro-erro": {
+        "role": "error",
+        "displayName": "Claro Erro",
+        "canonical": "oklch(50.0% 0.182 30)",
+        "tonalRamp": [
+          "oklch(15% 0.140 30)",
+          "oklch(25% 0.140 30)",
+          "oklch(37% 0.140 30)",
+          "oklch(49% 0.140 30)",
+          "oklch(61% 0.140 30)",
+          "oklch(73% 0.140 30)",
+          "oklch(85% 0.140 30)",
+          "oklch(95% 0.140 30)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "A frase que segura a seção: pergunta do CTA, leitura da Urgência, título da Proposta no computador; a headline do hero usa tamanho próprio para fechar em 4 linhas no celular."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título de cada seção e o número grande do preço."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Falas e frases de virada: objeções, citação do depoimento, fechamento da Dor, slogan do rodapé."
+      },
+      "title-sm": {
+        "displayName": "Title Small",
+        "purpose": "Nomes dentro de módulos: camadas do Método, benefícios, etapas, perguntas do FAQ."
+      },
+      "body-lg": {
+        "displayName": "Body Large",
+        "purpose": "Primeiro parágrafo de cada seção, até 44ch a 52ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido, até 58ch a 64ch."
+      },
+      "body-sm": {
+        "displayName": "Body Small",
+        "purpose": "Listas dos planos, rótulos de campo, ajudas, notas e erros."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Todo botão."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Rótulo técnico da copy e nomes de plano, em caixa alta e tinta apagada."
+      },
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Leituras do painel em caixa alta: microcopy, rodapés de módulo, selo de vagas, prazo, local."
+      }
+    },
+    "shadows": [
+      {
+        "name": "brilho-destaque",
+        "value": "camada com o recorte chanfrado em var(--brilho), filter: blur(40px), translate: 0 16px",
+        "purpose": "Atrás do plano Performance; camada parada para o feixe não refazer o desfoque."
+      },
+      {
+        "name": "brilho-leitura",
+        "value": "drop-shadow(0 0 6px var(--brilho))",
+        "purpose": "Cada segmento aceso do medidor de vagas."
+      },
+      {
+        "name": "brilho-destino",
+        "value": "drop-shadow(0 0 14px var(--brilho))",
+        "purpose": "O nó do WhatsApp no fim do circuito do Método."
+      },
+      {
+        "name": "brilho-cunha",
+        "value": "drop-shadow(0 0 8px var(--brilho))",
+        "purpose": "A cunha acesa do fechamento da Dor (4px no traço do corte da placa de Benefícios)."
+      },
+      {
+        "name": "halo-hero",
+        "value": "radial-gradient(closest-side, color-mix(in srgb, var(--brilho) 42%, transparent), transparent)",
+        "purpose": "Atrás da headline do hero, parado."
+      },
+      {
+        "name": "painel-sobreposto",
+        "value": "0 24px 48px -12px rgb(0 0 0 / 0.6)",
+        "purpose": "Só o painel do menu no celular, sobre um véu de 60% do fundo rebaixado."
+      },
+      {
+        "name": "topo-vidro",
+        "value": "background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(12px)",
+        "purpose": "Topo fixo sobre o conteúdo."
+      }
+    ],
+    "motion": [
+      {
+        "name": "dur-rapida",
+        "value": "150ms",
+        "purpose": "Toque (descer 1 px), troca de ícone, caixa de consentimento."
+      },
+      {
+        "name": "dur",
+        "value": "240ms",
+        "purpose": "Cores da moldura chanfrada, giros de 45°, painel do menu, acordeão."
+      },
+      {
+        "name": "dur-lenta",
+        "value": "400ms",
+        "purpose": "Entradas ao rolar, zonas novas do console, troca cheio/vazado do medidor."
+      },
+      {
+        "name": "ease-saida",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "A única curva do sistema."
+      },
+      {
+        "name": "feixe-volta",
+        "value": "conic-gradient na camada de borda, 3.2s linear, 1 volta",
+        "purpose": "Plano Performance ao entrar 35% na tela; para sozinho."
+      },
+      {
+        "name": "feixe-continuo",
+        "value": "2.4s linear infinite",
+        "purpose": "Só enquanto espera resposta: console ao gerar, formulário do CTA ao enviar."
+      },
+      {
+        "name": "circuito",
+        "value": "trilho 700ms; hastes 240ms a cada 140ms; pulso 1000ms (250ms de atraso); nós 400ms a cada 220ms; saída ~1.5s quando o nó do WhatsApp entra",
+        "purpose": "O gesto assinado do Método, uma vez, em dois tempos."
+      },
+      {
+        "name": "decifra",
+        "value": "~700ms, sorteio a cada 45ms, 90ms todo embaralhado antes da primeira letra",
+        "purpose": "Só a headline do hero, uma vez ao carregar; não roda se ela já está na tela há mais de 400ms ou se a fonte demora mais de 1s."
+      },
+      {
+        "name": "revela",
+        "value": "opacity 0, translate 0 14px, blur(6px) → 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Entradas ao rolar só em §8, §10 e §11, só no que ainda está abaixo da tela."
+      },
+      {
+        "name": "medidor-ligar",
+        "value": "360ms por segmento, atraso 240ms + 90ms × índice",
+        "purpose": "As vagas acendem uma a uma ao carregar e quando a janela da Urgência entra na tela."
+      },
+      {
+        "name": "console-entra",
+        "value": "opacity 0, translate 0 6px, blur(4px) → 400ms",
+        "purpose": "Zonas novas do console e avisos de falha."
+      },
+      {
+        "name": "giro-carregando",
+        "value": "quadrado de 14px, borda 2px, 0.9s linear infinite",
+        "purpose": "Ícone do botão em aria-busy."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "micro-selo",
+        "value": "375px"
+      },
+      {
+        "name": "micro-topo",
+        "value": "380px"
+      },
+      {
+        "name": "sm",
+        "value": "480px"
+      },
+      {
+        "name": "topo-icone",
+        "value": "520px"
+      },
+      {
+        "name": "md",
+        "value": "640px"
+      },
+      {
+        "name": "tablet",
+        "value": "720px"
+      },
+      {
+        "name": "lg",
+        "value": "960px"
+      },
+      {
+        "name": "xl",
+        "value": "1024px"
+      }
+    ],
+    "chanfros": [
+      {
+        "name": "chanfro-sm",
+        "value": "8px",
+        "purpose": "Controles pequenos: campos, nós, menu, acordeão, controle do vídeo, retrato do depoimento."
+      },
+      {
+        "name": "chanfro",
+        "value": "12px",
+        "purpose": "Botões e módulos médios."
+      },
+      {
+        "name": "chanfro-lg",
+        "value": "20px",
+        "purpose": "Módulos grandes: console, planos, ficha, formulário, placa, Garantia, fundador."
+      },
+      {
+        "name": "selo",
+        "value": "6px / 7px",
+        "purpose": "Selo recomendado / selo de vagas."
+      },
+      {
+        "name": "recorte",
+        "value": "polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c))",
+        "purpose": "Só nas camadas de fundo (::before borda, ::after preenchimento, chanfro interno = c − espessura × 0,586)."
+      },
+      {
+        "name": "cunha",
+        "value": "12px × 8px, polygon(0 0, 50% 0, 100% 100%, 50% 100%)",
+        "purpose": "O núcleo do símbolo em 45°."
+      }
+    ],
+    "layout": {
+      "larguraMax": "1120px",
+      "larguraEstreita": "760px",
+      "colunas": 12,
+      "intervalo": "24px",
+      "gradePasso": "32px",
+      "topo": "64px / 72px",
+      "scrollPaddingTop": "88px"
+    }
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "botao-primario",
+      "description": "O único botão preenchido do bloco: ciano elétrico no escuro (ciano profundo no claro), chanfro de 12 px, ícone que desliza no hover.",
+      "html": "<a class=\"ds-btn ds-btn--primario\" href=\"#\">Quero meu site <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4 4.5h16v11.5H11l-5 4v-4H4z M8 8.75h8 M8 11.75h5\"/></svg></a>",
+      "css": ".ds-btn{--c:12px;--esp:1px;position:relative;isolation:isolate}.ds-btn::before,.ds-btn::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-btn::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-btn::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px 0 24px;border:0;background:none;font:600 1rem/1.2 \"Inter\",system-ui,sans-serif;letter-spacing:-0.005em;text-decoration:none;cursor:pointer;transition:translate 150ms cubic-bezier(0.16,1,0.3,1)}.ds-btn svg{flex:none;transition:translate 240ms cubic-bezier(0.16,1,0.3,1)}.ds-btn:hover svg{translate:3px 0}.ds-btn:active{translate:0 1px}.ds-btn:focus-visible{outline:2px solid var(--accent,#35D5E8);outline-offset:4px}.ds-btn--primario{--cb:var(--accent,#35D5E8);--cf:var(--accent,#35D5E8);color:var(--on-accent,#0B0F14)}.ds-btn--primario:hover{--cb:var(--accent-hover,#6FE3F0);--cf:var(--accent-hover,#6FE3F0);color:var(--on-accent,#0B0F14)}"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "botao-secundario",
+      "description": "Vazado: borda de 1 px em linha forte sobre o fundo; no hover só a borda acende em ciano.",
+      "html": "<a class=\"ds-btn ds-btn--secundario\" href=\"#\">Ver projetos <svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4.5 12h14 M13 6.5l5.5 5.5-5.5 5.5\"/></svg></a>",
+      "css": ".ds-btn{--c:12px;--esp:1px;position:relative;isolation:isolate}.ds-btn::before,.ds-btn::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-btn::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-btn::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px 0 24px;border:0;background:none;font:600 1rem/1.2 \"Inter\",system-ui,sans-serif;letter-spacing:-0.005em;text-decoration:none;cursor:pointer;transition:translate 150ms cubic-bezier(0.16,1,0.3,1)}.ds-btn svg{flex:none;transition:translate 240ms cubic-bezier(0.16,1,0.3,1)}.ds-btn:hover svg{translate:3px 0}.ds-btn:active{translate:0 1px}.ds-btn:focus-visible{outline:2px solid var(--accent,#35D5E8);outline-offset:4px}.ds-btn--secundario{--cb:var(--line-forte,#4A5768);--cf:var(--surface,#0B0F14);color:var(--ink-strong,#F2F5F8)}.ds-btn--secundario:hover{--cb:var(--accent,#35D5E8)}"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "campo",
+      "description": "Moldura chanfrada de 8 px no fundo rebaixado; foco vira borda ciano de 2 px; erro vira borda vermelha com ícone e texto.",
+      "html": "<div class=\"ds-campo\"><label class=\"ds-campo__rotulo\" for=\"ds-vende\">O que você vende?</label><span class=\"ds-campo__moldura\"><input class=\"ds-campo__controle\" id=\"ds-vende\" placeholder=\"lentes de contato dental\"></span></div>",
+      "css": ".ds-campo__moldura{--c:8px;--esp:1px;position:relative;isolation:isolate}.ds-campo__moldura::before,.ds-campo__moldura::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-campo__moldura::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-campo__moldura::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-campo{display:grid;gap:8px;font-family:\"Inter\",system-ui,sans-serif}.ds-campo__rotulo{font:500 0.875rem/1.4 \"Inter\",system-ui,sans-serif;color:var(--ink-strong,#F2F5F8)}.ds-campo__moldura{display:block;--cb:color-mix(in srgb,var(--ink-muted,#8A96A6) 75%,var(--line-forte,#4A5768));--cf:var(--surface-sunken,#080B0F)}.ds-campo__moldura:hover{--cb:var(--ink-muted,#8A96A6)}.ds-campo__moldura:focus-within{--cb:var(--accent,#35D5E8);--esp:2px}.ds-campo__controle{display:block;width:100%;min-height:52px;padding:0 16px;border:0;background:transparent;color:var(--ink-strong,#F2F5F8);font:400 1rem/1.4 \"Inter\",system-ui,sans-serif;outline:none}.ds-campo__controle::placeholder{color:var(--ink-muted,#8A96A6);opacity:1}"
+    },
+    {
+      "name": "Selo de vagas com medidor",
+      "kind": "chip",
+      "refersTo": "selo-vagas",
+      "description": "A leitura das vagas: medidor de 5 paralelogramos ligado por um traço ao selo chanfrado de 7 px com a cunha acesa.",
+      "html": "<span class=\"ds-leitura\"><span class=\"ds-medidor\" aria-hidden=\"true\"><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-leitura__traco\" aria-hidden=\"true\"></span><span class=\"ds-selo\"><span class=\"ds-selo__cunha\" aria-hidden=\"true\"></span>5 vagas de fundador · 25% off · restam 5</span></span>",
+      "css": ".ds-selo{--c:7px;--esp:1px;position:relative;isolation:isolate}.ds-selo::before,.ds-selo::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-selo::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-selo::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-leitura{display:inline-flex;align-items:center;gap:12px;flex-wrap:wrap}.ds-leitura__traco{width:24px;height:1px;background:var(--line,#2E3946)}.ds-medidor{--alt:8px;display:inline-flex;gap:3px}.ds-medidor i{width:18px;height:var(--alt);background:var(--accent,#35D5E8);filter:drop-shadow(0 0 6px var(--brilho,rgb(53 213 232 / 0.22)));clip-path:polygon(var(--alt) 0,100% 0,calc(100% - var(--alt)) 100%,0 100%)}.ds-selo{--cb:var(--line-forte,#4A5768);--cf:var(--surface,#0B0F14);display:inline-flex;align-items:center;gap:10px;min-height:32px;padding:6px 14px 6px 12px;font:500 0.75rem/1.3 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.05em;text-transform:uppercase;white-space:nowrap;color:var(--ink,#D6DDE6)}.ds-selo__cunha{width:12px;height:8px;flex:none;background:var(--accent,#35D5E8);clip-path:polygon(0 0,50% 0,100% 100%,50% 100%)}"
+    },
+    {
+      "name": "Medidor de vagas (três leituras)",
+      "kind": "custom",
+      "refersTo": "medidor-segmento",
+      "description": "Aceso (N vagas em ciano), zerado (cheio em linha) e sem leitura (vazado, contorno de 1 px em linha forte).",
+      "html": "<div class=\"ds-medidores\" aria-hidden=\"true\"><span class=\"ds-med\" data-n=\"3\"><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-med\"><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-med ds-med--vazado\"><i></i><i></i><i></i><i></i><i></i></span></div>",
+      "css": ".ds-medidores{display:grid;gap:16px;justify-items:start}.ds-med{--alt:18px;display:inline-flex;gap:6px}.ds-med i{width:44px;height:var(--alt);background:var(--line,#2E3946);clip-path:polygon(evenodd,var(--alt) 0,100% 0,calc(100% - var(--alt)) 100%,0 100%,var(--alt) 0,50% 50%,50% 50%,50% 50%,50% 50%,50% 50%);transition:clip-path 400ms cubic-bezier(0.16,1,0.3,1),background-color 240ms cubic-bezier(0.16,1,0.3,1)}.ds-med[data-n=\"3\"] i:nth-child(-n+3){background:var(--accent,#35D5E8);filter:drop-shadow(0 0 6px var(--brilho,rgb(53 213 232 / 0.22)))}.ds-med--vazado i{background:var(--line-forte,#4A5768);clip-path:polygon(evenodd,var(--alt) 0,100% 0,calc(100% - var(--alt)) 100%,0 100%,var(--alt) 0,calc(var(--alt) + 0.414px) 1px,calc(100% - 2.414px) 1px,calc(100% - var(--alt) - 0.414px) calc(100% - 1px),2.414px calc(100% - 1px),calc(var(--alt) + 0.414px) 1px)}"
+    },
+    {
+      "name": "Camada do circuito",
+      "kind": "card",
+      "refersTo": "no-circuito",
+      "description": "Nó chanfrado numerado em mono, haste em 90° e módulo rebaixado com chanfro de 12 px: a unidade do circuito do Método.",
+      "html": "<div class=\"ds-camada\"><span class=\"ds-camada__no\">01</span><div class=\"ds-camada__modulo\"><h3>Copy que responde antes da pergunta</h3><p>Os textos são escritos para quebrar as dúvidas e objeções do seu cliente. Você não precisa escrever nada.</p></div></div>",
+      "css": ".ds-camada__no{--c:8px;--esp:1px;position:relative;isolation:isolate}.ds-camada__no::before,.ds-camada__no::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-camada__no::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-camada__no::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-camada__modulo{--c:12px;--esp:1px;position:relative;isolation:isolate}.ds-camada__modulo::before,.ds-camada__modulo::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-camada__modulo::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-camada__modulo::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-camada{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);column-gap:12px;align-items:start;max-width:520px}.ds-camada::before{content:\"\";position:absolute;top:18px;left:36px;width:12px;height:1px;background:var(--line-forte,#4A5768)}.ds-camada__no{--cb:var(--line-forte,#4A5768);--cf:var(--surface,#0B0F14);display:grid;place-items:center;width:36px;height:36px;font:500 0.75rem/1 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.04em;color:var(--ink-strong,#F2F5F8);font-variant-numeric:tabular-nums}.ds-camada__modulo{--cb:var(--line,#2E3946);--cf:var(--surface-sunken,#080B0F);display:grid;gap:8px;padding:16px}.ds-camada__modulo h3{margin:0;font:500 1.25rem/1.3 \"Space Grotesk\",system-ui,sans-serif;letter-spacing:-0.01em;color:var(--ink-strong,#F2F5F8)}.ds-camada__modulo p{margin:0;font:400 1rem/1.6 \"Inter\",system-ui,sans-serif;color:var(--ink-muted,#8A96A6)}"
+    },
+    {
+      "name": "Módulo em destaque (plano)",
+      "kind": "card",
+      "refersTo": "modulo-grafite",
+      "description": "O destaque do bloco: grafite, borda ciano, selo RECOMENDADO preso na borda, preço como leitura e o único botão preenchido.",
+      "html": "<article class=\"ds-plano\"><span class=\"ds-plano__selo\">RECOMENDADO</span><h3 class=\"ds-plano__nome\">Plano Performance</h3><p class=\"ds-plano__preco\"><s>R$ 2.497</s><strong><span>R$</span> 1.873</strong><span class=\"ds-plano__legenda\">preço de fundador</span></p></article>",
+      "css": ".ds-plano{--c:20px;--esp:1px;position:relative;isolation:isolate}.ds-plano::before,.ds-plano::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-plano::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-plano::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-plano__selo{--c:6px;--esp:1px;position:relative;isolation:isolate}.ds-plano__selo::before,.ds-plano__selo::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-plano__selo::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-plano__selo::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-plano{--cb:var(--accent,#35D5E8);--cf:var(--surface-raised,#202833);display:grid;gap:16px;max-width:360px;padding:36px 24px 24px;color:var(--ink,#D6DDE6)}.ds-plano__selo{--cb:var(--accent,#35D5E8);--cf:var(--accent,#35D5E8);position:absolute;top:0;left:32px;translate:0 -50%;min-height:26px;display:inline-flex;align-items:center;padding:4px 12px;font:500 0.75rem/1.3 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.16em;text-transform:uppercase;color:var(--on-accent,#0B0F14)}.ds-plano__nome{margin:0;font:500 0.75rem/1.3 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink,#D6DDE6)}.ds-plano__preco{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}.ds-plano__preco s{font:400 0.875rem/1.4 \"JetBrains Mono\",ui-monospace,monospace;color:var(--ink-muted,#8A96A6)}.ds-plano__preco strong{flex-basis:100%;font:600 3.125rem/1 \"Space Grotesk\",system-ui,sans-serif;letter-spacing:-0.03em;color:var(--ink-strong,#F2F5F8);font-variant-numeric:tabular-nums}.ds-plano__preco strong span{font-size:0.5em;font-weight:500;letter-spacing:0;color:var(--ink,#D6DDE6)}.ds-plano__legenda{flex-basis:100%;font:500 0.75rem/1.3 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-muted,#8A96A6)}"
+    },
+    {
+      "name": "Navegação do topo",
+      "kind": "nav",
+      "refersTo": "topo",
+      "description": "Topo fixo de vidro escuro: links em Inter 500 com sublinhado ciano de 1 px que corre da esquerda, divisória vertical e o WhatsApp sempre à vista.",
+      "html": "<header class=\"ds-topo\"><nav><a href=\"#\">Método</a><a href=\"#\">Projetos</a><a href=\"#\" aria-current=\"page\">Planos</a><a href=\"#\">Quem sou</a><a href=\"#\">Dúvidas</a></nav><span class=\"ds-topo__div\" aria-hidden=\"true\"></span><a class=\"ds-topo__zap\" href=\"#\">Falar no WhatsApp <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4 4.5h16v11.5H11l-5 4v-4H4z M8 8.75h8 M8 11.75h5\"/></svg></a></header>",
+      "css": ".ds-topo__zap{--c:12px;--esp:1px;position:relative;isolation:isolate}.ds-topo__zap::before,.ds-topo__zap::after{content:\"\";position:absolute;z-index:-1;pointer-events:none}.ds-topo__zap::before{inset:0;background:var(--cb);clip-path:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c))}.ds-topo__zap::after{--ci:calc(var(--c) - var(--esp) * 0.586);inset:var(--esp);background:var(--cf);clip-path:polygon(var(--ci) 0,100% 0,100% calc(100% - var(--ci)),calc(100% - var(--ci)) 100%,0 100%,0 var(--ci))}.ds-topo{display:flex;align-items:center;gap:24px;min-height:71px;padding:0 24px;background:color-mix(in srgb,var(--surface,#0B0F14) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line,#2E3946)}.ds-topo nav{display:flex;gap:24px;margin-left:auto}.ds-topo nav a{display:inline-flex;align-items:center;min-height:44px;font:500 0.9375rem/1 \"Inter\",system-ui,sans-serif;color:var(--ink,#D6DDE6);text-decoration:none;background:linear-gradient(var(--accent,#35D5E8),var(--accent,#35D5E8)) left calc(50% + 0.75em)/0 1px no-repeat;transition:color 240ms cubic-bezier(0.16,1,0.3,1),background-size 240ms cubic-bezier(0.16,1,0.3,1)}.ds-topo nav a:hover,.ds-topo nav a[aria-current=\"page\"]{color:var(--ink-strong,#F2F5F8);background-size:100% 1px}.ds-topo nav a:focus-visible{outline:2px solid var(--accent,#35D5E8);outline-offset:3px}.ds-topo__zap{--cb:var(--line-forte,#4A5768);--cf:var(--surface,#0B0F14);display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-left:8px;padding:0 16px 0 18px;font:600 0.9375rem/1.2 \"Inter\",system-ui,sans-serif;color:var(--ink-strong,#F2F5F8);text-decoration:none}.ds-topo__div{width:1px;height:24px;flex:none;margin-left:8px;background:var(--line,#2E3946)}.ds-topo__zap:hover{--cb:var(--accent,#35D5E8)}.ds-topo__zap:focus-visible{outline:2px solid var(--accent,#35D5E8);outline-offset:4px}"
+    },
+    {
+      "name": "Rótulo técnico da copy",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Traço de 14 px em 45° e o rótulo da copy em mono caixa alta; só onde a copy oficial tem um.",
+      "html": "<p class=\"ds-rotulo\"><span aria-hidden=\"true\"></span>O método</p>",
+      "css": ".ds-rotulo{display:inline-flex;align-items:center;gap:10px;margin:0;font:500 0.75rem/1.3 \"JetBrains Mono\",ui-monospace,monospace;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-muted,#8A96A6)}.ds-rotulo span{width:14px;height:1px;flex:none;background:currentColor;rotate:-45deg}"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Painel em Operação",
+    "overview": "O site é o painel de um sistema que já está ligado. O fundo é preto profundo; por cima, uma grade fina de 32 px na cor das linhas que se dissolve nas bordas. O conteúdo mora em módulos de borda 1 px com canto chanfrado em 45°, os dados aparecem como leituras em JetBrains Mono com números tabulares, e cada bloco tem um único ponto de luz em ciano. Nenhum traço é enfeite: cada linha é trilho, régua, divisória ou leitura, e o que acende acende uma vez e para.\n\nA densidade é calma e medida. O desenho nasce no celular (390 px) e abre para uma grade de 12 colunas no computador, com divisões assimétricas (7/5, 5/7, 4/8) em vez de colunas iguais. Títulos em Space Grotesk, texto corrido em Inter, dados e rótulos em mono. O escuro é o padrão; duas seções claras dão ritmo à página e faixas um passo acima do preto marcam prova, pessoa e fechamento.\n\nO sistema recusa o hero centralizado sobre uma fileira de cartões iguais, os cantos arredondados, a sombra cinza embaixo de cartão, o ciano elétrico como texto sobre fundo claro, o aparelho desenhado em volta de uma tela e o avatar falso. Listas viram registros, placas, trilhos e circuitos.",
+    "keyCharacteristics": [
+      "Preto profundo dominante, com profundidade feita de tom e de linha, não de sombra.",
+      "Módulos de borda 1 px com chanfro em 45° nos cantos superior esquerdo e inferior direito; nenhum raio.",
+      "Leituras em JetBrains Mono, caixa alta e números tabulares, só para dados e rótulos da copy.",
+      "Um só destaque ciano por bloco: botão preenchido, borda do módulo em destaque, nó de destino ou cunha acesa.",
+      "A cunha em 45° (o núcleo do símbolo) no lugar de marcador, asterisco e avatar.",
+      "O medidor de vagas: cinco paralelogramos acesos, ligados ao estado real do contador.",
+      "Movimento que liga uma vez e para; nada em laço sem motivo e sem jeito de parar."
+    ],
+    "rules": [
+      {
+        "name": "A Regra do Ciano Único",
+        "body": "Cada bloco tem um só destaque ciano: o botão preenchido, ou a borda do módulo em destaque, ou o nó de destino, ou a cunha acesa, ou a frase-chave de uma conta. Links de texto dentro de um bloco que já tem destaque ficam em tinta forte com sublinhado em linha forte. A única luz que pode acender junto com o destaque é a leitura do medidor de vagas (e a cunha do selo dele), porque é dado ao vivo e não ênfase.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Ciano Profundo",
+        "body": "Em seção clara, o destaque é o ciano profundo. Ciano elétrico nunca é texto, traço fino ou borda sobre fundo claro: lá ele dá 1,65:1.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra das Três Tintas",
+        "body": "Texto tem três degraus: tinta forte para títulos, números e o que importa; prata fria para o corpo; tinta apagada para o secundário. Ênfase dentro de uma frase sobe um degrau de tinta e vai a peso 600; não muda de cor.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Mono como Instrumento",
+        "body": "JetBrains Mono só para dados e rótulos: preços, valores, prazos, números dos nós e etapas, rótulos da copy, microcopy de leitura e nomes de plano. Nunca para frases de argumento. Todo número que muda ou se compara leva números tabulares.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Rótulo que Vem da Copy",
+        "body": "O rótulo técnico (um traço de 14 px em 45° seguido do texto em mono caixa alta) só existe onde a copy oficial tem um: O MÉTODO, PROJETOS, PLANOS, PROCESSO, QUEM FAZ e o rótulo do resultado do gerador. Nenhuma seção ganha rótulo para enfeitar o título.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Ritmo de Tons",
+        "body": "O escuro é o padrão. Seção clara é rara e nunca vem colada em outra clara: na home são só a Proposta (§5) e a Garantia (§12). A faixa elevada marca prova, pessoa e fechamento: Projetos (§8), Sobre (§13) e CTA final (§16). O rodapé desce para o fundo rebaixado.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra da Luz, Não Sombra",
+        "body": "Módulos não projetam sombra. A única luz é o halo do ciano, e ela só existe em volta do destaque do bloco, da leitura das vagas ou, parada, atrás da headline do hero. A única sombra escura é a do painel do menu.",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra dos Três Ângulos",
+        "body": "Todo traço, corte e ícone usa 0°, 45° ou 90°. Se uma forma pede curva ou raio, ela não é deste sistema.",
+        "section": "shapes"
+      },
+      {
+        "name": "A Regra do Liga e Para",
+        "body": "Todo efeito roda uma vez e para em menos de 5 s. Só corre sem parar o que mostra espera real (o feixe contínuo e o giro do botão carregando) ou o vídeo do case, que para fora da tela e tem botão de pausa.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "**Faça** cada módulo com borda de 1 px e chanfro em 45° (8, 12 ou 20 px) por camadas de fundo, para o conteúdo e o foco nunca serem cortados.",
+      "**Faça** um só destaque ciano por bloco; na seção clara, troque para o ciano profundo (#0B7C8C).",
+      "**Faça** a profundidade com os quatro fundos (rebaixado, preto, faixa elevada, grafite) e com a borda subindo de linha para linha forte.",
+      "**Faça** dados em JetBrains Mono com números tabulares: preços, prazos, vagas, números de nó e rótulos da copy.",
+      "**Faça** a cunha em 45° onde caberia um marcador, um asterisco ou um avatar.",
+      "**Faça** o medidor de vagas com os três estados (aceso, zerado, vazado) e todas as variantes de texto no HTML, para a página não pular quando o contador responde.",
+      "**Faça** contraste de pelo menos 4,5:1 no texto e 3:1 nas bordas de campo, nos dois temas; tinta apagada é o degrau mais fraco permitido para texto (6,40:1 no preto, 4,95:1 no grafite).",
+      "**Faça** foco visível em todo controle: contorno de 2 px no ciano a 3 px (4 px nos botões).",
+      "**Faça** área de toque de pelo menos 44 px (botões com 52 px, linhas do acordeão com 64 px).",
+      "**Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline sem decifra, nenhum feixe e o vídeo parado na capa.",
+      "**Faça** erros com ícone e texto, ligados ao campo e anunciados; nunca só a cor.",
+      "**Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real no título enquanto ele se decifra.",
+      "**Faça** tudo funcionar sem JavaScript: entradas visíveis, circuito aceso, menu com os links abertos abaixo da barra, formulários com envio por POST."
+    ],
+    "donts": [
+      "**Não use** raio de borda, pílula ou cantos arredondados em nada, nem na caixa de consentimento.",
+      "**Não use** ciano elétrico como texto, traço fino ou borda sobre fundo claro.",
+      "**Não ponha** dois destaques ciano no mesmo bloco; o medidor de vagas aceso é leitura, não segundo destaque, e nenhuma outra peça ganha essa exceção.",
+      "**Não ponha** sombra cinza embaixo de módulo; a única luz é o halo do ciano, e a única sombra escura é a do painel do menu.",
+      "**Não monte** fileiras de cartões iguais nem hero centralizado sobre elas; listas viram registro, placa, trilho ou circuito.",
+      "**Não use** mono para frase de argumento, nem invente rótulo técnico onde a copy não tem.",
+      "**Não deixe** nada em laço sem motivo: efeito sem espera real roda uma vez e para.",
+      "**Não anime** entrada fora dos blocos de prova e de sequência, nem esconda o que já está na tela ao carregar.",
+      "**Não decifre** outro texto além da headline do hero.",
+      "**Não desenhe** aparelho em volta da tela do case nem avatar falso no depoimento.",
+      "**Não aplique** efeito no logo: só tamanho.",
+      "**Não use** curva ou ângulo fora de 0°, 45° e 90° em traço, corte ou ícone.",
+      "**Não use** fonte abaixo de 16 px em campos de formulário."
+    ]
+  }
+}
