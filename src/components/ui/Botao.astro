@@ -120,4 +120,9 @@ const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "bo
   }
   .botao:disabled :global(.botao__icone),
   .botao[aria-disabled="true"] :global(.botao__icone) { translate: none; }
+
+  /* Alto contraste do Windows: a moldura chanfrada some com os fundos; a borda real fica no lugar */
+  @media (forced-colors: active) {
+    .botao { border: 1px solid ButtonText; }
+  }
 </style>

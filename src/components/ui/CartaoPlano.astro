@@ -50,7 +50,7 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
   data-plano={plano.id}
   data-feixe={destaque ? "" : undefined}
 >
-  {destaque && <span class="plano__brilho" aria-hidden="true"></span>}
+  {destaque && <span class="plano__brilho" aria-hidden="true"><span class="plano__brilho-luz"></span></span>}
   {destaque && <Selo tipo="recomendado" class="plano__selo" />}
 
   <div class="plano__corpo">
@@ -173,18 +173,25 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
 
   /*
     Brilho do Performance: o recorte chanfrado em --brilho, desfocado e um pouco abaixo, atrás das
-    camadas de borda e fundo. Fica parado numa camada própria; o feixe anima por cima sem tocar nele.
+    camadas de borda e fundo. Três níveis, cada um com um papel:
+    - .plano__brilho: camada própria e parada (will-change), que o feixe animado não invalida;
+    - .plano__brilho-luz: o desfoque, pintado uma vez dentro dessa camada (e não refeito a cada quadro);
+    - ::before: o recorte chanfrado na cor do brilho.
   */
   .plano__brilho {
     position: absolute;
     inset: 0;
     z-index: -2;
     pointer-events: none;
+    will-change: transform;
+  }
+  .plano__brilho-luz {
+    position: absolute;
+    inset: 0;
     translate: 0 16px;
     filter: blur(40px); /* mesmo desfoque do drop-shadow(0 16px 40px) de antes, medido em pixel */
-    will-change: transform; /* camada própria: o feixe não refaz o desfoque a cada quadro */
   }
-  .plano__brilho::before {
+  .plano__brilho-luz::before {
     content: "";
     position: absolute;
     inset: 0;

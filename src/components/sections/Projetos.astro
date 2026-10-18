@@ -14,6 +14,7 @@ import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
 import Botao from "../ui/Botao.astro";
 import MedidorVagas from "../ui/MedidorVagas.astro";
+import Icone from "../ui/Icone.astro";
 import Depoimento from "../ui/Depoimento.astro";
 import capaEben from "../../assets/cases/eben/site-eben-capa.jpg";
 import { projetos } from "../../content/home";
@@ -43,6 +44,7 @@ const { eben, fundador } = projetos;
               A capa fica atrás do vídeo e só carrega perto da tela (lazy, no tamanho certo);
               o vídeo (preload="none") só baixa quando o script manda tocar.
             */}
+            <div class="projetos-tela-area">
             <div class="projetos-tela" aria-hidden="true">
               <Image
                 class="projetos-tela__capa"
@@ -64,13 +66,27 @@ const { eben, fundador } = projetos;
                 playsinline
                 preload="none"
                 disablepictureinpicture
-                disableremoteplayback
+                disableRemotePlayback
                 aria-hidden="true"
                 data-tela-video
               >
                 <source src="/videos/eben/site-eben.webm" type="video/webm; codecs=av01.0.05M.08" />
                 <source src="/videos/eben/site-eben.mp4" type="video/mp4" />
               </video>
+            </div>
+              {/* Pausar e tocar (WCAG 2.2.2): só aparece quando o vídeo começa a tocar */}
+              <button
+                type="button"
+                class="projetos-tela__controle chanfrado"
+                aria-label={eben.videoPausar}
+                data-tela-controle
+                data-rotulo-pausar={eben.videoPausar}
+                data-rotulo-tocar={eben.videoTocar}
+                hidden
+              >
+                <Icone nome="pausar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--pausar" />
+                <Icone nome="tocar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--tocar" />
+              </button>
             </div>
 
             <div class="projetos-ficha__cabeca">
@@ -126,12 +142,45 @@ const { eben, fundador } = projetos;
     const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
     const conexao = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
     const visiveis = new Set<HTMLVideoElement>();
+    // Quem pausou pelo botão decide: o vídeo não volta a tocar sozinho ao reaparecer na tela
+    const pausadosPeloVisitante = new Set<HTMLVideoElement>();
     const PARTE_VISIVEL = 0.4;
 
+    function controleDe(video: HTMLVideoElement) {
+      return video.closest(".projetos-tela-area")?.querySelector<HTMLButtonElement>("[data-tela-controle]") ?? null;
+    }
+
+    function marcarControle(video: HTMLVideoElement) {
+      const controle = controleDe(video);
+      if (!controle) return;
+      const tocando = !video.paused;
+      controle.dataset.estado = tocando ? "tocando" : "pausado";
+      controle.setAttribute("aria-label", (tocando ? controle.dataset.rotuloPausar : controle.dataset.rotuloTocar) ?? "");
+    }
+
     function atualizar(video: HTMLVideoElement) {
-      const tocar = visiveis.has(video) && !semMovimento.matches && !conexao?.saveData && !document.hidden;
+      const tocar =
+        visiveis.has(video) && !pausadosPeloVisitante.has(video) && !semMovimento.matches && !conexao?.saveData && !document.hidden;
       if (tocar) video.play().catch(() => {});
       else if (!video.paused) video.pause();
+    }
+
+    for (const video of videos) {
+      const controle = controleDe(video);
+      video.addEventListener("playing", () => {
+        if (controle) controle.hidden = false;
+        marcarControle(video);
+      });
+      video.addEventListener("pause", () => marcarControle(video));
+      controle?.addEventListener("click", () => {
+        if (video.paused) {
+          pausadosPeloVisitante.delete(video);
+          video.play().catch(() => {});
+        } else {
+          pausadosPeloVisitante.add(video);
+          video.pause();
+        }
+      });
     }
 
     if (videos.length && "IntersectionObserver" in window) {
@@ -190,7 +239,7 @@ const { eben, fundador } = projetos;
     container: projetos-ficha / inline-size;
     display: grid;
   }
-  .projetos-ficha > :not(.projetos-tela) { padding-inline: var(--pad); }
+  .projetos-ficha > :not(.projetos-tela-area) { padding-inline: var(--pad); }
 
   /*
     A tela: o vídeo vai de ponta a ponta dentro da borda do módulo e herda o chanfro de cima
@@ -215,6 +264,33 @@ const { eben, fundador } = projetos;
     object-fit: cover;
     pointer-events: none;
   }
+  .projetos-tela-area { position: relative; }
+
+  /* Pausar e tocar: quadrado chanfrado de 44 px no canto da tela, neutro (o ciano do bloco é o botão do fundador) */
+  .projetos-tela__controle {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: color-mix(in srgb, var(--surface-sunken) 82%, transparent);
+    position: absolute;
+    right: var(--s-3);
+    bottom: var(--s-3);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-strong);
+    cursor: pointer;
+  }
+  .projetos-tela__controle[hidden] { display: none; }
+  .projetos-tela__controle:hover { --cor-borda: var(--ink-muted); }
+  .projetos-tela__controle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .projetos-tela__controle :global(.projetos-tela__icone) { grid-area: 1 / 1; }
+  .projetos-tela__controle:not([data-estado="pausado"]) :global(.projetos-tela__icone--tocar),
+  .projetos-tela__controle[data-estado="pausado"] :global(.projetos-tela__icone--pausar) { display: none; }
+
   /* iOS em modo de economia recusa o play() e desenharia um botão de play por cima: some com ele */
   .projetos-tela__video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
 
@@ -340,9 +416,10 @@ const { eben, fundador } = projetos;
       grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       align-items: start;
     }
+    /* Coluna de 5/12: o mesmo recuo da voz empilhada, para o texto não ficar estreito demais */
     .projetos-case__voz {
       --traco-x: var(--s-6);
-      --recuo: calc(var(--s-6) + var(--s-7));
+      --recuo: calc(var(--s-6) + var(--s-6));
       padding-top: var(--s-6);
     }
   }

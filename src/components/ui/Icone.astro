@@ -1,7 +1,7 @@
 ---
 // Ícones lineares da marca: traço único, pontas retas, ângulos de 0°, 45° e 90°.
 interface Props {
-  nome: "whatsapp" | "seta" | "seta-baixo" | "check" | "alerta" | "externo" | "menu" | "fechar" | "mais" | "instagram" | "facebook";
+  nome: "whatsapp" | "seta" | "seta-baixo" | "check" | "alerta" | "externo" | "menu" | "fechar" | "mais" | "instagram" | "facebook" | "pausar" | "tocar";
   tamanho?: number;
   class?: string;
 }
@@ -17,6 +17,8 @@ const caminhos: Record<Props["nome"], string> = {
   fechar: "M6 6l12 12 M18 6L6 18",
   mais: "M12 5v14 M5 12h14",
   instagram: "M7.5 3.5h9l4 4v9l-4 4h-9l-4-4v-9z M12 8.5a3.5 3.5 0 1 0 0.01 0z M16.75 6.75v0.5",
+  pausar: "M8.5 5.5v13 M15.5 5.5v13",
+  tocar: "M7.5 5l11 7-11 7z",
   facebook: "M14.5 3.5h3v3.5h-2.5v3h2.5v3.5h-2.5v7h-3.5v-7H9.5V10h2V6.5z",
 };
 ---
