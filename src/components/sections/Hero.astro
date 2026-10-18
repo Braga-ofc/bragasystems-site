@@ -3,7 +3,9 @@
   Hero (copy §2): a oferta numa frase, as vagas contadas de verdade e o WhatsApp a um toque.
   Vive dentro da .abertura (src/pages/index.astro), que cuida da largura, da grade e do respiro.
   Linha de leitura: medidor das 5 vagas ligado ao selo por um traço fino.
-  A headline se decifra uma vez ao carregar (scripts/decifra.ts).
+  A headline surge palavra por palavra, saindo do desfoque, uma vez ao carregar: Blur Text do
+  React Bits (MIT + Commons Clause), recriado em CSS puro. As palavras são separadas no build; o
+  leitor de tela lê a frase inteira num texto oculto, sem as palavras soltas.
 */
 import Botao from "../ui/Botao.astro";
 import Selo from "../ui/Selo.astro";
@@ -16,6 +18,7 @@ interface Props {
   vagas: number;
 }
 const { vagas } = Astro.props;
+const palavras = hero.titulo.split(" ");
 ---
 <section id="inicio" class="hero" aria-labelledby="hero-titulo">
   <div class="hero__leitura">
@@ -24,7 +27,14 @@ const { vagas } = Astro.props;
     <Selo tipo="vagas" estado="auto" vagas={vagas} class="hero__selo" />
   </div>
 
-  <h1 id="hero-titulo" class="hero__titulo" data-decifra>{hero.titulo}</h1>
+  <h1 id="hero-titulo" class="hero__titulo">
+    <span class="sr-only">{hero.titulo}</span>
+    <span aria-hidden="true">
+      {palavras.map((p, i) => (
+        <Fragment><span class="hero__palavra" style={`--i: ${i}`}>{p}</span>{i < palavras.length - 1 && " "}</Fragment>
+      ))}
+    </span>
+  </h1>
   <p class="hero__subtitulo">{hero.subtitulo}</p>
 
   <div class="hero__acoes">
@@ -36,10 +46,6 @@ const { vagas } = Astro.props;
     {hero.microcopy.map((frase) => <li>{frase}</li>)}
   </ul>
 </section>
-
-<script>
-  import "../../scripts/decifra";
-</script>
 
 <style>
   .hero {
@@ -101,10 +107,19 @@ const { vagas } = Astro.props;
     letter-spacing: -0.03em;
     color: var(--ink-strong);
   }
-  /* Letras criadas pelo decifra.ts enquanto a headline se resolve */
-  .hero__titulo :global(.decifra__palavra) { white-space: nowrap; }
-  .hero__titulo :global(.decifra__letra) { display: inline-block; text-align: center; }
-  .hero__titulo :global(.decifra__letra[data-cifrada]) { color: var(--ink-muted); }
+  /* Palavra por palavra: sobe 0,35 em, sai do desfoque e acende, 70 ms depois da anterior */
+  .hero__palavra { display: inline-block; }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__palavra {
+      animation: hero-palavra 760ms var(--ease-saida) both;
+      animation-delay: calc(80ms + var(--i) * 70ms);
+    }
+  }
+  @keyframes hero-palavra {
+    from { opacity: 0; filter: blur(12px); translate: 0 0.35em; }
+    60% { filter: blur(0); }
+    to { opacity: 1; filter: blur(0); translate: 0 0; }
+  }
 
   .hero__subtitulo {
     margin-top: var(--s-5);

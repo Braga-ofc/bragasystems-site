@@ -192,7 +192,7 @@ components:
 
 **Creative North Star: "O Painel em Operação"**
 
-O site é o painel de um sistema que já está ligado. O fundo é preto profundo; por cima, uma grade fina de 32 px na cor das linhas que se dissolve nas bordas. O conteúdo mora em módulos de borda 1 px com canto chanfrado em 45°, os dados aparecem como leituras em JetBrains Mono com números tabulares, e cada bloco tem um único ponto de luz em ciano. Nenhum traço é enfeite: cada linha é trilho, régua, divisória ou leitura, e o que acende acende uma vez e para.
+O site é o painel de um sistema que já está ligado. O fundo é preto profundo; por cima, uma grade fina de 32 px na cor das linhas que se dissolve nas bordas (na primeira dobra, uma grade de pontos que se curva na direção do mouse, sobre uma névoa de luz). O conteúdo mora em módulos de borda 1 px com canto chanfrado em 45°, os dados aparecem como leituras em JetBrains Mono com números tabulares, e cada bloco tem um único ponto de luz em ciano. Nenhum traço é enfeite: cada linha é trilho, régua, divisória ou leitura, e o que acende acende uma vez e para.
 
 A densidade é calma e medida. O desenho nasce no celular (390 px) e abre para uma grade de 12 colunas no computador, com divisões assimétricas (7/5, 5/7, 4/8) em vez de colunas iguais. Títulos em Space Grotesk, texto corrido em Inter, dados e rótulos em mono. O escuro é o padrão; duas seções claras dão ritmo à página e faixas um passo acima do preto marcam prova, pessoa e fechamento.
 
@@ -375,7 +375,10 @@ No PS, o retrato de quem assina aparece como presença apagada: tons de cinza (c
 Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms para entradas) e uma curva de saída, cubic-bezier(0.16, 1, 0.3, 1). Botões e controles chanfrados descem 1 px ao toque.
 - **Feixe:** uma luz em ciano forte percorre a borda chanfrada. Dá uma volta em 3,2 s e para no plano Performance quando ele entra na tela. Corre sem parar (2,4 s por volta) só enquanto o sistema espera uma resposta: no console ao gerar e no formulário do CTA ao enviar; desliga quando a resposta chega.
 - **Circuito do Método:** acende uma vez, em dois tempos. Quando o circuito entra na tela, o trilho desce (700 ms), as hastes abrem em escada e um pulso de luz corre de 01 a 04 (1 s), piscando cada nó. Quando o nó do WhatsApp entra na tela, a dobra e a linha se desenham, a luz corre até ele e ele acende (cerca de 1,5 s). Quem chega direto em #metodo já encontra tudo aceso.
-- **Decifra:** só a headline do hero, uma vez ao carregar. As letras embaralham com símbolos de largura parecida e se resolvem da esquerda para a direita em cerca de 700 ms; as cifradas ficam em tinta apagada e nada muda de lugar.
+- **Headline palavra por palavra:** só a headline do hero, uma vez ao carregar, em CSS puro. Cada palavra sobe 0,35 em, sai de um desfoque de 12 px e acende em 760 ms, 70 ms depois da anterior (cerca de 1,5 s no total). O leitor de tela lê a frase inteira num texto oculto.
+- **Névoa:** luz viva em grafite e ciano atrás da grade da primeira dobra, em WebGL, meia resolução e 30 qps; para fora da tela. Quadro parado com movimento reduzido; brilho parado em CSS sem placa de vídeo.
+- **Grade cinética:** a grade da primeira dobra é de pontos a cada 32 px; com mouse, os pontos se curvam na direção do cursor (alcance de 130 px), crescem e esquentam para o ciano, e voltam ao lugar quando ele sai. Parada no toque e com movimento reduzido.
+- **Brilho de CTA:** nos botões primários e no "Falar no WhatsApp" do topo, uma luz corre a borda chanfrada e uma faixa atravessa o botão: 2 voltas em 4,8 s quando ele aparece, e sem parar só com o mouse em cima ou o foco do teclado, quando acende também uma trama de pontos.
 - **Entradas ao rolar:** opacidade, 14 px de subida e desfoque de 6 px em 400 ms, só no que ainda está abaixo da tela e só em blocos de prova e de sequência: na home, o case e o cartão de fundador (§8), as etapas e a conta do Processo (§10) e a lista de objeções (§11).
 - **Medidor ligando:** no carregamento, e de novo uma vez quando a janela da Urgência entra na tela.
 - **Console:** cada zona nova entra com 6 px de subida e desfoque de 4 px; a headline gerada se digita no lugar.
@@ -396,9 +399,9 @@ Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms
 - **Faça** contraste de pelo menos 4,5:1 no texto e 3:1 nas bordas de campo, nos dois temas; tinta apagada é o degrau mais fraco permitido para texto (6,40:1 no preto, 4,95:1 no grafite).
 - **Faça** foco visível em todo controle: contorno de 2 px no ciano a 3 px (4 px nos botões).
 - **Faça** área de toque de pelo menos 44 px (botões com 52 px, linhas do acordeão com 64 px).
-- **Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline sem decifra, nenhum feixe e o vídeo parado na capa.
+- **Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline já inteira, a grade parada, os botões sem brilho correndo, nenhum feixe e o vídeo parado na capa.
 - **Faça** erros com ícone e texto, ligados ao campo e anunciados; nunca só a cor.
-- **Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real no título enquanto ele se decifra.
+- **Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real do título num texto oculto, com as palavras animadas escondidas do leitor de tela.
 - **Faça** tudo funcionar sem JavaScript: entradas visíveis, circuito aceso, menu com os links abertos abaixo da barra, formulários com envio por POST.
 
 ### Don't:
@@ -410,7 +413,7 @@ Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms
 - **Não use** mono para frase de argumento, nem invente rótulo técnico onde a copy não tem.
 - **Não deixe** nada em laço sem motivo: efeito sem espera real roda uma vez e para.
 - **Não anime** entrada fora dos blocos de prova e de sequência, nem esconda o que já está na tela ao carregar.
-- **Não decifre** outro texto além da headline do hero.
+- **Não anime** outro texto palavra por palavra além da headline do hero.
 - **Não desenhe** aparelho em volta da tela do case nem avatar falso no depoimento.
 - **Não aplique** efeito no logo: só tamanho.
 - **Não use** curva ou ângulo fora de 0°, 45° e 90° em traço, corte ou ícone.

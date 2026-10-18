@@ -481,9 +481,24 @@
         "purpose": "O gesto assinado do Método, uma vez, em dois tempos."
       },
       {
-        "name": "decifra",
-        "value": "~700ms, sorteio a cada 45ms, 90ms todo embaralhado antes da primeira letra",
-        "purpose": "Só a headline do hero, uma vez ao carregar; não roda se ela já está na tela há mais de 400ms ou se a fonte demora mais de 1s."
+        "name": "headline-palavras",
+        "value": "por palavra: opacity 0, blur(12px), translate 0 0.35em → 760ms cubic-bezier(0.16, 1, 0.3, 1); atraso 80ms + 70ms × índice",
+        "purpose": "Só a headline do hero, uma vez ao carregar, em CSS puro."
+      },
+      {
+        "name": "nevoa",
+        "value": "WebGL, ruído simplex em duas camadas, meia resolução, 30 qps; acende em 1200ms",
+        "purpose": "Luz viva atrás da grade da primeira dobra; quadro parado com movimento reduzido, brilho em CSS sem placa de vídeo."
+      },
+      {
+        "name": "grade-cinetica",
+        "value": "pontos a cada 32px; alcance 130px, puxão 0.38, suavização 0.14 por quadro",
+        "purpose": "Só com mouse, na primeira dobra; parada no toque e com movimento reduzido."
+      },
+      {
+        "name": "brilho-cta",
+        "value": "luz cônica na borda 2 voltas em 4.8s + faixa 2.4s ease-in-out ×2; hover: 1.6s sem parar",
+        "purpose": "Botões primários e o WhatsApp do topo; dispara ao aparecer na tela."
       },
       {
         "name": "revela",
@@ -725,9 +740,9 @@
       "**Faça** contraste de pelo menos 4,5:1 no texto e 3:1 nas bordas de campo, nos dois temas; tinta apagada é o degrau mais fraco permitido para texto (6,40:1 no preto, 4,95:1 no grafite).",
       "**Faça** foco visível em todo controle: contorno de 2 px no ciano a 3 px (4 px nos botões).",
       "**Faça** área de toque de pelo menos 44 px (botões com 52 px, linhas do acordeão com 64 px).",
-      "**Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline sem decifra, nenhum feixe e o vídeo parado na capa.",
+      "**Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline já inteira, a grade parada, os botões sem brilho correndo, nenhum feixe e o vídeo parado na capa.",
       "**Faça** erros com ícone e texto, ligados ao campo e anunciados; nunca só a cor.",
-      "**Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real no título enquanto ele se decifra.",
+      "**Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real do título num texto oculto, com as palavras animadas escondidas do leitor de tela.",
       "**Faça** tudo funcionar sem JavaScript: entradas visíveis, circuito aceso, menu com os links abertos abaixo da barra, formulários com envio por POST."
     ],
     "donts": [
@@ -739,7 +754,7 @@
       "**Não use** mono para frase de argumento, nem invente rótulo técnico onde a copy não tem.",
       "**Não deixe** nada em laço sem motivo: efeito sem espera real roda uma vez e para.",
       "**Não anime** entrada fora dos blocos de prova e de sequência, nem esconda o que já está na tela ao carregar.",
-      "**Não decifre** outro texto além da headline do hero.",
+      "**Não anime** outro texto palavra por palavra além da headline do hero.",
       "**Não desenhe** aparelho em volta da tela do case nem avatar falso no depoimento.",
       "**Não aplique** efeito no logo: só tamanho.",
       "**Não use** curva ou ângulo fora de 0°, 45° e 90° em traço, corte ou ícone.",

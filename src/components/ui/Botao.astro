@@ -13,6 +13,11 @@ interface Props {
   novaAba?: boolean;
   /** Origem do clique de WhatsApp (copy §21), usada na medição. */
   origem?: string;
+  /**
+    Brilho de CTA (Shiny Button): borda com luz correndo e faixa de luz atravessando.
+    Ligado por padrão nos primários; o "Falar no WhatsApp" do topo liga no secundário.
+  */
+  brilho?: boolean;
   class?: string;
 }
 
@@ -26,12 +31,14 @@ const {
   larguraTotal = false,
   novaAba = false,
   origem,
+  brilho = variante === "primario",
   class: classe,
 } = Astro.props;
 
 const ehWhatsapp = href?.startsWith("https://wa.me/");
 const abreNovaAba = ehWhatsapp || novaAba;
-const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "botao--cheio", classe];
+const comBrilho = brilho && !desativado && !carregando;
+const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "botao--cheio", comBrilho && "botao--brilho", classe];
 ---
 {href ? (
   <a
@@ -58,6 +65,10 @@ const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "bo
     {carregando ? <span class="botao__giro" aria-hidden="true" /> : icone && <Icone nome={icone} class="botao__icone" />}
   </button>
 )}
+
+<script>
+  import "../../scripts/brilho";
+</script>
 
 <style>
   .botao {
@@ -120,6 +131,67 @@ const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "bo
   }
   .botao:disabled :global(.botao__icone),
   .botao[aria-disabled="true"] :global(.botao__icone) { translate: none; }
+
+  /*
+    Brilho de CTA: Shiny Button (21st.dev, designali-in, MIT) recriado em CSS, dentro da moldura
+    chanfrada. Duas camadas: na borda (::before), uma luz que corre o contorno com um gradiente
+    cônico; no preenchimento (::after), uma faixa de luz que atravessa o botão e, no hover, uma
+    trama de pontos. Ao aparecer na tela (scripts/brilho.ts) dá 2 voltas em 4,8 s e para: nada
+    se mexe sozinho por mais de 5 s. Com o mouse em cima, ou com o foco do teclado, gira sem
+    parar e mais rápido. Com movimento reduzido, fica só a troca de cor de antes.
+  */
+  @property --brilho-angulo { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  @property --brilho-luz { syntax: "<color>"; inherits: false; initial-value: transparent; }
+  @property --brilho-faixa { syntax: "<percentage>"; inherits: false; initial-value: 130%; }
+  @property --brilho-pontos { syntax: "<color>"; inherits: false; initial-value: transparent; }
+
+  .botao--brilho { --espessura: 1.5px; --luz: var(--ink-strong); --faixa: rgb(255 255 255 / 0.38); --pontos: rgb(11 15 20 / 0.09); }
+  .botao--brilho.botao--secundario { --luz: var(--accent); --faixa: rgb(53 213 232 / 0.12); --pontos: rgb(53 213 232 / 0.16); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .botao--brilho::before {
+      background:
+        conic-gradient(from var(--brilho-angulo), transparent 0 62%, var(--brilho-luz) 82%, transparent 92%),
+        var(--cor-borda);
+    }
+    .botao--brilho::after {
+      background:
+        linear-gradient(105deg, transparent 38%, var(--brilho-luz-faixa, transparent) 50%, transparent 62%) var(--brilho-faixa) 0 / 250% 100% no-repeat,
+        radial-gradient(circle at 1px 1px, var(--brilho-pontos) 0.8px, transparent 1.2px) 0 0 / 4px 4px,
+        var(--cor-fundo);
+      transition: --cor-fundo var(--dur) var(--ease-saida), --brilho-pontos var(--dur) var(--ease-saida);
+    }
+
+    /* No secundário, a borda não vira ciano no hover: quem acende é a luz que corre */
+    .botao--brilho.botao--secundario:hover { --cor-borda: var(--line-forte); }
+
+    /* Ao aparecer: 2 voltas na borda e a faixa atravessando em cada uma */
+    .botao--brilho:global(.is-brilhando)::before { animation: brilho-borda 4.8s linear 1; }
+    .botao--brilho:global(.is-brilhando)::after { --brilho-luz-faixa: var(--faixa); animation: brilho-faixa 2.4s ease-in-out 2; }
+
+    /* Mouse em cima ou foco do teclado: sem parar, mais rápido, com os pontos acesos */
+    .botao--brilho:hover::before,
+    .botao--brilho:focus-visible::before { --brilho-luz: var(--luz); animation: brilho-volta 1.6s linear infinite; }
+    .botao--brilho:hover::after,
+    .botao--brilho:focus-visible::after {
+      --brilho-luz-faixa: var(--faixa);
+      --brilho-pontos: var(--pontos);
+      animation: brilho-faixa 1.6s ease-in-out infinite;
+    }
+  }
+  @keyframes brilho-borda {
+    0% { --brilho-angulo: 0deg; --brilho-luz: transparent; }
+    8% { --brilho-luz: var(--luz); }
+    88% { --brilho-luz: var(--luz); }
+    100% { --brilho-angulo: 720deg; --brilho-luz: transparent; }
+  }
+  @keyframes brilho-volta {
+    to { --brilho-angulo: 360deg; }
+  }
+  @keyframes brilho-faixa {
+    from { --brilho-faixa: 130%; }
+    to { --brilho-faixa: -30%; }
+  }
 
   /* Alto contraste do Windows: a moldura chanfrada some com os fundos; a borda real fica no lugar */
   @media (forced-colors: active) {

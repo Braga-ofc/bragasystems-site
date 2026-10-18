@@ -27,6 +27,7 @@ const vagas = vagasBuild ?? vagasMax;
   <main id="conteudo">
     <div class="abertura">
       <canvas class="abertura__nevoa" aria-hidden="true" data-nevoa></canvas>
+      <canvas class="abertura__grade" aria-hidden="true" data-grade-cinetica></canvas>
       <Hero vagas={vagas} />
       <Gerador />
     </div>
@@ -50,6 +51,7 @@ const vagas = vagasBuild ?? vagasMax;
 <script>
   import "../scripts/contador";
   import "../scripts/nevoa";
+  import "../scripts/grade-cinetica";
 </script>
 
 <style>
@@ -71,26 +73,29 @@ const vagas = vagasBuild ?? vagasMax;
   }
 
   /*
-    Grade fina de 32 px na cor das linhas, que se dissolve nas bordas: a mesma do utilitário .grade
-    (Grid Pattern do Magic UI, MIT, recriado em CSS), aqui como camada de fundo para não mascarar o
-    conteúdo. A primeira linha vertical cai na margem do conteúdo e as horizontais no topo dele.
+    Grade de pontos a cada 32 px, que se dissolve nas bordas. Parada, vem deste CSS; com mouse, o
+    canvas da grade cinética (scripts/grade-cinetica.ts) desenha os mesmos pontos e os curva na
+    direção do cursor. A primeira coluna cai na margem do conteúdo e a primeira linha no topo.
   */
-  .abertura::before {
-    content: "";
+  .abertura::before,
+  .abertura__grade {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    --grade-cor: color-mix(in srgb, var(--line) 55%, transparent);
-    background-image:
-      linear-gradient(to right, var(--grade-cor) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grade-cor) 1px, transparent 1px);
-    background-size: 32px 32px;
-    /* Em background-position, 100% desconta a largura do ladrilho: daí os 32px de volta */
-    background-position: max(var(--gutter), (100% - var(--largura-max) + 32px) / 2) 0;
     -webkit-mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
     mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
   }
+  .abertura::before {
+    content: "";
+    background-image: radial-gradient(circle at 0.875px 0.875px, rgb(74 87 104 / 0.85) 0.875px, transparent 1.4px);
+    background-size: 32px 32px;
+    /* Em background-position, 100% desconta a largura do ladrilho: daí os 32px de volta */
+    background-position: max(var(--gutter), (100% - var(--largura-max) + 32px) / 2) 0;
+  }
+  .abertura__grade { width: 100%; height: 100%; }
+  /* O canvas assume: a grade do CSS sai para não dobrar os pontos */
+  .abertura:global(.is-grade-viva)::before { visibility: hidden; }
 
   /*
     Névoa (scripts/nevoa.ts): luz viva atrás da grade, que acende devagar quando o primeiro quadro
@@ -110,8 +115,15 @@ const vagas = vagasBuild ?? vagasMax;
   /* Sem placa de vídeo: o mesmo núcleo de luz, parado, em gradientes */
   .abertura:global(.is-estatica) {
     background:
-      radial-gradient(ellipse 45% 40% at 78% 28%, rgb(11 124 140 / 0.22), transparent 70%),
-      radial-gradient(ellipse 60% 50% at 70% 35%, rgb(32 40 51 / 0.55), transparent 75%);
+      radial-gradient(ellipse 40% 45% at 85% 22%, rgb(11 124 140 / 0.3), transparent 70%),
+      radial-gradient(ellipse 65% 55% at 75% 30%, rgb(32 40 51 / 0.7), transparent 75%);
+  }
+  @media (min-width: 1024px) {
+    .abertura:global(.is-estatica) {
+      background:
+        radial-gradient(ellipse 30% 45% at 56% 40%, rgb(11 124 140 / 0.3), transparent 70%),
+        radial-gradient(ellipse 55% 60% at 58% 40%, rgb(32 40 51 / 0.7), transparent 75%);
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .abertura__nevoa { transition-duration: 1ms; }
@@ -137,7 +149,8 @@ const vagas = vagasBuild ?? vagasMax;
       column-gap: var(--s-5);
       align-items: start;
     }
-    .abertura::before {
+    .abertura::before,
+    .abertura__grade {
       -webkit-mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
       mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
     }

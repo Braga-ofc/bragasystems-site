@@ -56,7 +56,7 @@ void main() {
   float n = snoise(p * 1.7 + q * 0.9 + vec2(t * 0.6, -t * 0.4)) * 0.5 + 0.5;
   float n2 = snoise(p * 3.4 - q * 0.6 + t) * 0.5 + 0.5;
 
-  // Núcleo de luz: atrás do gerador no computador, no alto à direita no celular
+  // Núcleo de luz: no vão entre a oferta e o gerador no computador, no alto à direita no celular
   vec2 foco = u_foco + vec2(sin(t * 2.0), cos(t * 1.6)) * 0.04 * lado;
   vec2 d = (gl_FragCoord.xy - foco) / lado;
   float luz = exp(-dot(d, d) * 2.4);
@@ -101,7 +101,6 @@ function ligarNevoa(tela: HTMLCanvasElement) {
     antialias: false,
     depth: false,
     powerPreference: "low-power",
-    failIfMajorPerformanceCaveat: true,
   });
   const info = gl?.getExtension("WEBGL_debug_renderer_info");
   const placa = gl && info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
@@ -136,7 +135,8 @@ function ligarNevoa(tela: HTMLCanvasElement) {
   // Um ponto qualquer do ruído, para o quadro parado não começar sempre igual ao zero
   const inicio = performance.now() - 40000;
 
-  // O núcleo de luz segue o console do gerador no computador; no celular, o alto à direita
+  // No computador, o núcleo de luz fica no vão entre a oferta e o console do gerador (o console é
+  // opaco: atrás dele a luz não apareceria); no celular, no alto à direita
   function medir() {
     const r = area!.getBoundingClientRect();
     const w = Math.max(1, Math.round(r.width * ESCALA));
@@ -151,8 +151,8 @@ function ligarNevoa(tela: HTMLCanvasElement) {
     let fy = Math.min(r.height, 420) * 0.35;
     if (gerador && window.matchMedia("(min-width: 1024px)").matches) {
       const g = gerador.getBoundingClientRect();
-      fx = g.left - r.left + g.width / 2;
-      fy = g.top - r.top + Math.min(g.height, 480) * 0.4;
+      fx = g.left - r.left - 24;
+      fy = g.top - r.top + Math.min(g.height, 480) * 0.45;
     }
     // WebGL conta o y de baixo para cima
     gl!.uniform2f(uRes, w, h);
