@@ -20,9 +20,9 @@ export const hero = {
     esgotado: "Vagas de fundador esgotadas",
     falha: "Vagas de fundador limitadas",
   },
-  titulo: "Seu cliente chega no WhatsApp pronto para fechar.",
+  titulo: "Você explica tudo, manda o preço… e o cliente some.",
   subtitulo:
-    "Landing pages e sites personalizados, com copy de conversão inclusa, para negócios que vendem serviços de alto valor e fecham pelo WhatsApp.",
+    "A BRAGA SYSTEMS cria a página que faz essa explicação por você, com a copy pronta, para o cliente chegar no seu WhatsApp já querendo fechar.",
   botaoPrincipal: "Quero meu site",
   botaoSecundario: "Ver projetos",
   microcopy: ["Resposta em até 1 dia útil", "Preços abertos na página"],
@@ -59,7 +59,7 @@ export const gerador = {
 
 export const dor = {
   abertura:
-    'Post, anúncio, indicação. O contato aparece no WhatsApp, pergunta "quanto custa?", recebe uma explicação inteira e desaparece.',
+    'São dez da noite. Você termina o último atendimento, pega o celular e tem três mensagens: "quanto custa?". Você responde com calma, explica cada detalhe, manda o valor. Dois visualizam e não respondem. O terceiro diz que vai pensar. Ninguém volta.',
   titulo: "Isso já aconteceu com você?",
   itens: [
     "As mesmas cinco perguntas, respondidas todo santo dia.",
@@ -69,6 +69,7 @@ export const dor = {
     "Um concorrente mais barato que parece mais profissional.",
     "Dinheiro de anúncio indo para um lugar que não convence.",
   ],
+  virada: "O pior não é perder o cliente. É começar a duvidar do seu próprio preço.",
   fechamento: "Seu serviço é bom. Só falta alguém vendendo ele enquanto você trabalha.",
 } as const;
 
