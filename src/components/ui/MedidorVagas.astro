@@ -1,0 +1,52 @@
+---
+/*
+  Medidor das 5 vagas de fundador: um paralelogramo em 45° por vaga, aceso quando ainda está livre.
+  O número aceso vem de <html data-vagas-n> (build e contador ao vivo). Sem número (falha ou
+  carregando), todos ficam apagados. É só visual: o texto do selo é quem informa.
+*/
+import { vagasMax } from "../../lib/supabase";
+
+interface Props {
+  tamanho?: "sm" | "lg";
+  class?: string;
+}
+const { tamanho = "sm", class: classe } = Astro.props;
+---
+<span class:list={["medidor", `medidor--${tamanho}`, classe]} aria-hidden="true">
+  {Array.from({ length: vagasMax }, (_, i) => <span class="medidor__seg" style={`--i:${i}`} />)}
+</span>
+
+<style>
+  .medidor {
+    --alt: 8px;
+    --larg: 18px;
+    display: inline-flex;
+    gap: 3px;
+    flex: none;
+  }
+  .medidor--lg { --alt: 18px; --larg: 44px; gap: 6px; }
+
+  .medidor__seg {
+    width: var(--larg);
+    height: var(--alt);
+    background: var(--line);
+    clip-path: polygon(var(--alt) 0, 100% 0, calc(100% - var(--alt)) 100%, 0 100%);
+    transition: background-color var(--dur) var(--ease-saida), filter var(--dur) var(--ease-saida);
+  }
+
+  /* Acende as primeiras N: N = vagas restantes */
+  :global(:root[data-vagas-n="1"]) .medidor__seg:nth-child(-n + 1),
+  :global(:root[data-vagas-n="2"]) .medidor__seg:nth-child(-n + 2),
+  :global(:root[data-vagas-n="3"]) .medidor__seg:nth-child(-n + 3),
+  :global(:root[data-vagas-n="4"]) .medidor__seg:nth-child(-n + 4),
+  :global(:root[data-vagas-n="5"]) .medidor__seg:nth-child(-n + 5) {
+    background: var(--accent);
+    filter: drop-shadow(0 0 6px var(--brilho));
+  }
+
+  /* Ao carregar, as vagas acendem uma a uma, como um instrumento ligando */
+  @media (prefers-reduced-motion: no-preference) {
+    .medidor__seg { animation: medidor-ligar 360ms var(--ease-saida) backwards; animation-delay: calc(240ms + var(--i) * 90ms); }
+  }
+  @keyframes medidor-ligar { from { background: var(--line); filter: none; } }
+</style>

@@ -1,34 +1,51 @@
 ---
-// Página provisória até a home completa (§1 a §18) entrar na etapa 3.
+// Home de venda (copy oficial §1 a §18). Topo e rodapé vêm do layout Base.
 import Base from "../layouts/Base.astro";
-import Botao from "../components/ui/Botao.astro";
-import Selo from "../components/ui/Selo.astro";
-import logo from "../assets/logo/logo-horizontal-escuro.svg?raw";
-import { montarLinkWhatsapp } from "../lib/whatsapp";
+import Hero from "../components/sections/Hero.astro";
+import Gerador from "../components/sections/Gerador.astro";
+import Dor from "../components/sections/Dor.astro";
+import Proposta from "../components/sections/Proposta.astro";
+import Metodo from "../components/sections/Metodo.astro";
+import Beneficios from "../components/sections/Beneficios.astro";
+import Projetos from "../components/sections/Projetos.astro";
+import Planos from "../components/sections/Planos.astro";
+import Processo from "../components/sections/Processo.astro";
+import Objecoes from "../components/sections/Objecoes.astro";
+import Garantia from "../components/sections/Garantia.astro";
+import Sobre from "../components/sections/Sobre.astro";
+import Urgencia from "../components/sections/Urgencia.astro";
+import Faq from "../components/sections/Faq.astro";
+import CtaFinal from "../components/sections/CtaFinal.astro";
+import Ps from "../components/sections/Ps.astro";
+import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
+
+// Número de vagas do último build: a página já carrega com ele (mapa técnico, arquivo 03).
+const vagasBuild = await lerVagasNoBuild();
+const vagas = vagasBuild ?? vagasMax;
 ---
-<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão">
-  <main class="provisoria">
-    <div class="logo" set:html={logo} />
-    <Selo />
-    <h1>Seu cliente chega no WhatsApp pronto para fechar.</h1>
-    <p class="sub">Landing pages e sites personalizados, com copy de conversão inclusa, para negócios que vendem serviços de alto valor e fecham pelo WhatsApp.</p>
-    <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="topo">Falar no WhatsApp</Botao>
+<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild}>
+  <main id="conteudo">
+    <div class="abertura">
+      <Hero vagas={vagas} />
+      <Gerador />
+    </div>
+    <Dor />
+    <Proposta />
+    <Metodo />
+    <Beneficios />
+    <Projetos vagas={vagas} />
+    <Planos />
+    <Processo />
+    <Objecoes />
+    <Garantia />
+    <Sobre />
+    <Urgencia vagas={vagas} />
+    <Faq />
+    <CtaFinal />
+    <Ps vagas={vagas} />
   </main>
 </Base>
 
-<style>
-  .provisoria {
-    min-height: 100svh;
-    display: grid;
-    place-content: center;
-    justify-items: start;
-    gap: var(--s-5);
-    width: min(100% - 2 * var(--gutter), 680px);
-    margin-inline: auto;
-    padding-block: var(--s-8);
-  }
-  .logo { margin-bottom: var(--s-5); }
-  .logo :global(svg) { width: min(240px, 64vw); height: auto; }
-  h1 { font-size: var(--t-display); line-height: 1.05; letter-spacing: -0.03em; }
-  .sub { font-size: var(--t-body-lg); color: var(--ink-muted); max-width: 52ch; }
-</style>
+<script>
+  import "../scripts/contador";
+</script>

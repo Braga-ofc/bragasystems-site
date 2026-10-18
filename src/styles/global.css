@@ -102,3 +102,62 @@ button, input, select, textarea { font: inherit; color: inherit; }
   background: var(--cor-fundo);
   clip-path: polygon(var(--ci) 0, 100% 0, 100% calc(100% - var(--ci)), calc(100% - var(--ci)) 100%, 0 100%, 0 var(--ci));
 }
+
+/*
+  Estados do contador de vagas (mapa técnico, arquivo 03).
+  <html data-vagas-estado> recebe com-vagas, esgotado, falha ou carregando. Cada variante de texto
+  marca em data-quando-vagas os estados em que aparece: "com", "esgotado", "falha" (vale também
+  para "carregando"). Todas as variantes já vêm no HTML; só a certa fica visível.
+*/
+:root[data-vagas-estado="com-vagas"] [data-quando-vagas]:not([data-quando-vagas~="com"]),
+:root[data-vagas-estado="esgotado"] [data-quando-vagas]:not([data-quando-vagas~="esgotado"]),
+:root[data-vagas-estado="falha"] [data-quando-vagas]:not([data-quando-vagas~="falha"]),
+:root[data-vagas-estado="carregando"] [data-quando-vagas]:not([data-quando-vagas~="falha"]) {
+  display: none !important;
+}
+
+/* Entradas ao rolar: só o que ainda está abaixo da tela recebe "pendente" (scripts/revela.ts). */
+@media (prefers-reduced-motion: no-preference) {
+  [data-revela] {
+    transition:
+      opacity var(--dur-lenta) var(--ease-saida),
+      translate var(--dur-lenta) var(--ease-saida),
+      filter var(--dur-lenta) var(--ease-saida);
+  }
+  [data-revela="pendente"] { opacity: 0; translate: 0 14px; filter: blur(6px); }
+}
+
+/*
+  Grade do painel: linhas finas de 32 px na cor das linhas da marca, que se dissolvem
+  nas bordas (Grid Pattern do Magic UI, MIT, recriado em CSS).
+*/
+.grade {
+  background-image:
+    linear-gradient(to right, var(--grade-cor, rgb(46 57 70 / 0.55)) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grade-cor, rgb(46 57 70 / 0.55)) 1px, transparent 1px);
+  background-size: var(--grade-passo, 32px) var(--grade-passo, 32px);
+  background-position: var(--grade-origem, center top);
+  -webkit-mask-image: var(--grade-mascara, radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 100%));
+  mask-image: var(--grade-mascara, radial-gradient(ellipse 80% 70% at 50% 30%, #000 30%, transparent 100%));
+}
+
+/*
+  Feixe de luz que percorre a borda chanfrada (Border Beam do Magic UI, MIT, recriado em CSS).
+  Use junto com .chanfrado. Dá 2 voltas e para (nada se mexe sem parar); .feixe--ativo liga.
+*/
+@property --feixe-angulo { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --feixe-cor { syntax: "<color>"; inherits: false; initial-value: transparent; }
+.feixe::before {
+  background:
+    conic-gradient(from var(--feixe-angulo), transparent 0 76%, var(--feixe-cor) 90%, transparent 97%),
+    var(--cor-borda);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .feixe--ativo::before { animation: feixe-volta 3.2s linear 2; }
+  .feixe--continuo::before { animation: feixe-volta 2.4s linear infinite; }
+}
+@keyframes feixe-volta {
+  0% { --feixe-angulo: 0deg; --feixe-cor: transparent; }
+  12%, 88% { --feixe-cor: var(--ciano-eletrico-forte); }
+  100% { --feixe-angulo: 360deg; --feixe-cor: transparent; }
+}

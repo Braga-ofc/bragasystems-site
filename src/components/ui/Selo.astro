@@ -3,10 +3,11 @@
   Selo de vagas (copy §2) e selo RECOMENDADO (copy §9).
   O estado das vagas é aplicado pelo script do contador (etapa 5) trocando data-estado
   e o número; os três textos já vêm no HTML para a página não "pular".
+  Com estado="auto" (a home), quem decide é o <html data-vagas-estado> do contador.
 */
 interface Props {
   tipo?: "vagas" | "recomendado";
-  estado?: "com-vagas" | "esgotado" | "falha";
+  estado?: "com-vagas" | "esgotado" | "falha" | "auto";
   vagas?: number;
   class?: string;
 }
@@ -15,7 +16,7 @@ const { tipo = "vagas", estado = "com-vagas", vagas = 5, class: classe } = Astro
 {tipo === "recomendado" ? (
   <span class:list={["selo", "selo--recomendado", "chanfrado", classe]}>Recomendado</span>
 ) : (
-  <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={estado}>
+  <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={estado === "auto" ? undefined : estado}>
     <span class="selo__marca" aria-hidden="true"></span>
     <span class="selo__texto" data-quando="com-vagas">5 vagas de fundador · 25% off · restam <strong class="num" data-vagas>{vagas}</strong></span>
     <span class="selo__texto" data-quando="esgotado">Vagas de fundador esgotadas</span>
@@ -53,6 +54,13 @@ const { tipo = "vagas", estado = "com-vagas", vagas = 5, class: classe } = Astro
   [data-estado="esgotado"] > [data-quando="esgotado"],
   [data-estado="falha"] > [data-quando="falha"] { display: inline; }
   [data-estado="esgotado"] .selo__marca { background: var(--ink-muted); }
+
+  /* Modo automático: segue o estado do contador na página */
+  :global(:root[data-vagas-estado="com-vagas"]) .selo--vagas:not([data-estado]) > [data-quando="com-vagas"],
+  :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) > [data-quando="esgotado"],
+  :global(:root[data-vagas-estado="falha"]) .selo--vagas:not([data-estado]) > [data-quando="falha"],
+  :global(:root[data-vagas-estado="carregando"]) .selo--vagas:not([data-estado]) > [data-quando="falha"] { display: inline; }
+  :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) .selo__marca { background: var(--ink-muted); }
 
   .selo--recomendado {
     --c: 6px;

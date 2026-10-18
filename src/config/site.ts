@@ -8,5 +8,7 @@ export const site = {
   // Pendente: link completo da página do Facebook.
   facebook: { nome: "Braga Systems", url: "" },
   cidade: "Brasília – DF",
+  // Entra no rodapé depois da formalização (copy §18).
+  cnpj: "",
   emailAvisos: "bragasystemsofc@gmail.com",
 } as const;
