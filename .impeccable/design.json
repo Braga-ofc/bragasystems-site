@@ -488,7 +488,7 @@
       {
         "name": "nevoa",
         "value": "WebGL, ruído simplex em duas camadas, meia resolução, 30 qps; acende em 1200ms",
-        "purpose": "Luz viva atrás da grade da primeira dobra; quadro parado com movimento reduzido, brilho em CSS sem placa de vídeo."
+        "purpose": "Luz viva atrás da grade da primeira dobra; quadro parado com movimento reduzido; sem placa de vídeo, foto parada da névoa no mesmo canvas."
       },
       {
         "name": "grade-cinetica",

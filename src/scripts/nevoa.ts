@@ -7,8 +7,11 @@
   - Desenha em meia resolução e a no máximo 30 quadros por segundo.
   - Para fora da tela e com a aba escondida.
   - Com movimento reduzido ou economia de dados, desenha um quadro parado.
-  - Sem placa de vídeo (WebGL desenhado pelo processador, como no teste do PageSpeed e em aparelhos
-    muito simples) ou sem WebGL, nem compila: a dobra ganha um brilho parado em CSS (.is-estatica).
+  - Sem placa de vídeo (WebGL desenhado pelo processador, como no teste do PageSpeed, em aparelhos
+    muito simples ou com a aceleração gráfica desligada) ou sem WebGL, nem compila: o canvas mostra
+    uma foto parada da própria névoa (public/nevoa, ~7 KB, gerada deste shader). Num canvas, e não
+    como imagem de fundo, ela não conta como o maior elemento da página e não atrasa o LCP. Se a
+    foto não carregar, fica o brilho em CSS (.is-estatica).
 */
 
 const VERTICE = `
@@ -82,6 +85,49 @@ void main() {
 }
 `;
 
+const FOTOS = { computador: "/nevoa/nevoa-computador.webp", celular: "/nevoa/nevoa-celular.webp" };
+const COMPUTADOR = "(min-width: 1024px)";
+
+/** Sem placa de vídeo: a foto da névoa num canvas 2D novo, cobrindo a dobra a partir do topo. */
+function mostrarFoto(antiga: HTMLCanvasElement, area: HTMLElement) {
+  // O canvas antigo já está preso ao WebGL; um canvas novo, igual, recebe o desenho em 2D
+  const tela = antiga.cloneNode(false) as HTMLCanvasElement;
+  antiga.replaceWith(tela);
+  const ctx = tela.getContext("2d");
+  if (!ctx) return area.classList.add("is-estatica");
+  const computador = window.matchMedia(COMPUTADOR);
+  const fotos = new Map<string, HTMLImageElement>();
+
+  function desenhar() {
+    const src = computador.matches ? FOTOS.computador : FOTOS.celular;
+    let foto = fotos.get(src);
+    if (!foto) {
+      foto = new Image();
+      foto.decoding = "async";
+      foto.src = src;
+      fotos.set(src, foto);
+      foto.addEventListener("load", desenhar, { once: true });
+      foto.addEventListener("error", () => area.classList.add("is-estatica"), { once: true });
+      return;
+    }
+    if (!foto.complete || !foto.naturalWidth) return;
+    const r = area.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    tela.width = Math.max(1, Math.round(r.width * dpr));
+    tela.height = Math.max(1, Math.round(r.height * dpr));
+    const escala = Math.max(tela.width / foto.naturalWidth, tela.height / foto.naturalHeight);
+    const w = foto.naturalWidth * escala;
+    const h = foto.naturalHeight * escala;
+    ctx!.fillStyle = "#0B0F14";
+    ctx!.fillRect(0, 0, tela.width, tela.height);
+    ctx!.drawImage(foto, (tela.width - w) / 2, 0, w, h);
+    tela.classList.add("is-acesa");
+  }
+
+  desenhar();
+  new ResizeObserver(desenhar).observe(area);
+}
+
 const ESCALA = 0.5; // meia resolução: a névoa é macia, não precisa de mais
 const QUADRO_MS = 1000 / 30;
 
@@ -105,7 +151,7 @@ function ligarNevoa(tela: HTMLCanvasElement) {
   const info = gl?.getExtension("WEBGL_debug_renderer_info");
   const placa = gl && info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
   if (!gl || /swiftshader|llvmpipe|software|basic render/i.test(placa)) {
-    area.classList.add("is-estatica");
+    mostrarFoto(tela, area);
     return;
   }
 
@@ -149,7 +195,7 @@ function ligarNevoa(tela: HTMLCanvasElement) {
     const gerador = area!.querySelector<HTMLElement>(".gerador");
     let fx = r.width * 0.85;
     let fy = Math.min(r.height, 420) * 0.35;
-    if (gerador && window.matchMedia("(min-width: 1024px)").matches) {
+    if (gerador && window.matchMedia(COMPUTADOR).matches) {
       const g = gerador.getBoundingClientRect();
       fx = g.left - r.left - 24;
       fy = g.top - r.top + Math.min(g.height, 480) * 0.45;

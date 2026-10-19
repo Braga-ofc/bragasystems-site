@@ -112,7 +112,7 @@ const vagas = vagasBuild ?? vagasMax;
     transition: opacity 1200ms var(--ease-saida);
   }
   .abertura__nevoa:global(.is-acesa) { opacity: 1; }
-  /* Sem placa de vídeo: o mesmo núcleo de luz, parado, em gradientes */
+  /* Último recurso, se a foto da névoa não carregar: o mesmo núcleo de luz, parado, em gradientes */
   .abertura:global(.is-estatica) {
     background:
       radial-gradient(ellipse 40% 45% at 85% 22%, rgb(11 124 140 / 0.3), transparent 70%),
