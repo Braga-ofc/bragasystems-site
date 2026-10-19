@@ -24,6 +24,11 @@ export const hero = {
   titulo: "Venda enquanto dorme.",
   subtitulo:
     "A BRAGA SYSTEMS desenvolve páginas estratégicas, com copy de conversão, que apresentam a sua empresa, organizam o seu portfólio e esclarecem as dúvidas do cliente 24 horas por dia. Fora do expediente, sua página continua vendendo, e o cliente chega ao seu WhatsApp pronto para fechar negócio.",
+  // Copy 2.8: o rosto de quem atende, na primeira dobra (pedido do Gustavo, 19/10/2026)
+  retrato: {
+    alt: "Gustavo Braga, fundador da BRAGA SYSTEMS, sentado de camisa preta com as mãos entrelaçadas",
+    legenda: "Gustavo Braga · fundador da BRAGA SYSTEMS",
+  },
   // Copy 2.6: um botão só, que leva ao portfólio (a curiosidade vem antes do WhatsApp)
   botao: "Ver projetos",
   microcopy: ["Resposta em até 1 dia útil", "Preços abertos na página"],
@@ -223,13 +228,14 @@ export const garantia = {
   nota: "Garantia válida uma vez por projeto, solicitada em até 3 dias úteis após a apresentação do layout. Detalhes nas dúvidas frequentes.",
 } as const;
 
+// Copy 2.8: nome, missão e valor, escritos pelo Gustavo; a seção vem logo depois da Dor
 export const sobre = {
-  rotulo: "QUEM FAZ",
-  titulo: "Prazer, Gustavo Braga.",
+  titulo: "Muito prazer, sou Gustavo Braga, fundador da BRAGA SYSTEMS.",
   paragrafos: [
-    "Sou desenvolvedor web e fundador da BRAGA SYSTEMS. Meu foco são landing pages, mas aceito qualquer desafio digital, de sites institucionais a projetos sob medida.",
-    "Cada página que eu entrego é tratada como um sistema: estrutura clara, código limpo e um objetivo definido. Do briefing à publicação, é comigo que você fala. Sem atendente, sem repasse, sem telefone sem fio.",
+    "Eu crio páginas que fazem a pré-venda por você: explicam o seu serviço, mostram por que ele vale o preço e trazem o cliente pronto para fechar.",
+    "Do briefing à publicação, é comigo que você fala. Sem atendente, sem repasse, nada de telefone sem fio.",
   ],
+  retratoAlt: "Gustavo Braga, de camiseta preta, com a mão no queixo, olhando para a câmera",
   botaoHistoria: "Conheça minha história",
   botaoWhatsapp: "Falar comigo no WhatsApp",
 } as const;

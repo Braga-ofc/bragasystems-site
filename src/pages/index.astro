@@ -18,6 +18,9 @@ import Faq from "../components/sections/Faq.astro";
 import CtaFinal from "../components/sections/CtaFinal.astro";
 import Ps from "../components/sections/Ps.astro";
 import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
+import { Image } from "astro:assets";
+import fotoGustavo from "../assets/gustavo/gustavo-braga-sentado-hd.jpg";
+import { hero } from "../content/home";
 
 // Número de vagas do último build: a página já carrega com ele (mapa técnico, arquivo 03).
 const vagasBuild = await lerVagasNoBuild();
@@ -30,9 +33,24 @@ const vagas = vagasBuild ?? vagasMax;
       <span class="abertura__linha" aria-hidden="true"></span>
       <span class="abertura__grade-luz" aria-hidden="true" data-grade-luz></span>
       <Hero vagas={vagas} />
+      <figure class="abertura__retrato">
+        <Image
+          class="abertura__foto"
+          src={fotoGustavo}
+          alt={hero.retrato.alt}
+          widths={[360, 480, 720, 960]}
+          sizes="(min-width: 1024px) 460px, min(360px, 90vw)"
+          format="avif"
+          quality={70}
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption class="abertura__legenda">{hero.retrato.legenda}</figcaption>
+      </figure>
       <Gerador />
     </div>
     <Dor />
+    <Sobre />
     <Proposta />
     <Metodo />
     <Beneficios />
@@ -41,7 +59,6 @@ const vagas = vagasBuild ?? vagasMax;
     <Processo />
     <Objecoes />
     <Garantia />
-    <Sobre />
     <Urgencia vagas={vagas} />
     <Faq />
     <CtaFinal />
@@ -149,6 +166,47 @@ const vagas = vagasBuild ?? vagasMax;
     .abertura__nevoa { transition-duration: 1ms; }
   }
 
+  /*
+    O rosto de quem atende (copy 2.8): a foto tem fundo preto e se funde com a névoa, sem moldura;
+    as bordas somem num degradê. É o maior elemento da primeira tela, então carrega primeiro (AVIF).
+    No celular vem logo depois do botão, antes do gerador.
+  */
+  .abertura__retrato {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    max-width: 360px;
+    justify-self: center;
+    min-width: 0;
+  }
+  /* :global: o <Image> é outro componente e não recebe o escopo deste arquivo */
+  .abertura__retrato :global(.abertura__foto) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 18%;
+    -webkit-mask-image: radial-gradient(ellipse 50% 46% at 50% 44%, #000 62%, transparent 100%);
+    mask-image: radial-gradient(ellipse 50% 46% at 50% 44%, #000 62%, transparent 100%);
+  }
+  .abertura__legenda {
+    margin-top: calc(var(--s-7) * -1);
+    position: relative;
+    text-align: center;
+    font: 500 0.75rem/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    color: var(--ink-muted);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .abertura__retrato { animation: retrato-entra 900ms var(--ease-saida) 250ms backwards; }
+  }
+  @keyframes retrato-entra {
+    from { opacity: 0; translate: 0 16px; }
+  }
+
   /* Começo da linha do site inteiro (a mesma de ui/Secao): nasce no hero e desce até a Dor */
   .abertura { view-timeline: --abertura; }
   .abertura__linha {
@@ -190,7 +248,9 @@ const vagas = vagasBuild ?? vagasMax;
       -webkit-mask-image: radial-gradient(ellipse 75% 85% at 35% 5%, black 35%, transparent 100%);
       mask-image: radial-gradient(ellipse 75% 85% at 35% 5%, black 35%, transparent 100%);
     }
-    .abertura > :global(.hero) { grid-column: 1 / span 7; }
-    .abertura > :global(.gerador) { grid-column: 8 / span 5; }
+    .abertura > :global(.hero) { grid-column: 1 / span 7; align-self: center; }
+    .abertura__retrato { grid-column: 8 / span 5; max-width: none; justify-self: stretch; }
+    /* O gerador desce para a linha de baixo, centrado: o rosto fica com a primeira impressão */
+    .abertura > :global(.gerador) { grid-column: 3 / span 8; }
   }
 </style>

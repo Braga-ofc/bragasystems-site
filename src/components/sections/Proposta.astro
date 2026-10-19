@@ -1,6 +1,6 @@
 ---
 /*
-  Proposta de valor (copy §5), seção clara.
+  Proposta de valor (copy §5), seção escura desde 19/10/2026 (o Sobre claro veio para antes dela).
   O primeiro parágrafo é o h2: a afirmação em tinta forte, a consequência ("nada acontece") apagada.
   Os demais descem em degraus de 3 colunas (1 → 4 → 7) até um trilho que atravessa a seção:
   o nó em ciano profundo (o único acento) fica no meio dele, onde começa a frase
@@ -14,7 +14,7 @@ const [titulo, antes, meio, depois] = proposta.paragrafos;
 const [afirmacao, ...consequencia] = titulo.split(/(?<=\.)\s+/);
 const resto = consequencia.join(" ");
 ---
-<Secao tema="claro" class="proposta">
+<Secao class="proposta">
   <div class="proposta__grade">
     <h2 class="proposta__titulo">
       {afirmacao}{resto && <> <span class="proposta__consequencia">{resto}</span></>}

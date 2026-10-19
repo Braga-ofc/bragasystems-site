@@ -1,25 +1,24 @@
 ---
 /*
-  §13 Sobre. Uma ficha de quem faz: a foto profissional do Gustavo num encaixe chanfrado do
-  painel, com marcas de enquadramento em 90° nos cantos retos. No celular a foto vem acima do
-  nome; no computador, em 4:5 à esquerda, com o texto centrado na altura dela.
-  O único ciano é o botão do WhatsApp. Sem números (anos, projetos): copy §13.
+  Sobre (copy 2.8): logo depois da Dor, em fundo claro azul-gelo, a pessoa por trás da página:
+  nome, missão e valor. A foto (outra pose, diferente da do hero) fica num encaixe chanfrado com
+  marcas de enquadramento em 90°. No celular vem acima do nome; no computador, em 4:5 à esquerda.
+  O único ciano é o botão do WhatsApp. Sem números (anos, projetos).
 */
 import Secao from "../ui/Secao.astro";
-import Rotulo from "../ui/Rotulo.astro";
 import Botao from "../ui/Botao.astro";
 import { Image } from "astro:assets";
-import foto from "../../assets/gustavo/gustavo-braga-sentado.jpg";
+import foto from "../../assets/gustavo/gustavo-braga-retrato.webp";
 import { sobre } from "../../content/home";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
 ---
-<Secao id="sobre" tema="elevado" class="sobre">
+<Secao id="sobre" tema="claro" class="sobre">
   <div class="sobre__grade">
     <div class="sobre__retrato chanfrado">
       <Image
         class="sobre__foto"
         src={foto}
-        alt="Gustavo Braga, fundador da BRAGA SYSTEMS, sentado de camisa preta com as mãos entrelaçadas"
+        alt={sobre.retratoAlt}
         widths={[320, 480, 640, 880]}
         sizes="(min-width: 960px) 440px, (min-width: 720px) 240px, min(320px, 100vw)"
         quality={80}
@@ -31,7 +30,6 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     </div>
 
     <header class="sobre__cabeca">
-      <Rotulo>{sobre.rotulo}</Rotulo>
       <h2 class="sobre__titulo">{sobre.titulo}</h2>
     </header>
 
@@ -79,7 +77,7 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     width: calc(100% - 2px);
     height: calc(100% - 2px);
     object-fit: cover;
-    object-position: 50% 20%;
+    object-position: 50% 22%;
     clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
   }
 
@@ -113,7 +111,8 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     min-width: 0;
   }
   .sobre__titulo {
-    max-width: 16ch;
+    max-width: 22ch;
+    text-wrap: balance;
     font-size: var(--t-h1);
     font-weight: 600;
     line-height: 1.12;
@@ -183,6 +182,6 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     /* O texto começa na coluna 6, recuado: os dois botões cabem lado a lado em 1440 */
     .sobre__cabeca { grid-column: 6 / -1; grid-row: 2; padding-left: var(--s-7); }
     .sobre__corpo { grid-column: 6 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-7); }
-    .sobre__titulo { max-width: 20ch; }
+    .sobre__titulo { max-width: 24ch; }
   }
 </style>

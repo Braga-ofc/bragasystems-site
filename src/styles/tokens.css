@@ -76,17 +76,19 @@
 
 /* Seções claras */
 .tema-claro {
-  --surface: #F5F7FA;
-  --surface-raised: #FFFFFF;
-  --surface-sunken: #E9EDF2;
+  /* Azul-gelo #E0ECFF, escolhido pelo Gustavo (19/10/2026): claro, mas não branco */
+  --surface: #E0ECFF;
+  --surface-raised: #F2F7FF;
+  --surface-sunken: #D2E2F8;
   --ink: var(--preto-profundo);
   --ink-strong: #000000;
   --ink-muted: #566170;
-  --accent: var(--ciano-profundo);
-  --accent-hover: #096A78;
+  /* Ciano profundo forte: o ciano profundo dá só 4,1:1 neste fundo; este dá 5,3:1 */
+  --accent: #096A78;
+  --accent-hover: #075A66;
   --on-accent: #FFFFFF;
-  --line: #C9D1DB;
-  --line-forte: #8E9AA8;
+  --line: #AFBDCE;
+  --line-forte: #7F8EA1;
   --erro: #B42318;
   --sucesso: #067647;
   --brilho: rgb(11 124 140 / 0.16);
