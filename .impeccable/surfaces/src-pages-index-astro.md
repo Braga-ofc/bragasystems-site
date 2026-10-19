@@ -17,7 +17,7 @@ OWN-WORLD: Preto profundo com grade fina de 32 px na cor das linhas, que se diss
 
 STORY: O visitante entende a oferta numa frase, vê que as vagas são contadas de verdade, testa o método no gerador, segue o circuito do Método até os planos com preço aberto e chama no WhatsApp com a mensagem pronta.
 
-FIRST VIEWPORT: Celular (390): topo fixo com logo, "Falar no WhatsApp" e menu; medidor de vagas sobre o selo; headline em display em 4 linhas; subheadline; "Quero meu site" preenchido em largura total e "Ver projetos" vazado; microcopy em mono. Computador (1440): um painel de dois módulos sobre a grade: oferta em 7/12 à esquerda (selo com medidor, headline display, botões) e o console do gerador em 5/12 à direita, já funcionando. A headline surge palavra por palavra, saindo do desfoque, uma vez ao carregar; atrás, a névoa de luz e a grade de pontos que se curva com o mouse.
+FIRST VIEWPORT: Celular (390): topo fixo com logo, "Falar no WhatsApp" e menu; medidor de vagas sobre o selo; headline em display em 2 linhas; subheadline; "Ver projetos" preenchido em largura total, o único botão, levando ao portfólio; microcopy em mono. Computador (1440): um painel de dois módulos sobre a grade: oferta em 7/12 à esquerda (selo com medidor, headline display, botões) e o console do gerador em 5/12 à direita, já funcionando. A headline surge palavra por palavra, saindo do desfoque, uma vez ao carregar; atrás, a névoa de luz e a grade de pontos que se curva com o mouse.
 
 FORM: Painel, posição 7 da lista ordenada, semente e9f0ae38. Gesto assinado: o circuito do Método, um traço em 45° e 90° que acende uma vez e termina no nó do WhatsApp.
 

@@ -20,11 +20,12 @@ export const hero = {
     esgotado: "Vagas de fundador esgotadas",
     falha: "Vagas de fundador limitadas",
   },
-  titulo: "Você explica tudo, manda o preço… e o cliente some.",
+  // Copy 2.6: a headline abre com a promessa; a dor fica para a §4
+  titulo: "Venda enquanto dorme.",
   subtitulo:
-    "A BRAGA SYSTEMS cria a página que faz essa explicação por você, com a copy pronta, para o cliente chegar no seu WhatsApp já querendo fechar.",
-  botaoPrincipal: "Quero meu site",
-  botaoSecundario: "Ver projetos",
+    "A BRAGA SYSTEMS desenvolve páginas estratégicas, com copy de conversão, que apresentam a sua empresa, organizam o seu portfólio e esclarecem as dúvidas do cliente 24 horas por dia. Fora do expediente, sua página continua vendendo, e o cliente chega ao seu WhatsApp pronto para fechar negócio.",
+  // Copy 2.6: um botão só, que leva ao portfólio (a curiosidade vem antes do WhatsApp)
+  botao: "Ver projetos",
   microcopy: ["Resposta em até 1 dia útil", "Preços abertos na página"],
 } as const;
 

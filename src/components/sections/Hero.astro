@@ -1,6 +1,7 @@
 ---
 /*
-  Hero (copy §2): a oferta numa frase, as vagas contadas de verdade e o WhatsApp a um toque.
+  Hero (copy §2): a promessa numa frase, as vagas contadas de verdade e um botão só, que leva ao
+  portfólio (o WhatsApp continua a um toque no topo).
   Vive dentro da .abertura (src/pages/index.astro), que cuida da largura, da grade e do respiro.
   Linha de leitura: medidor das 5 vagas ligado ao selo por um traço fino.
   A headline surge palavra por palavra, saindo do desfoque, uma vez ao carregar: Blur Text do
@@ -11,7 +12,6 @@ import Botao from "../ui/Botao.astro";
 import Selo from "../ui/Selo.astro";
 import MedidorVagas from "../ui/MedidorVagas.astro";
 import { hero } from "../../content/home";
-import { montarLinkWhatsapp } from "../../lib/whatsapp";
 
 interface Props {
   /** Vagas do último build (ou o máximo, se não deu para ler). O contador atualiza ao vivo. */
@@ -38,8 +38,7 @@ const palavras = hero.titulo.split(" ");
   <p class="hero__subtitulo">{hero.subtitulo}</p>
 
   <div class="hero__acoes">
-    <Botao href={montarLinkWhatsapp("hero")} icone="whatsapp" origem="hero">{hero.botaoPrincipal}</Botao>
-    <Botao variante="secundario" href="#projetos" icone="seta">{hero.botaoSecundario}</Botao>
+    <Botao href="#projetos" icone="seta">{hero.botao}</Botao>
   </div>
 
   <ul class="hero__micro" role="list">
@@ -94,9 +93,8 @@ const palavras = hero.titulo.split(" ");
   }
 
   /*
-    Headline em display, 4 linhas no celular (contrato, FIRST VIEWPORT). A frase quebra em 4 linhas
-    enquanto a coluna tem entre ~8,0 e ~8,8 vezes o tamanho da letra; por isso, só aqui, o tamanho
-    acompanha a largura da tela (≈ coluna ÷ 8,4 de 320 a 540 px) e para nos 56 px do tokens.json.
+    Headline em display, 2 linhas da copy 2.6 em todas as larguras. No celular, o tamanho acompanha a
+    largura da tela (≈ coluna ÷ 8,4 de 320 a 540 px) e para nos 56 px do tokens.json.
   */
   .hero__titulo {
     margin-top: var(--s-6);
