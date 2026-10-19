@@ -108,6 +108,8 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
   @media (forced-colors: active) { .topo::after { display: none; } }
 
   .topo {
+    /* A linha neon atravessa a tela por fora da direita: sem isso, criava rolagem lateral */
+    overflow-x: clip;
     position: sticky;
     top: 0;
     z-index: 50;
