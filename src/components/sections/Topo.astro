@@ -82,13 +82,37 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
 </script>
 
 <style>
+  /*
+    Linha neon do cabeçalho (pedido do Gustavo, 19/10/2026): um traço curto de luz que corre a borda
+    de baixo da direita para a esquerda. Só transform, no compositor; para com movimento reduzido.
+  */
+  .topo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 22%;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, var(--ciano-eletrico-forte) 60%, transparent);
+    box-shadow: 0 0 6px 0 rgb(53 213 232 / 0.5);
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .topo::after { opacity: 0.8; animation: topo-neon 7s linear infinite; will-change: transform; }
+  }
+  @keyframes topo-neon {
+    from { transform: translateX(100vw); }
+    to { transform: translateX(-100%); }
+  }
+  @media (forced-colors: active) { .topo::after { display: none; } }
+
   .topo {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--surface) 88%, transparent);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    /* Sem backdrop-filter: com o fundo vivo sempre em movimento, o desfoque era refeito a cada quadro e travava o computador */
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
     border-bottom: 1px solid var(--line);
   }
 

@@ -250,12 +250,8 @@ function ligarNevoa(tela: HTMLCanvasElement) {
 
 const tela = document.querySelector<HTMLCanvasElement>("[data-nevoa]");
 if (tela) {
-  const iniciar = () =>
-    "requestIdleCallback" in window
-      ? requestIdleCallback(() => ligarNevoa(tela), { timeout: 2000 })
-      : setTimeout(() => ligarNevoa(tela), 200);
-  if (document.readyState === "complete") iniciar();
-  else window.addEventListener("load", iniciar, { once: true });
+  // Liga junto com a entrada da dobra (pedido do Gustavo, 19/10/2026), sem esperar o load
+  ligarNevoa(tela);
 }
 
 export {};

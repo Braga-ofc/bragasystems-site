@@ -11,6 +11,14 @@ const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
   {tema === "claro" && (
     <div class="secao__fundo-claro" aria-hidden="true"><span></span><span></span></div>
   )}
+  <span class="linha" aria-hidden="true"></span>
+  <div class="fio" aria-hidden="true">
+    <span class="fio__linha"></span>
+    <span class="fio__faisca"></span>
+    <span class="fio__ramo"></span>
+    <span class="fio__onda"></span>
+    <svg class="fio__no" viewBox="0 0 24 16"><path d="M0 0 H12 L24 16 H12 Z" /></svg>
+  </div>
   <div class:list={["secao__conteudo", largura === "estreita" && "secao__conteudo--estreita"]}>
     <slot />
   </div>
@@ -34,7 +42,6 @@ const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
     width: 60vmax;
     height: 60vmax;
     border-radius: 50%;
-    filter: blur(70px);
     will-change: transform;
   }
   .secao__fundo-claro span:first-child { top: -30vmax; left: -15vmax; background: radial-gradient(closest-side, rgb(11 124 140 / 0.12), transparent); }
@@ -60,6 +67,145 @@ const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
       linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
   }
   .secao--claro + .secao::before, .secao + .secao--claro::before { display: none; }
+  /*
+    O fio (a partir do "thread" do site da EBEN, pedido do Gustavo em 19/10/2026): na passagem de uma
+    seção para a outra, uma linha de luz desce pela margem esquerda conforme a rolagem, com uma faísca
+    na ponta. Ao chegar, o núcleo do B (o paralelogramo em 45°) acende com uma onda em volta e a linha
+    corre para a direita sobre a divisória. Subindo a página, tudo se desfaz no mesmo caminho.
+    Só transform, opacity e clip-path, ligados à rolagem pelo próprio CSS (animation-timeline: view()).
+    Sem suporte ou com movimento reduzido: o fio fica desenhado e parado.
+  */
+  /*
+    A linha do site inteiro: um traço fino na margem, ao lado do conteúdo, de cima a baixo de cada
+    seção. A parte já lida acende em ciano: enche quando o meio da tela desce pela seção e esvazia
+    quando sobe. Junta-se ao fio de cada passagem, e as seções formam uma linha só.
+  */
+  .secao {
+    --x-linha: calc(max(var(--gutter), (100% - var(--largura-max)) / 2) - min(18px, var(--gutter) * 0.5));
+    view-timeline: --secao;
+  }
+  .linha {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x-linha);
+    width: 1px;
+    pointer-events: none;
+    background: rgb(74 87 104 / 0.45);
+  }
+  .linha::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    box-shadow: 0 0 6px rgb(53 213 232 / 0.45);
+    transform-origin: top;
+  }
+  .secao--claro .linha { background: var(--claro-linha, #C9D1DB); }
+  .secao--claro .linha::after { background: var(--ciano-profundo); box-shadow: none; }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .linha::after {
+        animation: fio-desce linear both;
+        animation-timeline: --secao;
+        animation-range: cover 50vh cover calc(100% - 50vh);
+      }
+    }
+  }
+  @media (forced-colors: active) { .linha { display: none; } }
+
+  .fio {
+    --x: var(--x-linha);
+    --altura: clamp(88px, 12vw, 160px);
+    --cor: var(--accent);
+    position: absolute;
+    top: calc(var(--altura) * -1);
+    left: 0;
+    right: 0;
+    height: calc(var(--altura) + 8px);
+    pointer-events: none;
+    view-timeline: --fio;
+  }
+  .secao--claro .fio { --cor: var(--ciano-profundo); top: 0; height: 8px; }
+  .secao--claro .fio__linha, .secao--claro .fio__faisca { display: none; }
+  .fio__linha {
+    position: absolute;
+    top: 0;
+    bottom: 8px;
+    left: var(--x);
+    width: 1px;
+    background: linear-gradient(transparent, var(--cor) 35%);
+    box-shadow: 0 0 6px rgb(53 213 232 / 0.45);
+    transform-origin: top;
+  }
+  .fio__faisca {
+    position: absolute;
+    top: 0;
+    left: calc(var(--x) + 0.5px);
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    background: var(--ink-strong);
+    box-shadow: 0 0 8px 2px rgb(53 213 232 / 0.6);
+    rotate: 45deg;
+    opacity: 0;
+  }
+  .fio__ramo {
+    position: absolute;
+    bottom: 8px;
+    left: calc(var(--x) + 8px);
+    right: max(var(--gutter), (100% - var(--largura-max)) / 2);
+    height: 1px;
+    background: linear-gradient(90deg, var(--cor), transparent);
+    transform-origin: left;
+  }
+  .fio__no {
+    position: absolute;
+    bottom: 2px;
+    left: calc(var(--x) - 6.5px);
+    width: 14px;
+    height: 10px;
+    fill: var(--cor);
+    filter: drop-shadow(0 0 5px rgb(53 213 232 / 0.6));
+  }
+  .secao--claro .fio__no { filter: none; }
+  .fio__onda {
+    position: absolute;
+    bottom: -9px;
+    left: calc(var(--x) - 15.5px);
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--cor);
+    rotate: 45deg;
+    opacity: 0;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .fio__linha { animation: fio-desce linear both; animation-timeline: --fio; animation-range: entry 0% cover 45%; }
+      .fio__faisca { animation: fio-faisca linear both; animation-timeline: --fio; animation-range: entry 0% cover 45%; }
+      .fio__no { animation: fio-no linear both; animation-timeline: --fio; animation-range: cover 40% cover 52%; }
+      .fio__onda { animation: fio-onda linear both; animation-timeline: --fio; animation-range: cover 44% cover 64%; }
+      .fio__ramo { animation: fio-ramo linear both; animation-timeline: --fio; animation-range: cover 46% cover 75%; }
+      .secao--claro .fio__no { animation-range: entry 40% cover 40%; }
+      .secao--claro .fio__onda { animation-range: entry 60% cover 60%; }
+      .secao--claro .fio__ramo { animation-range: entry 70% cover 75%; }
+    }
+  }
+  @keyframes fio-desce { from { transform: scaleY(0); } }
+  @keyframes fio-faisca {
+    0% { opacity: 0; translate: 0 0; }
+    10%, 90% { opacity: 1; }
+    100% { opacity: 0; translate: 0 calc(var(--altura) - 6px); }
+  }
+  @keyframes fio-no { from { opacity: 0; scale: 0.2; rotate: -90deg; } }
+  @keyframes fio-onda {
+    0% { opacity: 0.9; scale: 0.4; }
+    100% { opacity: 0; scale: 1.6; }
+  }
+  @keyframes fio-ramo { from { transform: scaleX(0); } }
+  @media (forced-colors: active) { .fio { display: none; } }
+  /* A divisória antiga (linha com corte em 45°) fica por baixo: o ramo do fio acende sobre ela */
+
   .secao__conteudo { width: min(100% - 2 * var(--gutter), var(--largura-max)); margin-inline: auto; }
   .secao__conteudo--estreita { width: min(100% - 2 * var(--gutter), 760px); }
 </style>

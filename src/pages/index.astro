@@ -27,7 +27,7 @@ const vagas = vagasBuild ?? vagasMax;
   <main id="conteudo">
     <div class="abertura">
       <canvas class="abertura__nevoa" aria-hidden="true" data-nevoa></canvas>
-      <canvas class="abertura__grade" aria-hidden="true" data-grade-cinetica></canvas>
+      <span class="abertura__linha" aria-hidden="true"></span>
       <Hero vagas={vagas} />
       <Gerador />
     </div>
@@ -51,12 +51,11 @@ const vagas = vagasBuild ?? vagasMax;
 <script>
   import "../scripts/contador";
   import "../scripts/nevoa";
-  import "../scripts/grade-cinetica";
 </script>
 
 <style>
   /*
-    Primeira dobra: Hero e Gerador dividem a mesma faixa sobre a grade do painel.
+    Primeira dobra: Hero e Gerador dividem a mesma faixa sobre a névoa (a grade saiu em 19/10/2026).
     Celular: empilhados. A partir de 1024 px: 12 colunas, a oferta em 1–7 e o console em 8–12,
     alinhados ao topo; cabe em 1440×900 com o topo de 72 px.
   */
@@ -73,31 +72,6 @@ const vagas = vagasBuild ?? vagasMax;
   }
 
   /*
-    Grade de pontos a cada 32 px, que se dissolve nas bordas. Parada, vem deste CSS; com mouse, o
-    canvas da grade cinética (scripts/grade-cinetica.ts) desenha os mesmos pontos e os curva na
-    direção do cursor. A primeira coluna cai na margem do conteúdo e a primeira linha no topo.
-  */
-  .abertura::before,
-  .abertura__grade {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    -webkit-mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
-    mask-image: radial-gradient(ellipse 120% 52% at 20% 0%, black 30%, transparent 100%);
-  }
-  .abertura::before {
-    content: "";
-    background-image: radial-gradient(circle at 0.875px 0.875px, rgb(74 87 104 / 0.85) 0.875px, transparent 1.4px);
-    background-size: 32px 32px;
-    /* Em background-position, 100% desconta a largura do ladrilho: daí os 32px de volta */
-    background-position: max(var(--gutter), (100% - var(--largura-max) + 32px) / 2) 0;
-  }
-  .abertura__grade { width: 100%; height: 100%; }
-  /* O canvas assume: a grade do CSS sai para não dobrar os pontos */
-  .abertura:global(.is-grade-viva)::before { visibility: hidden; }
-
-  /*
     Névoa (scripts/nevoa.ts): luz viva atrás da grade, que acende devagar quando o primeiro quadro
     fica pronto. Sem WebGL ela nunca acende e a dobra fica só com a grade.
   */
@@ -110,6 +84,9 @@ const vagas = vagasBuild ?? vagasMax;
     pointer-events: none;
     opacity: 0;
     transition: opacity 1200ms var(--ease-saida);
+    /* Esmaece no fim da dobra: a primeira dobra se funde com a Dor, sem corte */
+    -webkit-mask-image: linear-gradient(#000 60%, transparent);
+    mask-image: linear-gradient(#000 60%, transparent);
   }
   .abertura__nevoa:global(.is-acesa) { opacity: 1; }
   /* Último recurso, se a foto da névoa não carregar: o mesmo núcleo de luz, parado, em gradientes */
@@ -129,30 +106,42 @@ const vagas = vagasBuild ?? vagasMax;
     .abertura__nevoa { transition-duration: 1ms; }
   }
 
-  /* Fim da dobra: a mesma linha com corte em 45° que separa as seções (ui/Secao) */
-  .abertura::after {
+  /* Começo da linha do site inteiro (a mesma de ui/Secao): nasce no hero e desce até a Dor */
+  .abertura { view-timeline: --abertura; }
+  .abertura__linha {
+    position: absolute;
+    top: var(--s-8);
+    bottom: 0;
+    left: calc(var(--borda-lateral) - min(18px, var(--gutter) * 0.5));
+    width: 1px;
+    pointer-events: none;
+    background: linear-gradient(transparent, rgb(74 87 104 / 0.45) 25%);
+  }
+  .abertura__linha::after {
     content: "";
     position: absolute;
-    bottom: 0;
-    left: var(--borda-lateral);
-    right: var(--borda-lateral);
-    height: 9px;
-    pointer-events: none;
-    background:
-      linear-gradient(var(--line), var(--line)) 14px 0 / 100% 1px no-repeat,
-      linear-gradient(135deg, transparent 6px, var(--line) 6px 7.4px, transparent 7.4px) 0 0 / 10px 9px no-repeat;
+    inset: 0;
+    background: linear-gradient(transparent, var(--accent) 25%);
+    box-shadow: 0 0 6px rgb(53 213 232 / 0.45);
+    transform-origin: top;
   }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .abertura__linha::after {
+        animation: abertura-linha linear both;
+        animation-timeline: --abertura;
+        animation-range: cover 50vh cover calc(100% - 50vh);
+      }
+    }
+  }
+  @keyframes abertura-linha { from { transform: scaleY(0); } }
+  @media (forced-colors: active) { .abertura__linha { display: none; } }
 
   @media (min-width: 1024px) {
     .abertura {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       column-gap: var(--s-5);
       align-items: start;
-    }
-    .abertura::before,
-    .abertura__grade {
-      -webkit-mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
-      mask-image: radial-gradient(ellipse 75% 90% at 35% 10%, black 35%, transparent 100%);
     }
     .abertura > :global(.hero) { grid-column: 1 / span 7; }
     .abertura > :global(.gerador) { grid-column: 8 / span 5; }

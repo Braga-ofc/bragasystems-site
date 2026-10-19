@@ -10,7 +10,7 @@
     plaqueta (rotateX), sai do desfoque, pousa acesa em ciano e esfria para o branco; depois uma
     faixa de luz passa pela frase inteira, na ordem de leitura. Split Text / Blur Text do React Bits
     (MIT + Commons Clause), recriados em CSS: as letras são separadas no build.
-  - 900 ms → ~9 s, explicação digitada sem pressa (24 ms por caractere, respiro após vírgula e
+  - 900 ms → ~9 s, explicação digitada (16 ms por caractere, respiro após vírgula e
     ponto final), com cursor fino em ciano que pisca no fim e some. As letras são separadas no
     build e ficam no lugar (CLS 0); o script inline logo após o parágrafo acende uma por tique,
     trocando a classe de duas letras por vez (246 animações CSS, uma por letra, dobravam o
@@ -51,7 +51,15 @@ const digitado = [...hero.subtitulo.normalize("NFC")].map((c) => (c === " " ? " 
     <span class="sr-only">{hero.titulo}</span>
     <span aria-hidden="true">
       {palavras.map((letrasDaPalavra, p) => (
-        <Fragment><span class="hero__palavra">{letrasDaPalavra.map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>{p < palavras.length - 1 && " "}</Fragment>
+        <Fragment>
+          {/* "dorme" ganha o marca-texto depois que as letras pousam (pedido do Gustavo, 19/10/2026) */}
+          {letrasDaPalavra.map((l) => l.letra).join("").startsWith("dorme") ? (
+            <span class="hero__palavra"><mark data-marca data-marca-atraso="1700">{letrasDaPalavra.slice(0, 5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</mark>{letrasDaPalavra.slice(5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>
+          ) : (
+            <span class="hero__palavra">{letrasDaPalavra.map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>
+          )}
+          {p < palavras.length - 1 && " "}
+        </Fragment>
       ))}
     </span>
   </h1>
@@ -72,7 +80,7 @@ const digitado = [...hero.subtitulo.normalize("NFC")].map((c) => (c === " " ? " 
         letras[k].className = "is-feita is-cursor";
         const c = letras[k++].textContent;
         if (k === letras.length) return caixa.classList.add("is-fim");
-        setTimeout(passo, c === "." ? 324 : c === "," ? 94 : 24);
+        setTimeout(passo, c === "." ? 220 : c === "," ? 64 : 16);
       };
       if (letras.length) setTimeout(passo, 900);
     })();

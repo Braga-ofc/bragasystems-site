@@ -1,21 +1,66 @@
----
+﻿---
 /*
-  Dor (copy §4): o registro do que dá errado hoje.
-  Seis linhas, cada uma com a cunha em 45° apagada. O fechamento acende a mesma cunha
-  em ciano (o único destaque do bloco), na coluna da direita: o registro termina resolvido.
+  Dor (copy §4): o registro do que dá errado hoje, contado como a noite de quem atende sozinho.
+  Animação "Dez da noite" (escolha do Gustavo, 19/10/2026): a seção escurece quando chega ao centro
+  da tela, cada linha do registro acende ao passar pela faixa central, a virada acende palavra por
+  palavra e a luz volta, em ciano, no fechamento (o único destaque do bloco). Luas bem apagadas e
+  espalhadas fazem o céu. Sem JavaScript ou com movimento reduzido: tudo aceso e parado.
 */
 import Secao from "../ui/Secao.astro";
 import { dor } from "../../content/home";
 import { rich } from "../../lib/texto";
 
 // A fala do cliente ("quanto custa?") ganha a cor forte; o resto da abertura fica em segundo plano.
-const abertura = rich(dor.abertura).replace(/\u201C(.+?)\u201D/, '<span class="dor__fala">\u201C$1\u201D</span>');
+const abertura = rich(dor.abertura).replace(/“(.+?)”/, '<span class="dor__fala">“$1”</span>');
 
 // No computador o registro corre em duas colunas, de cima para baixo.
 const linhas = Math.ceil(dor.itens.length / 2);
+
+const palavras = dor.virada.split(" ");
+
+// "excelente" ganha o marca-texto (pedido do Gustavo); se a copy mudar, a frase sai igual, sem o destaque.
+const fechamento = rich(dor.fechamento).replace("excelente", '<mark data-marca>$&</mark>');
+
+// Luas: posição (% da seção), tamanho (px), opacidade e giro. Onde: sempre nos respiros de cima e de
+// baixo; "computador" também nos vazios da grade (ao lado do título, embaixo da virada); "largo" nas margens.
+const luas = [
+  { x: 3, y: 0.6, t: 22, o: 0.34, r: -20 },
+  { x: 62, y: 1.2, t: 12, o: 0.24, r: 15 },
+  { x: 86, y: 0.4, t: 30, o: 0.3, r: -40 },
+  { x: 18, y: 97.8, t: 14, o: 0.26, r: 30 },
+  { x: 80, y: 97.2, t: 24, o: 0.32, r: -10 },
+  { x: 72, y: 8, t: 34, o: 0.3, r: -25, onde: "computador" },
+  { x: 88, y: 19, t: 14, o: 0.24, r: 20, onde: "computador" },
+  { x: 64, y: 25, t: 10, o: 0.2, r: 50, onde: "computador" },
+  { x: 14, y: 86, t: 26, o: 0.28, r: -30, onde: "computador" },
+  { x: 38, y: 92, t: 12, o: 0.22, r: 10, onde: "computador" },
+  { x: 2, y: 40, t: 20, o: 0.26, r: 35, onde: "largo" },
+  { x: 96, y: 52, t: 28, o: 0.3, r: -15, onde: "largo" },
+  { x: 4, y: 66, t: 12, o: 0.2, r: -45, onde: "largo" },
+  { x: 97, y: 80, t: 16, o: 0.24, r: 25, onde: "largo" },
+];
 ---
 <Secao class="dor">
-  <div class="dor__grade">
+  <div class="dor__ceu" aria-hidden="true">
+    <span class="dor__noite"></span>
+    <svg class="dor__defs" width="0" height="0">
+      <mask id="dor-lua" maskContentUnits="objectBoundingBox">
+        <rect width="1" height="1" fill="#fff" />
+        <circle cx="0.7" cy="0.34" r="0.36" fill="#000" />
+      </mask>
+    </svg>
+    {luas.map((l, i) => (
+      <svg
+        class:list={["dor__lua", l.onde && `dor__lua--${l.onde}`]}
+        viewBox="0 0 24 24"
+        style={`--x:${l.x}%;--y:${l.y}%;--t:${l.t}px;--o:${l.o};--r:${l.r}deg;--fim:${30 + ((i * 17) % 30)}%`}
+      >
+        <circle cx="12" cy="12" r="10" mask="url(#dor-lua)" />
+      </svg>
+    ))}
+  </div>
+
+  <div class="dor__grade" data-dor>
     <header class="dor__cabeca">
       <p class="dor__abertura" set:html={abertura} />
       <h2 class="dor__titulo">{dor.titulo}</h2>
@@ -36,17 +81,80 @@ const linhas = Math.ceil(dor.itens.length / 2);
       ))}
     </ul>
 
-    <p class="dor__virada">{dor.virada}</p>
+    <p class="dor__virada">
+      {palavras.map((p, i) => <><span class="dor__palavra" style={`--i:${i}`}>{p}</span>{i < palavras.length - 1 && " "}</>)}
+    </p>
 
-    <p class="dor__fechamento">
+    <p class="dor__fechamento" data-fechamento>
       <span class="dor__luz" aria-hidden="true"><span class="dor__cunha dor__cunha--acesa"></span></span>
-      <span>{dor.fechamento}</span>
+      <span set:html={fechamento} />
     </p>
   </div>
 </Secao>
 
+<script>
+  // Liga a sequência só com movimento e IntersectionObserver; sem isso a seção fica toda acesa.
+  const secao = document.querySelector<HTMLElement>(".dor");
+  const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (secao && !reduzido && "IntersectionObserver" in window) {
+    secao.dataset.fase = "dia";
+
+    // A noite cai quando a seção ocupa o meio da tela e acaba quando o fechamento acende
+    new IntersectionObserver(
+      ([e]) => {
+        if (secao.dataset.fase === "amanhecer") return;
+        secao.dataset.fase = e.isIntersecting ? "noite" : "dia";
+      },
+      { rootMargin: "-45% 0px -45% 0px" },
+    ).observe(secao);
+
+    // Linhas do registro: acendem na faixa central e, ao subir, ficam como mensagem vista (antes/faixa/depois)
+    // Calculado na rolagem (um observador perde a faixa quando a rolagem pula), só com a seção à vista
+    const itens = [...secao.querySelectorAll<HTMLElement>(".dor__item")];
+    let quadro = 0;
+    // Pela ordem da copy, um por vez: o avanço na lista (linha do meio da tela) escolhe o item aceso.
+    // No computador são duas colunas, então a posição na tela não serve: 1 e 4 acenderiam juntos.
+    const lista = secao.querySelector<HTMLElement>(".dor__registro")!;
+    const marcar = () => {
+      quadro = 0;
+      const r = lista.getBoundingClientRect();
+      const p = (window.innerHeight * 0.5 - r.top) / r.height;
+      const k = p < 0 ? -1 : Math.min(itens.length, Math.floor(p * itens.length));
+      itens.forEach((el, i) => {
+        const estado = i < k ? "depois" : i === k ? "faixa" : "antes";
+        if (el.dataset.estado !== estado) el.dataset.estado = estado;
+      });
+    };
+    const pedir = () => { if (!quadro) quadro = requestAnimationFrame(marcar); };
+    marcar();
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { window.addEventListener("scroll", pedir, { passive: true }); pedir(); }
+      else window.removeEventListener("scroll", pedir);
+    }).observe(secao);
+
+    // Virada e fechamento acendem uma vez; o fechamento traz a luz de volta
+    const uma = new IntersectionObserver(
+      (entradas) => {
+        for (const e of entradas) {
+          if (!e.isIntersecting) continue;
+          const el = e.target as HTMLElement;
+          el.dataset.estado = "acesa";
+          uma.unobserve(el);
+          if (el.hasAttribute("data-fechamento")) secao.dataset.fase = "amanhecer";
+        }
+      },
+      { rootMargin: "-30% 0px -30% 0px" },
+    );
+    for (const el of secao.querySelectorAll<HTMLElement>(".dor__virada, .dor__fechamento")) {
+      el.dataset.estado = "antes";
+      uma.observe(el);
+    }
+  }
+</script>
+
 <style>
-  .dor__grade { display: grid; min-width: 0; }
+  .dor__grade { position: relative; display: grid; min-width: 0; }
 
   .dor__cabeca { display: grid; gap: var(--s-4); }
   .dor__abertura {
@@ -155,5 +263,94 @@ const linhas = Math.ceil(dor.itens.length / 2);
     .dor__virada { grid-column: 1 / span 7; }
     .dor__fechamento { grid-row: auto; }
     .dor__fechamento { grid-column: 7 / -1; max-width: none; }
+  }
+
+  /* ---------- Céu: véu da noite e luas (decorativo, atrás do conteúdo) ---------- */
+  .dor__ceu {
+    position: absolute;
+    inset: 0;
+    overflow: clip;
+    pointer-events: none;
+  }
+  .dor__defs { position: absolute; }
+  /* O véu escurece a própria seção, com as pontas esmaecidas para não cortar o fundo vivo */
+  .dor__noite {
+    position: absolute;
+    inset: 0;
+    background: #05070A;
+    mask-image: linear-gradient(transparent, #000 16%, #000 84%, transparent);
+    opacity: 0;
+    transition: opacity 1400ms var(--ease-saida);
+  }
+  .dor[data-fase="noite"] .dor__noite { opacity: 0.4; }
+
+  .dor__lua {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--t);
+    height: var(--t);
+    fill: var(--ink);
+    opacity: calc(var(--o) * 0.8);
+    rotate: var(--r);
+    transition: opacity 1400ms var(--ease-saida);
+  }
+  .dor__lua--computador, .dor__lua--largo { display: none; }
+  .dor[data-fase="dia"] .dor__lua { opacity: calc(var(--o) * 0.6); }
+  .dor[data-fase="noite"] .dor__lua { opacity: var(--o); }
+
+  /* ---------- Sequência (só com data-fase, que o script liga) ---------- */
+  .dor[data-fase] .dor__fala { transition: color 400ms var(--ease-saida); }
+
+  .dor[data-fase] .dor__item {
+    transition: color 400ms var(--ease-saida);
+  }
+  .dor[data-fase] .dor__item .dor__cunha {
+    transition: background-color 400ms var(--ease-saida), translate 400ms var(--ease-saida);
+  }
+  .dor[data-fase] .dor__item[data-estado="antes"] { color: var(--ink-muted); }
+  .dor[data-fase] .dor__item[data-estado="antes"] .dor__cunha { background: var(--line-forte); }
+  .dor[data-fase] .dor__item[data-estado="faixa"] { color: var(--ink-strong); }
+  .dor[data-fase] .dor__item[data-estado="faixa"] .dor__cunha { background: var(--ink-strong); translate: 4px 0; }
+
+  /* Virada: palavra por palavra, do apagado ao forte */
+  .dor[data-fase] .dor__palavra { transition: color 500ms var(--ease-saida) calc(var(--i) * 60ms); }
+  .dor[data-fase] .dor__virada[data-estado="antes"] .dor__palavra { color: var(--ink-muted); }
+
+  /* Fechamento: a cunha acende em ciano e a luz volta */
+  .dor[data-fase] .dor__fechamento { transition: color 600ms var(--ease-saida); }
+  .dor[data-fase] .dor__luz { transition: filter 800ms var(--ease-saida) 200ms; }
+  .dor[data-fase] .dor__cunha--acesa { transition: background-color 600ms var(--ease-saida) 200ms; }
+  .dor[data-fase] .dor__fechamento[data-estado="antes"] { color: var(--ink-muted); }
+  .dor[data-fase] .dor__fechamento[data-estado="antes"] .dor__luz { filter: none; }
+  .dor[data-fase] .dor__fechamento[data-estado="antes"] .dor__cunha--acesa { background: var(--line-forte); }
+
+  @media (min-width: 960px) {
+    .dor__lua--computador { display: block; }
+  }
+  /* Só com margem de verdade fora do conteúdo */
+  @media (min-width: 1280px) {
+    .dor__lua--largo { display: block; }
+  }
+
+  /*
+    Luas com a rolagem: descendo, cada uma gira e cresce até o lugar; subindo, desfaz o giro.
+    Cada lua termina num ponto diferente da rolagem (--fim), para não chegarem todas juntas.
+  */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .dor__lua {
+        animation: dor-lua linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover var(--fim, 40%);
+      }
+    }
+  }
+  @keyframes dor-lua {
+    from { rotate: calc(var(--r) - 220deg); scale: 0.3; translate: 0 48px; }
+    to { rotate: var(--r); scale: 1; translate: 0 0; }
+  }
+  @media (forced-colors: active) {
+    .dor__ceu { display: none; }
   }
 </style>

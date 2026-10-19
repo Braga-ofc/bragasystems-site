@@ -8,7 +8,7 @@ html {
   scroll-padding-top: 88px;
 }
 @media (prefers-reduced-motion: no-preference) {
-  html { scroll-behavior: smooth; }
+  html:not(.lenis) { scroll-behavior: smooth; }
 }
 
 body {
@@ -116,6 +116,34 @@ button, input, select, textarea { font: inherit; color: inherit; }
   display: none !important;
 }
 
+/*
+  Marca-texto (<mark data-marca>): uma pincelada de caneta marca-texto em ciano translúcido, com as
+  pontas chanfradas e os veios da ponta de feltro, levemente inclinada. A tinta é um SVG atrás da
+  palavra; a passada da esquerda para a direita é um clip-path (scripts/marca-texto.ts liga e desliga).
+*/
+[data-marca] {
+  position: relative;
+  isolation: isolate;
+  color: inherit;
+  background: none;
+}
+[data-marca]::before {
+  content: "";
+  position: absolute;
+  inset: 0.18em -0.16em -0.02em -0.12em;
+  z-index: -1;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath fill='%2335D5E8' fill-opacity='.46' d='M14 9 L120 7 L210 9 L300 6 L392 8 L384 30 L396 52 L300 54 L196 51 L104 55 L6 53 L12 31 Z'/%3E%3Cpath fill='%2335D5E8' fill-opacity='.22' d='M18 15 L392 13 L390 17 L16 19 Z M14 44 L388 41 L389 45 L12 48 Z'/%3E%3Cpath fill='%2335D5E8' fill-opacity='.14' d='M22 27 L380 25 L381 28 L20 30 Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  rotate: -1.2deg;
+}
+/* Entrada da esquerda para a direita; a saída recolhe o mesmo traço da direita para a esquerda */
+[data-marca]::before { transition: clip-path 750ms cubic-bezier(0.55, 0, 0.25, 1); }
+[data-marca="pronta"]::before { clip-path: inset(0 100% 0 0); }
+[data-marca="marcada"]::before { clip-path: inset(0 0 0 0); }
+@media (forced-colors: active) {
+  [data-marca] { background: Mark; color: MarkText; }
+  [data-marca]::before { display: none; }
+}
+
 /* Entradas ao rolar: só o que ainda está abaixo da tela recebe "pendente" (scripts/revela.ts). */
 @media (prefers-reduced-motion: no-preference) {
   [data-revela] {
@@ -125,6 +153,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
       filter var(--dur-lenta) var(--ease-saida);
   }
   [data-revela="pendente"] { opacity: 0; translate: 0 14px; filter: blur(6px); }
+}
+/*
+  Onde o navegador anima pela rolagem (pedido do Gustavo, 19/10/2026): a entrada acompanha o scroll,
+  descendo ela se completa e subindo ela se desfaz. O script de revela.ts fica só para os outros navegadores.
+*/
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-revela], [data-revela="pendente"] {
+      transition: none;
+      opacity: 1;
+      translate: none;
+      filter: none;
+      animation: revela-rolagem linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 30%;
+    }
+  }
+}
+@keyframes revela-rolagem {
+  from { opacity: 0; translate: 0 32px; filter: blur(6px); }
+  to { opacity: 1; translate: 0 0; filter: blur(0); }
 }
 
 /*

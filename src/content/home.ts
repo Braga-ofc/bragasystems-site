@@ -59,19 +59,20 @@ export const gerador = {
 } as const;
 
 export const dor = {
+  // Proposta 2.7 "Fora do expediente" (opção 1 do PROPOSTAS-DOR.md, escolhida pelo Gustavo; aguardando aprovação final)
   abertura:
-    'São dez da noite. Você termina o último atendimento, pega o celular e tem três mensagens: "quanto custa?". Você responde com calma, explica cada detalhe, manda o valor. Dois visualizam e não respondem. O terceiro diz que vai pensar. Ninguém volta.',
-  titulo: "Isso já aconteceu com você?",
+    'Dez da noite. O último atendimento acabou, e o celular tem três mensagens: "quanto custa?". Você explica tudo com calma e manda o valor. Dois visualizam. Um diz que vai pensar. Ninguém volta.',
+  titulo: "Seu expediente acaba. A dúvida do cliente, não.",
   itens: [
-    "As mesmas cinco perguntas, respondidas todo santo dia.",
-    "Um perfil bonito que não explica direito o que você entrega.",
-    "O preço parece alto porque o valor nunca foi mostrado antes.",
-    "Um site parado que não traz ninguém, ou site nenhum.",
-    "Um concorrente mais barato que parece mais profissional.",
-    "Dinheiro de anúncio indo para um lugar que não convence.",
+    "As mesmas perguntas chegam todo dia, e cada resposta começa do zero.",
+    "O perfil mostra o trabalho, mas não explica o que você entrega.",
+    "O preço parece caro porque ninguém mostrou o valor antes.",
+    "O concorrente mais barato fecha porque parece mais profissional.",
+    "O investimento em anúncio cai num lugar que não convence.",
+    "Quando você para de atender, a venda para junto.",
   ],
   virada: "O pior não é perder o cliente. É começar a duvidar do seu próprio preço.",
-  fechamento: "Seu serviço é bom. Só falta alguém vendendo ele enquanto você trabalha.",
+  fechamento: "Seu serviço é excelente. Só falta uma página que trabalhe enquanto você descansa.",
 } as const;
 
 export const proposta = {

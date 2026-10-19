@@ -97,7 +97,10 @@ function desenhar() {
     luzX += (mouseX - luzX) * 0.18;
     luzY += (mouseY - luzY) * 0.18;
     luz.style.transform = `translate3d(${luzX.toFixed(1)}px, ${luzY.toFixed(1)}px, 0)`;
-    luz.toggleAttribute("data-claro", secaoEm(Math.min(alto - 1, Math.max(0, luzY))).claro);
+    const sob = secaoEm(Math.min(alto - 1, Math.max(0, luzY)));
+    luz.toggleAttribute("data-claro", sob.claro);
+    // Na Dor a luz fica neutra: o único ciano do bloco é o fechamento
+    luz.toggleAttribute("data-neutra", sob.el.classList.contains("dor"));
     if (Math.abs(mouseX - luzX) > 0.5 || Math.abs(mouseY - luzY) > 0.5) ocupado = true;
   }
 
