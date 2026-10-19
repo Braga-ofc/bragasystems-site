@@ -65,7 +65,8 @@ const vagas = vagasBuild ?? vagasMax;
     --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);
     position: relative;
     isolation: isolate;
-    overflow-x: clip;
+    /* Corta nos dois eixos: a luz da grade (360 px) não vaza para a Dor */
+    overflow: clip;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s-8);

@@ -8,9 +8,8 @@
   data-quando-n. Com estado fixo (a /amostra), sai só o texto daquele estado e daquele número.
   Movimento (pedido do Gustavo: pequeno, mas tem que chamar atenção), só no selo de vagas:
   - 0–400 ms: a moldura varre da esquerda (clip-path) e o texto acende logo atrás, saindo do desfoque.
-  - Depois, sem parar: uma luz ciano corre o contorno (em cima →, embaixo ←, virando nas pontas),
-    com um halo desfocado que a acompanha; o "25% off" pisca em vermelho (1 vez a cada 1,2 s).
-    Fora da tela os loops pausam; esgotado não tem luz; movimento reduzido mostra tudo parado.
+  - Depois, sem parar: o "25% off" pisca em vermelho (1 vez a cada 1,2 s). A luz neon que corria o
+    contorno saiu a pedido do Gustavo (19/10/2026). Fora da tela o loop pausa; movimento reduzido mostra tudo parado.
 */
 import { hero } from "../../content/home";
 import { performance } from "../../content/planos";
@@ -34,7 +33,6 @@ const comUma = desconto(rich(hero.selo.comUmaVaga));
   <span class:list={["selo", "selo--recomendado", "chanfrado", classe]}>{performance.selo}</span>
 ) : (
   <span class:list={["selo", "selo--vagas", "chanfrado", classe]} data-selo-vagas data-estado={auto ? undefined : estado}>
-    <span class="selo__brilho" aria-hidden="true"></span>
     <span class="selo__marca" aria-hidden="true"></span>
     {auto ? (
       <>
@@ -50,7 +48,7 @@ const comUma = desconto(rich(hero.selo.comUmaVaga));
 )}
 
 <script>
-  // Loop infinito fora da vista só gasta bateria: pausa o brilho e o piscar quando o selo sai da tela.
+  // Loop infinito fora da vista só gasta bateria: pausa o piscar quando o selo sai da tela.
   const selos = document.querySelectorAll<HTMLElement>("[data-selo-vagas]");
   if (selos.length && "IntersectionObserver" in window) {
     const observador = new IntersectionObserver((entradas) => {
@@ -108,52 +106,13 @@ const comUma = desconto(rich(hero.selo.comUmaVaga));
     text-shadow: 0 0 8px rgb(255 90 95 / 0.55);
   }
 
-  /* Halo da luz do contorno: atrás da moldura (que é opaca), então só aparece do lado de fora */
-  .selo__brilho {
-    position: absolute;
-    inset: -3px;
-    z-index: -2;
-    pointer-events: none;
-  }
-
-  /*
-    Luz que corre o contorno: o mesmo papel do .feixe (Border Beam do Magic UI, MIT), mas com duas
-    faixas lineares em vez de um conic-gradient. Num selo ~11× mais largo que alto, o conic se arrasta
-    no meio e dispara nas pontas; as faixas andam em velocidade constante e "viram" em cada ponta.
-    A de cima vai da esquerda para a direita; quando a cabeça dela chega na ponta, a de baixo entra
-    voltando. Posições (faixa de 32% x 50%): cabeça na borda em -40%→107% (cima) e 140%→-7% (baixo);
-    -50% e 150% = fora do selo, onde o loop recomeça sem salto visível.
-  */
-  @property --selo-x1 { syntax: "<percentage>"; inherits: false; initial-value: -50%; }
-  @property --selo-x2 { syntax: "<percentage>"; inherits: false; initial-value: -50%; }
 
   @media (prefers-reduced-motion: no-preference) {
     .selo--vagas { animation: selo-entra var(--dur-lenta) var(--ease-saida) backwards; }
-    /* A luz anima só nas duas camadas que a desenham: na raiz, a variável herdada recalculava o selo inteiro a cada quadro */
-    .selo--vagas::before,
-    .selo--vagas .selo__brilho {
-      --selo-luz:
-        linear-gradient(90deg, transparent, var(--ciano-eletrico-forte) 85%, transparent) var(--selo-x1) 0 / 32% 50% no-repeat,
-        linear-gradient(270deg, transparent, var(--ciano-eletrico-forte) 85%, transparent) var(--selo-x2) 100% / 32% 50% no-repeat;
-      animation:
-        selo-ida 2.8s linear var(--dur-lenta) infinite,
-        selo-volta 2.8s linear calc(var(--dur-lenta) + 1.4s) infinite;
-    }
-    .selo--vagas::before { background: var(--selo-luz), var(--cor-borda); }
-    .selo__brilho { background: var(--selo-luz); filter: blur(5px); }
     .selo--vagas .selo__marca,
     .selo--vagas .selo__texto { animation: selo-texto var(--dur) var(--ease-saida) 160ms backwards; }
     .selo :global(.selo__desconto) { animation: selo-pisca 1.2s ease-in-out infinite; }
 
-    /* Esgotado: só a entrada; luz correndo ali anunciaria uma vaga que não existe */
-    .selo--vagas[data-estado="esgotado"]::before,
-    .selo--vagas[data-estado="esgotado"] .selo__brilho,
-    :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado])::before,
-    :global(:root[data-vagas-estado="esgotado"]) .selo--vagas:not([data-estado]) .selo__brilho { animation: none; }
-
-    .selo--fora,
-    .selo--fora::before,
-    .selo--fora .selo__brilho,
     .selo--fora :global(.selo__desconto) { animation-play-state: paused; }
   }
 
@@ -164,16 +123,6 @@ const comUma = desconto(rich(hero.selo.comUmaVaga));
   }
   @keyframes selo-texto {
     from { opacity: 0; filter: blur(3px); }
-  }
-  @keyframes selo-ida {
-    0% { --selo-x1: -40%; }
-    50% { --selo-x1: 107%; }
-    65%, 100% { --selo-x1: 150%; }
-  }
-  @keyframes selo-volta {
-    0% { --selo-x2: 140%; }
-    50% { --selo-x2: -7%; }
-    65%, 100% { --selo-x2: -50%; }
   }
   /*
     Menos de 1 piscada por segundo (WCAG 2.3.1 permite até 3). Pisca trocando de cor, vermelho ↔ prata:
@@ -187,7 +136,6 @@ const comUma = desconto(rich(hero.selo.comUmaVaga));
 
   /* Alto contraste: o sistema pinta o texto; sem halo e sem nada piscando */
   @media (forced-colors: active) {
-    .selo__brilho { display: none; }
     .selo--vagas,
     .selo--vagas::before,
     .selo :global(.selo__desconto) { animation: none; }

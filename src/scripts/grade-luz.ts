@@ -12,11 +12,8 @@ if (area && luz && matchMedia("(hover: hover) and (pointer: fine)").matches && !
   let x = 0;
   let y = 0;
   let quadro = 0;
-  // Mesma origem da grade parada (index.astro): primeira coluna na margem do conteúdo
-  const origemX = () => {
-    const gutter = Math.min(32, Math.max(20, innerWidth * 0.05));
-    return Math.max(gutter, (area.clientWidth - 1120 + 32) / 2);
-  };
+  // Mesma origem da grade parada (index.astro): o padding esquerdo da abertura é a --borda-lateral
+  const origemX = () => parseFloat(getComputedStyle(area).paddingLeft);
   const desenhar = () => {
     quadro = 0;
     const left = x - LADO / 2;
