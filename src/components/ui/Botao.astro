@@ -15,7 +15,8 @@ interface Props {
   origem?: string;
   /**
     Brilho de CTA (Shiny Button): borda com luz correndo e faixa de luz atravessando.
-    Ligado por padrão nos primários; o "Falar no WhatsApp" do topo liga no secundário.
+    Ligado por padrão nos primários e em todo botão que abre o WhatsApp. Os secundários sem
+    brilho são de navegação e ganham a borda que se fecha nos cantos (.botao--navega).
   */
   brilho?: boolean;
   class?: string;
@@ -31,14 +32,23 @@ const {
   larguraTotal = false,
   novaAba = false,
   origem,
-  brilho = variante === "primario",
+  brilho,
   class: classe,
 } = Astro.props;
 
 const ehWhatsapp = href?.startsWith("https://wa.me/");
 const abreNovaAba = ehWhatsapp || novaAba;
-const comBrilho = brilho && !desativado && !carregando;
-const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "botao--cheio", comBrilho && "botao--brilho", classe];
+const comBrilho = (brilho ?? (variante === "primario" || ehWhatsapp)) && !desativado && !carregando;
+const navega = variante === "secundario" && !comBrilho && !desativado;
+const classes = [
+  "botao",
+  "chanfrado",
+  `botao--${variante}`,
+  larguraTotal && "botao--cheio",
+  comBrilho && "botao--brilho",
+  navega && "botao--navega",
+  classe,
+];
 ---
 {href ? (
   <a
@@ -191,6 +201,32 @@ const classes = ["botao", "chanfrado", `botao--${variante}`, larguraTotal && "bo
   @keyframes brilho-faixa {
     from { --brilho-faixa: 130%; }
     to { --brilho-faixa: -30%; }
+  }
+
+  /*
+    Navegação (secundários sem brilho): em repouso, a borda fica aberta nos dois cantos chanfrados;
+    com o mouse em cima ou o foco do teclado, ela se fecha e acende em ciano, como um circuito que
+    completa. Variação do botão de cantos abertos de adamgiebl (Uiverse, MIT), recriada em CSS na
+    moldura chanfrada: uma máscara corta dois quadrados da camada de borda (::before) e encolhe.
+  */
+  @property --abre { syntax: "<length>"; inherits: false; initial-value: 0px; }
+  .botao--navega::before {
+    --abre: 22px;
+    -webkit-mask:
+      linear-gradient(#000 0 0) top left / var(--abre) var(--abre) no-repeat,
+      linear-gradient(#000 0 0) bottom right / var(--abre) var(--abre) no-repeat,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor, xor;
+    mask:
+      linear-gradient(#000 0 0) top left / var(--abre) var(--abre) no-repeat exclude,
+      linear-gradient(#000 0 0) bottom right / var(--abre) var(--abre) no-repeat exclude,
+      linear-gradient(#000 0 0);
+    transition: --abre var(--dur-lenta) var(--ease-saida);
+  }
+  .botao--navega:hover::before,
+  .botao--navega:focus-visible::before { --abre: 0px; }
+  @media (prefers-reduced-motion: reduce) {
+    .botao--navega::before { transition: none; }
   }
 
   /* Alto contraste do Windows: a moldura chanfrada some com os fundos; a borda real fica no lugar */

@@ -498,7 +498,12 @@
       {
         "name": "brilho-cta",
         "value": "luz cônica na borda 2 voltas em 4.8s + faixa 2.4s ease-in-out ×2; hover: 1.6s sem parar",
-        "purpose": "Botões primários e o WhatsApp do topo; dispara ao aparecer na tela."
+        "purpose": "Botões primários e todo botão de WhatsApp; dispara ao aparecer na tela."
+      },
+      {
+        "name": "navega-cantos",
+        "value": "máscara abre 22px nos dois cantos chanfrados → 0 em 400ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Secundários de navegação: a borda se fecha e acende em ciano no hover e no foco."
       },
       {
         "name": "revela",
