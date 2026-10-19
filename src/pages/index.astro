@@ -52,7 +52,8 @@ const vagas = vagasBuild ?? vagasMax;
 <script>
   import "../scripts/contador";
   import "../scripts/nevoa";
-  import "../scripts/grade-luz";
+  import { depois } from "../scripts/depois";
+  depois(() => import("../scripts/grade-luz"));
 </script>
 
 <style>

@@ -19,7 +19,7 @@ const linhas = Math.ceil(dor.itens.length / 2);
 const palavras = dor.virada.split(" ");
 
 // "excelente" ganha o marca-texto (pedido do Gustavo); se a copy mudar, a frase sai igual, sem o destaque.
-const fechamento = rich(dor.fechamento).replace("excelente", '<mark data-marca>$&</mark>');
+const fechamento = rich(dor.fechamento).replace("excelente", '<mark data-marca="pronta">$&</mark>');
 
 // Luas: posição (% da seção), tamanho (px), opacidade e giro. Onde: sempre nos respiros de cima e de
 // baixo; "computador" também nos vazios da grade (ao lado do título, embaixo da virada); "largo" nas margens.
@@ -93,64 +93,69 @@ const luas = [
 </Secao>
 
 <script>
+  import { depois } from "../../scripts/depois";
+
   // Liga a sequência só com movimento e IntersectionObserver; sem isso a seção fica toda acesa.
-  const secao = document.querySelector<HTMLElement>(".dor");
-  const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Espera o navegador ficar livre: a Dor está abaixo da primeira tela.
+  depois(() => {
+    const secao = document.querySelector<HTMLElement>(".dor");
+    const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (secao && !reduzido && "IntersectionObserver" in window) {
-    secao.dataset.fase = "dia";
+    if (secao && !reduzido && "IntersectionObserver" in window) {
+      secao.dataset.fase = "dia";
 
-    // A noite cai quando a seção ocupa o meio da tela e acaba quando o fechamento acende
-    new IntersectionObserver(
-      ([e]) => {
-        if (secao.dataset.fase === "amanhecer") return;
-        secao.dataset.fase = e.isIntersecting ? "noite" : "dia";
-      },
-      { rootMargin: "-45% 0px -45% 0px" },
-    ).observe(secao);
+      // A noite cai quando a seção ocupa o meio da tela e acaba quando o fechamento acende
+      new IntersectionObserver(
+        ([e]) => {
+          if (secao.dataset.fase === "amanhecer") return;
+          secao.dataset.fase = e.isIntersecting ? "noite" : "dia";
+        },
+        { rootMargin: "-45% 0px -45% 0px" },
+      ).observe(secao);
 
-    // Linhas do registro: acendem na faixa central e, ao subir, ficam como mensagem vista (antes/faixa/depois)
-    // Calculado na rolagem (um observador perde a faixa quando a rolagem pula), só com a seção à vista
-    const itens = [...secao.querySelectorAll<HTMLElement>(".dor__item")];
-    let quadro = 0;
-    // Pela ordem da copy, um por vez: o avanço na lista (linha do meio da tela) escolhe o item aceso.
-    // No computador são duas colunas, então a posição na tela não serve: 1 e 4 acenderiam juntos.
-    const lista = secao.querySelector<HTMLElement>(".dor__registro")!;
-    const marcar = () => {
-      quadro = 0;
-      const r = lista.getBoundingClientRect();
-      const p = (window.innerHeight * 0.5 - r.top) / r.height;
-      const k = p < 0 ? -1 : Math.min(itens.length, Math.floor(p * itens.length));
-      itens.forEach((el, i) => {
-        const estado = i < k ? "depois" : i === k ? "faixa" : "antes";
-        if (el.dataset.estado !== estado) el.dataset.estado = estado;
-      });
-    };
-    const pedir = () => { if (!quadro) quadro = requestAnimationFrame(marcar); };
-    marcar();
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) { window.addEventListener("scroll", pedir, { passive: true }); pedir(); }
-      else window.removeEventListener("scroll", pedir);
-    }).observe(secao);
+      // Linhas do registro: acendem na faixa central e, ao subir, ficam como mensagem vista (antes/faixa/depois)
+      // Calculado na rolagem (um observador perde a faixa quando a rolagem pula), só com a seção à vista
+      const itens = [...secao.querySelectorAll<HTMLElement>(".dor__item")];
+      let quadro = 0;
+      // Pela ordem da copy, um por vez: o avanço na lista (linha do meio da tela) escolhe o item aceso.
+      // No computador são duas colunas, então a posição na tela não serve: 1 e 4 acenderiam juntos.
+      const lista = secao.querySelector<HTMLElement>(".dor__registro")!;
+      const marcar = () => {
+        quadro = 0;
+        const r = lista.getBoundingClientRect();
+        const p = (window.innerHeight * 0.5 - r.top) / r.height;
+        const k = p < 0 ? -1 : Math.min(itens.length, Math.floor(p * itens.length));
+        itens.forEach((el, i) => {
+          const estado = i < k ? "depois" : i === k ? "faixa" : "antes";
+          if (el.dataset.estado !== estado) el.dataset.estado = estado;
+        });
+      };
+      const pedir = () => { if (!quadro) quadro = requestAnimationFrame(marcar); };
+      marcar();
+      new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) { window.addEventListener("scroll", pedir, { passive: true }); pedir(); }
+        else window.removeEventListener("scroll", pedir);
+      }).observe(secao);
 
-    // Virada e fechamento acendem uma vez; o fechamento traz a luz de volta
-    const uma = new IntersectionObserver(
-      (entradas) => {
-        for (const e of entradas) {
-          if (!e.isIntersecting) continue;
-          const el = e.target as HTMLElement;
-          el.dataset.estado = "acesa";
-          uma.unobserve(el);
-          if (el.hasAttribute("data-fechamento")) secao.dataset.fase = "amanhecer";
-        }
-      },
-      { rootMargin: "-30% 0px -30% 0px" },
-    );
-    for (const el of secao.querySelectorAll<HTMLElement>(".dor__virada, .dor__fechamento")) {
-      el.dataset.estado = "antes";
-      uma.observe(el);
+      // Virada e fechamento acendem uma vez; o fechamento traz a luz de volta
+      const uma = new IntersectionObserver(
+        (entradas) => {
+          for (const e of entradas) {
+            if (!e.isIntersecting) continue;
+            const el = e.target as HTMLElement;
+            el.dataset.estado = "acesa";
+            uma.unobserve(el);
+            if (el.hasAttribute("data-fechamento")) secao.dataset.fase = "amanhecer";
+          }
+        },
+        { rootMargin: "-30% 0px -30% 0px" },
+      );
+      for (const el of secao.querySelectorAll<HTMLElement>(".dor__virada, .dor__fechamento")) {
+        el.dataset.estado = "antes";
+        uma.observe(el);
+      }
     }
-  }
+  });
 </script>
 
 <style>

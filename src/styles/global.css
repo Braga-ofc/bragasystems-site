@@ -139,6 +139,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
 [data-marca]::before { transition: clip-path 750ms cubic-bezier(0.55, 0, 0.25, 1); }
 [data-marca="pronta"]::before { clip-path: inset(0 100% 0 0); }
 [data-marca="marcada"]::before { clip-path: inset(0 0 0 0); }
+/* A marca nasce apagada (o script liga depois da primeira tela); com movimento reduzido, já marcada */
+@media (prefers-reduced-motion: reduce) {
+  [data-marca]::before { clip-path: none; transition: none; }
+}
 @media (forced-colors: active) {
   [data-marca] { background: Mark; color: MarkText; }
   [data-marca]::before { display: none; }

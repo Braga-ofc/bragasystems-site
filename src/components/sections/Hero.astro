@@ -54,7 +54,7 @@ const digitado = [...hero.subtitulo.normalize("NFC")].map((c) => (c === " " ? " 
         <Fragment>
           {/* "dorme" ganha o marca-texto depois que as letras pousam (pedido do Gustavo, 19/10/2026) */}
           {letrasDaPalavra.map((l) => l.letra).join("").startsWith("dorme") ? (
-            <span class="hero__palavra"><mark data-marca data-marca-atraso="1700">{letrasDaPalavra.slice(0, 5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</mark>{letrasDaPalavra.slice(5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>
+            <span class="hero__palavra"><mark data-marca="pronta" data-marca-atraso="1700">{letrasDaPalavra.slice(0, 5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</mark>{letrasDaPalavra.slice(5).map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>
           ) : (
             <span class="hero__palavra">{letrasDaPalavra.map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>
           )}

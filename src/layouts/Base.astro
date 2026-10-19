@@ -56,9 +56,13 @@ const temContador = vagasBuild !== undefined;
     <slot />
     {moldura && <Rodape />}
     <script>
-      import "../scripts/revela";
-      import "../scripts/rolagem";
-      import "../scripts/marca-texto";
+      // Fora da primeira tela: liga depois que o hero começou a entrar, sem travar a abertura
+      import { depois } from "../scripts/depois";
+      depois(() => {
+        import("../scripts/revela");
+        import("../scripts/rolagem");
+        import("../scripts/marca-texto");
+      });
     </script>
   </body>
 </html>

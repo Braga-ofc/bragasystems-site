@@ -3,19 +3,19 @@
   entra na faixa de leitura e recolhe da direita para a esquerda quando ela sai (subindo ou descendo),
   para marcar de novo na volta.
   data-marca-atraso (ms) segura a primeira passada, como na headline, que espera as letras pousarem.
-  Sem JavaScript ou com movimento reduzido, a palavra já aparece marcada (CSS).
+  A marca nasce apagada no HTML (data-marca="pronta"); com movimento reduzido o CSS já mostra marcada.
 */
 const marcas = [...document.querySelectorAll<HTMLElement>("[data-marca]")];
 const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 if (marcas.length && !reduzido && "IntersectionObserver" in window) {
-  const inicio = performance.now();
   const observador = new IntersectionObserver(
     (entradas) => {
       for (const e of entradas) {
         const el = e.target as HTMLElement;
         if (e.isIntersecting) {
-          const falta = Number(el.dataset.marcaAtraso ?? 0) - (performance.now() - inicio);
+          // O atraso conta da abertura da página: o script só liga quando o navegador fica livre
+          const falta = Number(el.dataset.marcaAtraso ?? 0) - performance.now();
           window.setTimeout(() => el.setAttribute("data-marca", "marcada"), Math.max(0, falta));
         } else if (el.getAttribute("data-marca") === "marcada") {
           el.setAttribute("data-marca", "pronta");

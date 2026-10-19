@@ -250,8 +250,9 @@ function ligarNevoa(tela: HTMLCanvasElement) {
 
 const tela = document.querySelector<HTMLCanvasElement>("[data-nevoa]");
 if (tela) {
-  // Liga junto com a entrada da dobra (pedido do Gustavo, 19/10/2026), sem esperar o load
-  ligarNevoa(tela);
+  // Liga junto com a entrada da dobra (pedido do Gustavo, 19/10/2026), sem esperar o load, mas depois
+  // do primeiro quadro: compilar o WebGL antes dele atrasava a primeira pintura do hero
+  requestAnimationFrame(() => setTimeout(() => ligarNevoa(tela), 0));
 }
 
 export {};
