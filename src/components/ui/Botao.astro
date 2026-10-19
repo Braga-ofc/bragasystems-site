@@ -2,7 +2,8 @@
 import Icone from "./Icone.astro";
 
 interface Props {
-  variante?: "primario" | "secundario";
+  /** "vitrine": botão de destaque do hero ("Ver projetos"), com efeito próprio (sem Shiny Button). */
+  variante?: "primario" | "secundario" | "vitrine";
   href?: string;
   tipo?: "button" | "submit";
   icone?: "whatsapp" | "seta" | "externo" | null;
@@ -17,8 +18,11 @@ interface Props {
     Brilho de CTA (Shiny Button): borda com luz correndo e faixa de luz atravessando.
     Ligado por padrão nos primários e em todo botão que abre o WhatsApp. Os secundários sem
     brilho são de navegação e ganham a borda que se fecha nos cantos (.botao--navega).
+    A vitrine nunca leva esse brilho: tem a faixa de luz dela.
   */
   brilho?: boolean;
+  /** Neon da borda girando sem parar, aurora no fundo e texto em degradê (WhatsApp do topo). Liga o brilho. */
+  sempre?: boolean;
   class?: string;
 }
 
@@ -33,12 +37,14 @@ const {
   novaAba = false,
   origem,
   brilho,
+  sempre = false,
   class: classe,
 } = Astro.props;
 
 const ehWhatsapp = href?.startsWith("https://wa.me/");
 const abreNovaAba = ehWhatsapp || novaAba;
-const comBrilho = (brilho ?? (variante === "primario" || ehWhatsapp)) && !desativado && !carregando;
+const comBrilho =
+  variante !== "vitrine" && (sempre || (brilho ?? (variante === "primario" || ehWhatsapp))) && !desativado && !carregando;
 const navega = variante === "secundario" && !comBrilho && !desativado;
 const classes = [
   "botao",
@@ -46,6 +52,7 @@ const classes = [
   `botao--${variante}`,
   larguraTotal && "botao--cheio",
   comBrilho && "botao--brilho",
+  comBrilho && sempre && "botao--sempre",
   navega && "botao--navega",
   classe,
 ];
@@ -112,6 +119,45 @@ const classes = [
   .botao--secundario { --cor-borda: var(--line-forte); --cor-fundo: var(--surface); color: var(--ink-strong); }
   .botao--secundario:hover { --cor-borda: var(--accent); color: var(--ink-strong); }
 
+  /*
+    Vitrine ("Ver projetos" do hero): o botão de faixa de luz que o Gustavo mandou (pílula azul)
+    trazido para a moldura chanfrada. Preenchimento ciano profundo com texto branco (4,9:1; o
+    --ink-strong ficaria em 4,49:1), porque a faixa branca some sobre o ciano elétrico. Contorno
+    de 3 px = 30% de branco sobre o preenchimento (como a borda translúcida do original), 60% no
+    hover. A sombra vai no filter para seguir o chanfro. Inter vai só até 600: sem negrito falso.
+  */
+  @property --vitrine-faixa { syntax: "<length-percentage>"; inherits: false; initial-value: -100px; }
+  .botao--vitrine {
+    --espessura: 3px;
+    --cor-fundo: var(--ciano-profundo);
+    --cor-borda: color-mix(in srgb, #fff 30%, var(--ciano-profundo));
+    color: #fff;
+    filter: drop-shadow(0 10px 20px rgb(0 0 0 / 0.2));
+    transition:
+      --cor-borda 0.3s ease-in-out,
+      scale 0.3s ease-in-out,
+      translate var(--dur-rapida) var(--ease-saida);
+  }
+  .botao--vitrine:hover { --cor-borda: color-mix(in srgb, #fff 60%, var(--ciano-profundo)); }
+  /* Faixa de 100 px a 120°, parada fora do botão; calc(100% + 100px) põe a borda esquerda dela no fim */
+  .botao--vitrine::after {
+    background:
+      linear-gradient(120deg, transparent 30%, rgb(255 255 255 / 0.48), transparent 70%) var(--vitrine-faixa) 0 / 100px 100% no-repeat,
+      var(--cor-fundo);
+  }
+  .botao--vitrine :global(.botao__icone) { transition: translate 0.3s ease-in-out; }
+  /* .botao.botao--vitrine: vence a regra geral de 3 px declarada depois */
+  .botao.botao--vitrine:hover :global(.botao__icone) { translate: 4px 0; }
+  /* Só com mouse de verdade: no toque o hover gruda e a faixa ficaria rodando fora da tela */
+  @media (prefers-reduced-motion: no-preference) and (hover: hover) {
+    .botao--vitrine:hover { scale: 1.05; }
+    .botao--vitrine:hover::after { animation: botao-vitrine 1.5s ease-out infinite; }
+  }
+  @keyframes botao-vitrine {
+    0% { --vitrine-faixa: -100px; }
+    60%, 100% { --vitrine-faixa: calc(100% + 100px); }
+  }
+
   .botao:active { translate: 0 1px; }
   .botao:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
@@ -138,6 +184,7 @@ const classes = [
     color: var(--ink-muted);
     cursor: not-allowed;
     translate: none;
+    scale: none;
   }
   .botao:disabled :global(.botao__icone),
   .botao[aria-disabled="true"] :global(.botao__icone) { translate: none; }
@@ -204,6 +251,60 @@ const classes = [
   }
 
   /*
+    Sempre (WhatsApp do topo, pedido do Gustavo): a luz da borda gira sem parar, no ritmo da
+    entrada (2,4 s por volta; no hover não acelera, porque trocar a duração faz a luz pular).
+    No preenchimento, uma aurora: três manchas suaves de ciano profundo, azul-petróleo e um
+    toque de ciano elétrico que passeiam em 12 s; sem filter, só radial-gradients com as
+    posições em @property. O texto ganha um degradê lento de branco, ciano claro e azul gelo
+    (≥ 5:1 mesmo com as três manchas somadas). Com movimento reduzido: luz e aurora paradas,
+    texto em cor sólida. O topo nunca sai da tela, então não há pausa por rolagem.
+  */
+  @property --botao-aurora-x { syntax: "<percentage>"; inherits: false; initial-value: 18%; }
+  @property --botao-aurora-y { syntax: "<percentage>"; inherits: false; initial-value: 25%; }
+  .botao--sempre.botao--brilho::before {
+    --brilho-luz: var(--luz);
+    background:
+      conic-gradient(from var(--brilho-angulo), transparent 0 62%, var(--brilho-luz) 82%, transparent 92%),
+      var(--cor-borda);
+  }
+  .botao--sempre.botao--brilho::after {
+    background:
+      linear-gradient(105deg, transparent 38%, var(--brilho-luz-faixa, transparent) 50%, transparent 62%) var(--brilho-faixa) 0 / 250% 100% no-repeat,
+      radial-gradient(circle at 1px 1px, var(--brilho-pontos) 0.8px, transparent 1.2px) 0 0 / 4px 4px,
+      radial-gradient(70% 130% at var(--botao-aurora-x) var(--botao-aurora-y), rgb(11 124 140 / 0.45), transparent 70%),
+      radial-gradient(60% 120% at calc(100% - var(--botao-aurora-x)) calc(100% - var(--botao-aurora-y)), rgb(16 78 110 / 0.5), transparent 70%),
+      radial-gradient(45% 90% at var(--botao-aurora-y) var(--botao-aurora-x), rgb(53 213 232 / 0.14), transparent 70%),
+      var(--cor-fundo);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    /* Vem depois das regras do brilho: vence a volta única da entrada e a volta rápida do hover */
+    .botao--sempre.botao--brilho::before { animation: brilho-volta 2.4s linear infinite; }
+    .botao--sempre.botao--brilho::after { animation: botao-aurora 12s ease-in-out infinite; }
+    .botao--sempre.botao--brilho:hover::after,
+    .botao--sempre.botao--brilho:focus-visible::after { animation: botao-aurora 12s ease-in-out infinite, brilho-faixa 1.6s ease-in-out infinite; }
+
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+      .botao--sempre .botao__texto {
+        background: linear-gradient(90deg, var(--ink-strong), #A6EEF6 25%, var(--ink-strong) 50%, #CFE3F7 75%, var(--ink-strong)) 0 0 / 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: botao-degrade 10s linear infinite;
+      }
+    }
+  }
+  @keyframes botao-aurora {
+    0%, 100% { --botao-aurora-x: 18%; --botao-aurora-y: 25%; }
+    25% { --botao-aurora-x: 62%; --botao-aurora-y: 90%; }
+    50% { --botao-aurora-x: 92%; --botao-aurora-y: 40%; }
+    75% { --botao-aurora-x: 40%; --botao-aurora-y: 5%; }
+  }
+  /* 200% de posição = uma imagem inteira (o dobro do texto): a volta fecha sem emenda */
+  @keyframes botao-degrade {
+    to { background-position: 200% 0; }
+  }
+
+  /*
     Navegação (secundários sem brilho): em repouso, a borda fica aberta nos dois cantos chanfrados;
     com o mouse em cima ou o foco do teclado, ela se fecha e acende em ciano, como um circuito que
     completa. Variação do botão de cantos abertos de adamgiebl (Uiverse, MIT), recriada em CSS na
@@ -232,5 +333,6 @@ const classes = [
   /* Alto contraste do Windows: a moldura chanfrada some com os fundos; a borda real fica no lugar */
   @media (forced-colors: active) {
     .botao { border: 1px solid ButtonText; }
+    .botao--sempre .botao__texto { background: none; color: ButtonText; }
   }
 </style>

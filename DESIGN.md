@@ -375,10 +375,19 @@ No PS, o retrato de quem assina aparece como presença apagada: tons de cinza (c
 Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms para entradas) e uma curva de saída, cubic-bezier(0.16, 1, 0.3, 1). Botões e controles chanfrados descem 1 px ao toque.
 - **Feixe:** uma luz em ciano forte percorre a borda chanfrada. Dá uma volta em 3,2 s e para no plano Performance quando ele entra na tela. Corre sem parar (2,4 s por volta) só enquanto o sistema espera uma resposta: no console ao gerar e no formulário do CTA ao enviar; desliga quando a resposta chega.
 - **Circuito do Método:** acende uma vez, em dois tempos. Quando o circuito entra na tela, o trilho desce (700 ms), as hastes abrem em escada e um pulso de luz corre de 01 a 04 (1 s), piscando cada nó. Quando o nó do WhatsApp entra na tela, a dobra e a linha se desenham, a luz corre até ele e ele acende (cerca de 1,5 s). Quem chega direto em #metodo já encontra tudo aceso.
-- **Headline palavra por palavra:** só a headline do hero, uma vez ao carregar, em CSS puro. Cada palavra sobe 0,35 em, sai de um desfoque de 12 px e acende em 760 ms, 70 ms depois da anterior (cerca de 1,5 s no total). O leitor de tela lê a frase inteira num texto oculto.
+- **Primeira dobra viva (pedido do Gustavo, 19/10/2026):** todo componente do hero se mexe. Linha do tempo a partir da primeira pintura:
+  - **Selo de vagas (0–400 ms):** a moldura varre da esquerda e o texto sai do desfoque. Depois, uma luz ciano corre o contorno sem parar (2,8 s por volta, duas faixas que viram nas pontas, com halo). O "25% off" pisca a cada 1,2 s trocando de vermelho #FF5A5F para prata, nunca por opacidade (as duas cores passam de 4,5:1). No esgotado, só a entrada.
+  - **Traço do medidor (200 ms):** se desenha do medidor até o selo, enquanto as vagas acendem.
+  - **Headline (150 ms → ~1,4 s):** letra por letra, 18 ms entre elas: cada uma vira para cima a partir da base (rotateX), sai do desfoque, pousa acesa em ciano e esfria para o branco; depois uma faixa de luz passa pela frase. O brilho muda só de cor, nunca de raio.
+  - **Explicação (900 ms → ~9 s):** digitada letra por letra (24 ms, mais 70 ms depois de vírgula e 300 ms depois de ponto), com cursor ciano de 2 px que pisca três vezes no fim. As letras ficam no lugar desde a primeira pintura (CLS 0); um script inline troca a classe de duas letras por tique.
+  - **"Ver projetos" (1,1 s) e microcopy (1,3 s):** sobem 12 px e aparecem.
+  - **Gerador:** ver "Console vivo" abaixo. **WhatsApp do topo:** neon contínuo, ver "Brilho de CTA".
+  Leitores de tela leem headline e explicação inteiras num texto oculto. Com movimento reduzido ou sem JavaScript, tudo já aparece pronto e parado.
+- **Console vivo (gerador):** entrada uma vez, quando o topo do console passa de 75% da janela (300 ms ao carregar no computador): a moldura se desenha a partir do chanfro com uma luz e um halo na ponta, as zonas sobem do desfoque em cascata (título, texto, campos, botão, rodapé), uma varredura desce e o botão acende por último (~1,5 s). Depois, só com o console à vista e no inicial ou no resultado: luz lenta na borda (7 s por volta), varredura a cada 6,5 s, cursor piscando depois do título e o botão respirando. No carregando, o feixe rápido assume; no enviado, o painel descansa. O halo desfocado fica só na entrada. Quem abre numa âncora (/#planos) não gasta a entrada na rolagem automática.
 - **Névoa:** luz viva em grafite e ciano atrás da grade da primeira dobra, em WebGL, meia resolução e 30 qps; para fora da tela. Quadro parado com movimento reduzido. Sem placa de vídeo, uma foto parada da própria névoa (~7 KB) desenhada no mesmo canvas.
 - **Grade cinética:** a grade da primeira dobra é de pontos a cada 32 px; com mouse, os pontos se curvam na direção do cursor (alcance de 130 px), crescem e esquentam para o ciano, e voltam ao lugar quando ele sai. Parada no toque e com movimento reduzido.
-- **Brilho de CTA:** nos botões primários e em todo botão que abre o WhatsApp, uma luz corre a borda chanfrada e uma faixa atravessa o botão: 2 voltas em 4,8 s quando ele aparece, e sem parar só com o mouse em cima ou o foco do teclado, quando acende também uma trama de pontos.
+- **Brilho de CTA:** nos botões primários e em todo botão que abre o WhatsApp, uma luz corre a borda chanfrada e uma faixa atravessa o botão: 2 voltas em 4,8 s quando ele aparece, e sem parar só com o mouse em cima ou o foco do teclado, quando acende também uma trama de pontos. O "Falar no WhatsApp" do topo (prop `sempre`) gira o neon sem parar (2,4 s), com uma aurora macia de ciano profundo e azul-petróleo no fundo (12 s) e um degradê lento de prata, ciano claro e azul gelo no texto (10 s).
+- **Vitrine ("Ver projetos" do hero):** o botão de destaque que o Gustavo mandou, no chanfro e nas cores da marca: ciano profundo com texto branco (4,91:1), contorno de 3 px com 30% de branco que vai a 60% no hover, sombra de 10 px que segue o chanfro, cresce 1,05 no hover (300 ms ease-in-out), a seta anda 4 px e uma faixa de luz de 100 px a 120° atravessa em loop de 1,5 s só no hover com mouse.
 - **Navegação:** os secundários que não abrem o WhatsApp ("Conheça minha história", "Ver o site no ar") têm a borda aberta nos dois cantos chanfrados; com o mouse em cima ou o foco do teclado, ela se fecha em 400 ms e acende em ciano.
 - **Entradas ao rolar:** opacidade, 14 px de subida e desfoque de 6 px em 400 ms, só no que ainda está abaixo da tela e só em blocos de prova e de sequência: na home, o case e o cartão de fundador (§8), as etapas e a conta do Processo (§10) e a lista de objeções (§11).
 - **Medidor ligando:** no carregamento, e de novo uma vez quando a janela da Urgência entra na tela.
@@ -400,7 +409,7 @@ Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms
 - **Faça** contraste de pelo menos 4,5:1 no texto e 3:1 nas bordas de campo, nos dois temas; tinta apagada é o degrau mais fraco permitido para texto (6,40:1 no preto, 4,95:1 no grafite).
 - **Faça** foco visível em todo controle: contorno de 2 px no ciano a 3 px (4 px nos botões).
 - **Faça** área de toque de pelo menos 44 px (botões com 52 px, linhas do acordeão com 64 px).
-- **Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline já inteira, a grade parada, os botões sem brilho correndo, nenhum feixe e o vídeo parado na capa.
+- **Faça** cada efeito com um estado final parado: com movimento reduzido, o circuito já aparece desenhado e aceso, o medidor já aceso, a headline e a explicação já inteiras, o selo e o console prontos, o "25% off" vermelho parado, a grade parada, os botões sem brilho correndo, nenhum feixe e o vídeo parado na capa.
 - **Faça** erros com ícone e texto, ligados ao campo e anunciados; nunca só a cor.
 - **Faça** o que é decorativo invisível para leitor de tela (medidor, retrato fantasma, tela do case, ícones) e mantenha o texto real do título num texto oculto, com as palavras animadas escondidas do leitor de tela.
 - **Faça** tudo funcionar sem JavaScript: entradas visíveis, circuito aceso, menu com os links abertos abaixo da barra, formulários com envio por POST.
@@ -414,7 +423,8 @@ Três durações (150 ms para toque e ícones, 240 ms para cores e giros, 400 ms
 - **Não use** mono para frase de argumento, nem invente rótulo técnico onde a copy não tem.
 - **Não deixe** nada em laço sem motivo: efeito sem espera real roda uma vez e para.
 - **Não anime** entrada fora dos blocos de prova e de sequência, nem esconda o que já está na tela ao carregar.
-- **Não anime** outro texto palavra por palavra além da headline do hero.
+- **Não anime** outro texto letra por letra além da headline e da explicação do hero.
+- **Faça** os loops contínuos pausarem fora da tela e com a aba escondida, e mudarem só cor ou ângulo, nunca o tamanho de uma sombra (o raio que muda refaz o layout a cada quadro).
 - **Não desenhe** aparelho em volta da tela do case nem avatar falso no depoimento.
 - **Não aplique** efeito no logo: só tamanho.
 - **Não use** curva ou ângulo fora de 0°, 45° e 90° em traço, corte ou ícone.

@@ -4,9 +4,20 @@
   portfólio (o WhatsApp continua a um toque no topo).
   Vive dentro da .abertura (src/pages/index.astro), que cuida da largura, da grade e do respiro.
   Linha de leitura: medidor das 5 vagas ligado ao selo por um traço fino.
-  A headline surge palavra por palavra, saindo do desfoque, uma vez ao carregar: Blur Text do
-  React Bits (MIT + Commons Clause), recriado em CSS puro. As palavras são separadas no build; o
-  leitor de tela lê a frase inteira num texto oculto, sem as palavras soltas.
+
+  Entrada (pedido do Gustavo: tudo na dobra se mexe), em CSS puro, uma vez ao carregar:
+  - 150 ms → ~1,4 s, headline: o painel ligando. Letra por letra, cada uma vira para cima como uma
+    plaqueta (rotateX), sai do desfoque, pousa acesa em ciano e esfria para o branco; depois uma
+    faixa de luz passa pela frase inteira, na ordem de leitura. Split Text / Blur Text do React Bits
+    (MIT + Commons Clause), recriados em CSS: as letras são separadas no build.
+  - 900 ms → ~9 s, explicação digitada sem pressa (24 ms por caractere, respiro após vírgula e
+    ponto final), com cursor fino em ciano que pisca no fim e some. As letras são separadas no
+    build e ficam no lugar (CLS 0); o script inline logo após o parágrafo acende uma por tique,
+    trocando a classe de duas letras por vez (246 animações CSS, uma por letra, dobravam o
+    trabalho de estilo da página).
+  - 1,1 s: "Ver projetos" sobe e aparece; 1,3 s: as frases da microcopy, uma depois da outra.
+  O leitor de tela lê headline e explicação inteiras num texto oculto (as cópias animadas são
+  aria-hidden). Com movimento reduzido ou sem JavaScript, a explicação já aparece inteira.
 */
 import Botao from "../ui/Botao.astro";
 import Selo from "../ui/Selo.astro";
@@ -18,7 +29,16 @@ interface Props {
   vagas: number;
 }
 const { vagas } = Astro.props;
-const palavras = hero.titulo.split(" ");
+
+// Headline: letras agrupadas por palavra (nenhuma palavra quebra no meio). --i conta as letras da
+// frase inteira, para a onda de entrada e a faixa de luz seguirem a leitura.
+let n = 0;
+const palavras = hero.titulo.split(" ").map((p) => [...p].map((letra) => ({ letra, i: n++ })));
+
+// Explicação: uma letra por span (espaços ficam soltos); o script inline acende uma por vez.
+const escapa = (c: string) => (c === "&" ? "&amp;" : c === "<" ? "&lt;" : c);
+const digitado = [...hero.subtitulo.normalize("NFC")].map((c) => (c === " " ? " " : `<span>${escapa(c)}</span>`)).join("");
+
 ---
 <section id="inicio" class="hero" aria-labelledby="hero-titulo">
   <div class="hero__leitura">
@@ -30,15 +50,36 @@ const palavras = hero.titulo.split(" ");
   <h1 id="hero-titulo" class="hero__titulo">
     <span class="sr-only">{hero.titulo}</span>
     <span aria-hidden="true">
-      {palavras.map((p, i) => (
-        <Fragment><span class="hero__palavra" style={`--i: ${i}`}>{p}</span>{i < palavras.length - 1 && " "}</Fragment>
+      {palavras.map((letrasDaPalavra, p) => (
+        <Fragment><span class="hero__palavra">{letrasDaPalavra.map(({ letra, i }) => <span class="hero__letra" style={`--i: ${i}`}>{letra}</span>)}</span>{p < palavras.length - 1 && " "}</Fragment>
       ))}
     </span>
   </h1>
-  <p class="hero__subtitulo">{hero.subtitulo}</p>
+  <p class="hero__subtitulo">
+    <span class="sr-only">{hero.subtitulo}</span>
+    <span class="hero__digitado" aria-hidden="true" data-digitado set:html={digitado} />
+  </p>
+  <script is:inline>
+    // Antes da primeira pintura: as letras ficam transparentes no lugar (o parágrafo já ocupa o tamanho final).
+    (() => {
+      const caixa = document.querySelector("[data-digitado]");
+      if (!caixa || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const letras = caixa.children;
+      caixa.classList.add("is-digitando");
+      let k = 0;
+      const passo = () => {
+        letras[k - 1]?.classList.remove("is-cursor");
+        letras[k].className = "is-feita is-cursor";
+        const c = letras[k++].textContent;
+        if (k === letras.length) return caixa.classList.add("is-fim");
+        setTimeout(passo, c === "." ? 324 : c === "," ? 94 : 24);
+      };
+      if (letras.length) setTimeout(passo, 900);
+    })();
+  </script>
 
   <div class="hero__acoes">
-    <Botao href="#projetos" icone="seta">{hero.botao}</Botao>
+    <Botao variante="vitrine" href="#projetos" icone="seta">{hero.botao}</Botao>
   </div>
 
   <ul class="hero__micro" role="list">
@@ -105,18 +146,38 @@ const palavras = hero.titulo.split(" ");
     letter-spacing: -0.03em;
     color: var(--ink-strong);
   }
-  /* Palavra por palavra: sobe 0,35 em, sai do desfoque e acende, 70 ms depois da anterior */
-  .hero__palavra { display: inline-block; }
+  /*
+    Painel ligando: cada letra vira para cima a partir da base, sai do desfoque e pousa acesa em
+    ciano (34%), esfria para o branco (60%) e acende de novo quando a faixa de luz passa (86%).
+    Como a faixa anda no mesmo passo da entrada (18 ms por letra), as duas cabem numa animação só;
+    ela só começa a passar quando a última letra já pousou. Sem filtro de movimento: letras paradas.
+  */
+  .hero__palavra { display: inline-block; white-space: nowrap; }
+  .hero__letra { display: inline-block; transform-origin: 50% 85%; }
   @media (prefers-reduced-motion: no-preference) {
-    .hero__palavra {
-      animation: hero-palavra 760ms var(--ease-saida) both;
-      animation-delay: calc(80ms + var(--i) * 70ms);
+    .hero__letra {
+      animation: hero-letra 950ms var(--ease-saida) backwards;
+      animation-delay: calc(150ms + var(--i) * 18ms);
     }
   }
-  @keyframes hero-palavra {
-    from { opacity: 0; filter: blur(12px); translate: 0 0.35em; }
-    60% { filter: blur(0); }
-    to { opacity: 1; filter: blur(0); translate: 0 0; }
+  @keyframes hero-letra {
+    0% {
+      opacity: 0;
+      transform: perspective(500px) translateY(0.45em) rotateX(-85deg) scale(0.7);
+      filter: blur(10px);
+      color: var(--ciano-eletrico-forte);
+      text-shadow: 0 0 0.45em rgb(111 227 240 / 0);
+    }
+    34% {
+      opacity: 1;
+      transform: perspective(500px) translateY(0) rotateX(0) scale(1);
+      filter: blur(0);
+      color: var(--ciano-eletrico-forte);
+      text-shadow: 0 0 0.45em rgb(111 227 240 / 0.75);
+    }
+    60%, 74% { color: var(--ink-strong); text-shadow: 0 0 0.45em rgb(111 227 240 / 0); }
+    86% { color: #fff; text-shadow: 0 0 0.45em rgb(111 227 240 / 0.9); }
+    100% { color: var(--ink-strong); text-shadow: 0 0 0.45em rgb(111 227 240 / 0); }
   }
 
   .hero__subtitulo {
@@ -125,6 +186,18 @@ const palavras = hero.titulo.split(" ");
     font-size: var(--t-body-lg);
     line-height: 1.6;
     color: var(--ink);
+  }
+  /*
+    Digitação (script logo após o parágrafo): as letras ainda não digitadas ficam transparentes e o
+    cursor é uma sombra de 2 px na última digitada. A sombra já existe, transparente, em todas: o
+    cursor só troca de cor e nada muda de lugar nem de tamanho. No fim pisca três vezes e some.
+  */
+  .is-digitando :global(span) { color: transparent; box-shadow: 2px 0 transparent; }
+  .is-digitando :global(.is-feita) { color: inherit; }
+  .is-digitando :global(.is-cursor) { box-shadow: 2px 0 var(--accent); }
+  .is-fim :global(.is-cursor) { animation: hero-pisca 500ms step-end 3 forwards; }
+  @keyframes hero-pisca {
+    50%, 100% { box-shadow: 2px 0 transparent; }
   }
 
   /* Botões: empilhados em largura total no celular, lado a lado a partir de 480 px */
@@ -147,6 +220,21 @@ const palavras = hero.titulo.split(" ");
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-muted);
+  }
+
+  /* O botão sobe e aparece quando a headline termina de pousar; a microcopy vem logo atrás */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__acoes { animation: hero-sobe 500ms var(--ease-saida) 1100ms backwards; }
+    .hero__micro li { animation: hero-sobe 500ms var(--ease-saida) 1300ms backwards; }
+    /* O traço se desenha do medidor até o selo, enquanto as vagas acendem */
+    .hero__traco { transform-origin: left; animation: hero-traco 400ms var(--ease-saida) 200ms backwards; }
+    .hero__micro li + li { animation-delay: 1380ms; }
+  }
+  @keyframes hero-sobe {
+    from { opacity: 0; translate: 0 12px; }
+  }
+  @keyframes hero-traco {
+    from { scale: 0 1; }
   }
 
   @media (min-width: 480px) {

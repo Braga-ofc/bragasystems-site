@@ -35,7 +35,7 @@ const atual = (href: string) => (href === caminho ? "page" : undefined);
     </nav>
 
     <div class="topo__acoes">
-      <Botao variante="secundario" brilho icone="whatsapp" origem="topo" href={montarLinkWhatsapp("topo")}>{topo.botao}</Botao>
+      <Botao variante="secundario" sempre icone="whatsapp" origem="topo" href={montarLinkWhatsapp("topo")}>{topo.botao}</Botao>
       <button class="topo__menu chanfrado" type="button" aria-expanded="false" aria-controls="topo-menu" aria-label="Menu" data-menu-botao>
         <span class="topo__menu-linhas" aria-hidden="true"><span></span><span></span><span></span></span>
       </button>

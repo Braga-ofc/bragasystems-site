@@ -1,9 +1,11 @@
 ---
 /*
-  §3 Gerador de headline com IA: o console do painel. Vive dentro da .abertura (index.astro),
-  ao lado do Hero no computador e logo abaixo dele no celular.
+  §3 Gerador de headline com IA: o console do painel, o carro-chefe da primeira dobra. Vive dentro
+  da .abertura (index.astro), ao lado do Hero no computador e logo abaixo dele no celular.
   Estados em data-estado: inicial | carregando | resultado | enviado. Todos já estão no HTML;
   quem troca é scripts/gerador.ts. Sem JavaScript, o formulário faz POST (nada vai para a URL).
+  Movimento em data-entrada: espera | ligando | pronta (script inline logo após o console). O painel
+  "liga" uma vez ao aparecer e depois fica vivo só enquanto está na tela; regras no fim do CSS.
 */
 import Campo from "../ui/Campo.astro";
 import Botao from "../ui/Botao.astro";
@@ -30,6 +32,9 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
 ---
 <section id="gerador" class="gerador" aria-labelledby="gerador-titulo">
   <div class="console chanfrado feixe" data-gerador data-estado="inicial">
+    {/* Luz lenta da borda e o halo dela: só decoração, só com movimento */}
+    <span class="console__luz" aria-hidden="true"></span>
+    <span class="console__halo" aria-hidden="true"></span>
     <div class="console__zona console__cabeca">
       <h2 id="gerador-titulo" class="console__titulo">
         {tituloPartes.map((parte) => (parte.includes("-") ? <span class="console__inteira">{parte}</span> : parte))}
@@ -128,7 +133,59 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
 
     {/* Anúncios para leitor de tela (carregando) */}
     <p class="sr-only" aria-live="polite" data-anuncio></p>
+    <span class="console__varredura" aria-hidden="true"></span>
   </div>
+  <script is:inline>
+    /*
+      Roda antes da primeira pintura: o console nasce apagado (nada pisca) e liga quando o topo dele
+      passa da linha de 75% da janela (não depende da altura do console: com zoom de 400% ele é mais
+      alto que 4 janelas e nunca ficaria 25% à vista). is-na-tela deixa os loops rodarem só à vista.
+      Quem abre já numa âncora (/#planos) não gasta a entrada na rolagem automática: o gatilho só
+      liga quando ela termina. Sem JS ou com movimento reduzido, nada muda.
+    */
+    (() => {
+      const painel = document.querySelector("[data-gerador]");
+      if (!painel || !("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      painel.dataset.entrada = "espera";
+      new IntersectionObserver(([e]) => painel.classList.toggle("is-na-tela", e.isIntersecting)).observe(painel);
+      let primeira = true;
+      const gatilho = new IntersectionObserver(
+        ([e]) => {
+          if (painel.dataset.entrada === "espera" && e.isIntersecting) {
+            // À vista ao carregar (computador), espera os 300 ms da dobra; ao rolar até ele (celular), liga já.
+            if (!primeira) painel.style.setProperty("--ligar", "60ms");
+            painel.dataset.entrada = "ligando";
+            gatilho.disconnect();
+          }
+          primeira = false;
+        },
+        { rootMargin: "0px 0px -25% 0px" },
+      );
+      const ancora = location.hash && !["#inicio", "#gerador"].includes(location.hash);
+      if (!ancora) gatilho.observe(painel);
+      else {
+        // O navegador pode soltar um scrollend antes da rolagem até a âncora: só vale quando o destino chegou ao topo.
+        let ligado = false;
+        const observar = () => {
+          if (ligado) return;
+          ligado = true;
+          primeira = false;
+          removeEventListener("scrollend", chegou);
+          gatilho.observe(painel);
+        };
+        const chegou = () => {
+          const alvo = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+          if (!alvo || Math.abs(alvo.getBoundingClientRect().top) < 160) observar();
+        };
+        addEventListener("scrollend", chegou);
+        setTimeout(observar, 3000);
+      }
+      // O botão acende por último: daí em diante só valem os loops (a entrada não se repete na troca de estado).
+      painel.addEventListener("animationend", (evento) => {
+        if (evento.animationName === "console-acende") painel.dataset.entrada = "pronta";
+      });
+    })();
+  </script>
 
   <template data-modelo="limite">
     <p class="console__erro">
@@ -162,6 +219,10 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
     --cor-borda: var(--line);
     --cor-fundo: var(--surface-sunken);
     --pad: clamp(20px, 7cqi, 32px);
+    /* O mesmo recorte da moldura (global.css), para a luz, o halo e a varredura */
+    --recorte: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+    /* Quando a entrada começa: 300 ms depois da primeira pintura (o script inline baixa ao rolar) */
+    --ligar: 300ms;
     display: flex;
     flex-direction: column;
   }
@@ -184,6 +245,18 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
     color: var(--ink-strong);
   }
   .console__inteira { white-space: nowrap; }
+  /* Cursor de "sistema pronto" depois do título: o espaço fica sempre reservado (nada pula quando pisca) */
+  .console__titulo::after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 0.86em;
+    margin-left: 0.14em;
+    margin-right: calc(-2px - 0.14em);
+    vertical-align: -0.06em;
+    background: var(--accent);
+    opacity: 0;
+  }
   .console__texto {
     max-width: 52ch;
     color: var(--ink-muted);
@@ -385,6 +458,167 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
   }
   @keyframes console-entra {
     from { opacity: 0; translate: 0 6px; filter: blur(4px); }
+  }
+
+  /*
+    ---------- O console vivo (pedido do Gustavo: o carro-chefe da dobra chama atenção) ----------
+    Entrada, uma vez (data-entrada="ligando", ~1,2 s depois de --ligar): a moldura se desenha a partir
+    do chanfro de cima com uma luz na ponta (Border Beam do Magic UI, MIT, recriado em CSS), as zonas
+    sobem do desfoque em cascata, uma varredura ciano desce pelo painel e o botão acende por último.
+    Contínua (data-entrada="pronta", só com .is-na-tela, no inicial e no resultado): a luz lenta com
+    rodeia a borda (7 s por volta; o halo desfocado só na entrada), a varredura passa a cada 6,5 s, um cursor pisca depois do título
+    e o botão respira. No carregando, a luz lenta apaga e o feixe rápido de global.css assume sozinho.
+    Tudo anima só cor, opacidade, filtro, translate e ângulos registrados: CLS 0.
+  */
+  @property --console-traco { syntax: "<angle>"; inherits: true; initial-value: 360deg; }
+  @property --console-luz { syntax: "<angle>"; inherits: true; initial-value: 0deg; }
+
+  /* A luz e o halo ficam entre a borda (::before) e o fundo (::after): só aparecem no traço e por fora */
+  .console__luz,
+  .console__halo,
+  .console__varredura {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    display: none;
+    pointer-events: none;
+  }
+  .console__luz,
+  .console__halo::before,
+  .console__varredura { clip-path: var(--recorte); }
+  /* Cometa: a cabeça ciano forte termina seca na emenda do gradiente; começa no chanfro de cima (-32deg) */
+  .console__luz {
+    background: conic-gradient(from calc(var(--console-luz) - 32deg), transparent 0 60%, rgb(11 124 140 / 0.55) 84%, var(--ciano-eletrico-forte));
+  }
+  /*
+    O desfoque fica no pai: o filho já vem recortado no chanfro, então o halo segue o canto em 45°.
+    O pai sobra 24 px para fora: a máscara da entrada corta na caixa dele, e o halo mora fora da borda.
+  */
+  .console__halo { inset: -24px; filter: blur(12px); }
+  .console__halo::before {
+    content: "";
+    position: absolute;
+    inset: 24px;
+    background: conic-gradient(from calc(var(--console-luz) - 32deg), transparent 0 84%, rgb(53 213 232 / 0.4) 94%, var(--ciano-eletrico-forte));
+  }
+  /* Varredura: linha de 1 px com um rastro fraco acima, por cima do conteúdo e sem pegar clique */
+  .console__varredura { z-index: 1; }
+  .console__varredura::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    translate: 0 -100%;
+    background: linear-gradient(to bottom, transparent calc(100% - 96px), rgb(53 213 232 / 0.08) calc(100% - 1px), rgb(111 227 240 / 0.8) calc(100% - 1px));
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .console__luz,
+    .console__halo,
+    .console__varredura { display: block; }
+    .console__luz,
+    .console__halo {
+      opacity: 0;
+      transition: opacity var(--dur-lenta) var(--ease-saida);
+    }
+
+    /* Espera (celular, abaixo da dobra): só o fundo do painel; moldura e zonas apagadas */
+    .console[data-entrada="espera"] { --console-traco: 0deg; }
+    .console[data-entrada="espera"] :is(.console__cabeca > *, .console__entrada .console__acao, .console__rodape),
+    .console[data-entrada="espera"] .console__entrada .console__campos > :global(*) { opacity: 0; }
+
+    /* Ligando: a moldura, a luz e o halo se revelam juntos, do chanfro em sentido horário */
+    .console:is([data-entrada="espera"], [data-entrada="ligando"])::before,
+    .console:is([data-entrada="espera"], [data-entrada="ligando"]) :is(.console__luz, .console__halo) {
+      -webkit-mask: conic-gradient(from -32deg, #000 var(--console-traco), transparent 0);
+      mask: conic-gradient(from -32deg, #000 var(--console-traco), transparent 0);
+    }
+    .console[data-entrada="ligando"]:not(.feixe--continuo) :is(.console__luz, .console__halo) { opacity: 1; }
+    /* Fora do carregando: se o pedido sair durante a entrada, o feixe rápido de global.css vence */
+    .console[data-entrada="ligando"]:not(.feixe--continuo)::before,
+    .console[data-entrada="ligando"] :is(.console__luz, .console__halo) {
+      animation: console-desenha 1160ms cubic-bezier(0.45, 0, 0.2, 1) var(--ligar) both;
+    }
+    .console[data-entrada="ligando"] .console__varredura::before {
+      animation: console-varre-entrada 900ms cubic-bezier(0.4, 0, 0.2, 1) calc(var(--ligar) + 260ms) both;
+    }
+    .console[data-entrada="ligando"] :is(.console__titulo, .console__texto, .console__rodape),
+    .console[data-entrada="ligando"] .console__entrada .console__campos > :global(*) {
+      animation: console-zona 600ms var(--ease-saida) calc(var(--ligar) + var(--atraso)) backwards;
+    }
+    .console__titulo { --atraso: 120ms; }
+    .console__texto { --atraso: 200ms; }
+    .console__entrada .console__campos > :global(:nth-child(1)) { --atraso: 290ms; }
+    .console__entrada .console__campos > :global(:nth-child(2)) { --atraso: 370ms; }
+    .console__rodape { --atraso: 540ms; }
+    /* O botão sai apagado e cinza, passa do ponto com um halo ciano e assenta: termina junto com a moldura */
+    .console[data-entrada="ligando"] .console__entrada .console__acao {
+      animation: console-acende 700ms var(--ease-saida) calc(var(--ligar) + 460ms) backwards;
+    }
+
+    /*
+      Pronta: loops só à vista, e só no inicial e no resultado (no carregando o feixe rápido assume; no
+      enviado o painel descansa). O halo desfocado fica só na entrada: refazer o blur do tamanho do
+      console a cada quadro dobrava o custo do loop.
+    */
+    .console[data-entrada="pronta"] .console__halo { display: none; }
+    .console[data-entrada="pronta"].is-na-tela:is([data-estado="inicial"], [data-estado="resultado"]):not(.feixe--continuo) .console__luz {
+      opacity: 1;
+      animation: console-volta 7s linear infinite;
+    }
+    /* Varredura e cursor somem enquanto alguém digita: nada passa por cima do campo nem dobra o cursor dele */
+    .console[data-entrada="pronta"].is-na-tela:is([data-estado="inicial"], [data-estado="resultado"]):not(.feixe--continuo, :has(input:focus)) .console__varredura::before {
+      animation: console-varre 6.5s linear infinite;
+    }
+    .console[data-entrada="pronta"].is-na-tela[data-estado="inicial"]:not(:has(input:focus)) .console__titulo::after {
+      opacity: 1;
+      animation: console-cursor 1.1s steps(1) infinite;
+    }
+    .console[data-entrada="pronta"].is-na-tela[data-estado="inicial"] .console__entrada :global(.botao) {
+      animation: console-respira 3.6s ease-in-out infinite;
+    }
+  }
+  @keyframes console-desenha {
+    from { --console-traco: 0deg; --console-luz: 0deg; }
+    to { --console-traco: 360deg; --console-luz: 360deg; }
+  }
+  @keyframes console-volta {
+    from { --console-luz: 0deg; }
+    to { --console-luz: 360deg; }
+  }
+  @keyframes console-zona {
+    from { opacity: 0; translate: 0 10px; filter: blur(6px); }
+  }
+  @keyframes console-acende {
+    0% { opacity: 0; translate: 0 10px; filter: brightness(0.35) saturate(0) drop-shadow(0 0 0 rgb(53 213 232 / 0)); }
+    55% { opacity: 1; translate: 0 0; filter: brightness(1.3) saturate(1.1) drop-shadow(0 0 18px rgb(53 213 232 / 0.6)); }
+    100% { opacity: 1; translate: 0 0; filter: brightness(1) saturate(1) drop-shadow(0 0 0 rgb(53 213 232 / 0)); }
+  }
+  @keyframes console-varre-entrada {
+    from { translate: 0 -100%; opacity: 1; }
+    80% { opacity: 1; }
+    to { translate: 0 0; opacity: 0; }
+  }
+  /* Parada no alto e invisível por 4 s; desce em ~2 s; some no pé */
+  @keyframes console-varre {
+    0%, 62% { translate: 0 -100%; opacity: 0; }
+    64% { opacity: 0.55; }
+    94% { translate: 0 0; opacity: 0.55; }
+    100% { translate: 0 0; opacity: 0; }
+  }
+  @keyframes console-cursor {
+    50% { opacity: 0; }
+  }
+  @keyframes console-respira {
+    50% { filter: drop-shadow(0 0 16px rgb(53 213 232 / 0.38)); }
+  }
+
+  /* Alto contraste do Windows: os gradientes somem; luz, halo e varredura saem para não deixar sobra */
+  @media (forced-colors: active) {
+    .console__luz,
+    .console__halo,
+    .console__varredura,
+    .console__titulo::after { display: none !important; }
   }
 
   /* Console largo (tablet, antes de dividir a dobra com o Hero): campos lado a lado */
