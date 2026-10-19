@@ -4,6 +4,7 @@ import "../styles/tokens.css";
 import "../styles/global.css";
 import Topo from "../components/sections/Topo.astro";
 import Rodape from "../components/sections/Rodape.astro";
+import CamadaViva from "../components/ui/CamadaViva.astro";
 import { estadoDe } from "../lib/supabase";
 
 interface Props {
@@ -50,6 +51,7 @@ const temContador = vagasBuild !== undefined;
     <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
+    {moldura && <CamadaViva />}
     {moldura && <Topo />}
     <slot />
     {moldura && <Rodape />}

@@ -8,20 +8,43 @@ interface Props {
 const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
 ---
 <section id={id} class:list={["secao", `secao--${tema}`, tema === "claro" && "tema-claro", classe]}>
+  {tema === "claro" && (
+    <div class="secao__fundo-claro" aria-hidden="true"><span></span><span></span></div>
+  )}
   <div class:list={["secao__conteudo", largura === "estreita" && "secao__conteudo--estreita"]}>
     <slot />
   </div>
 </section>
 
 <style>
+  /* As seções escuras são transparentes: o fundo contínuo e vivo (ui/CamadaViva) aparece por trás */
   .secao {
     position: relative;
-    background: var(--surface);
     color: var(--ink);
     padding-block: var(--secao-respiro);
   }
-  /* Faixa elevada: um passo perceptível acima do preto profundo, na direção do grafite */
-  .secao--elevado { background: color-mix(in srgb, var(--surface) 72%, var(--surface-raised)); }
+  /* Faixa elevada: um véu de grafite por cima do fundo vivo, o mesmo passo acima do preto profundo */
+  .secao--elevado { background: color-mix(in srgb, var(--surface-raised) 30%, transparent); }
+
+  /* Seção clara: fundo branco próprio, também em movimento lento (manchas bem claras de ciano e prata) */
+  .secao--claro { background: var(--surface); isolation: isolate; overflow: clip; }
+  .secao__fundo-claro { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  .secao__fundo-claro span {
+    position: absolute;
+    width: 60vmax;
+    height: 60vmax;
+    border-radius: 50%;
+    filter: blur(70px);
+    will-change: transform;
+  }
+  .secao__fundo-claro span:first-child { top: -30vmax; left: -15vmax; background: radial-gradient(closest-side, rgb(11 124 140 / 0.12), transparent); }
+  .secao__fundo-claro span:last-child { bottom: -30vmax; right: -15vmax; background: radial-gradient(closest-side, rgb(138 150 166 / 0.18), transparent); }
+  @media (prefers-reduced-motion: no-preference) {
+    .secao__fundo-claro span:first-child { animation: claro-deriva-1 40s ease-in-out infinite alternate; }
+    .secao__fundo-claro span:last-child { animation: claro-deriva-2 52s ease-in-out infinite alternate; }
+  }
+  @keyframes claro-deriva-1 { to { transform: translate(40vw, 20vh) scale(1.2); } }
+  @keyframes claro-deriva-2 { to { transform: translate(-36vw, -18vh) scale(0.9); } }
   /* Linha de divisão com corte em 45° na esquerda, como as fendas do símbolo */
   .secao + .secao::before {
     --borda-lateral: max(var(--gutter), (100% - var(--largura-max)) / 2);

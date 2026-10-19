@@ -1,0 +1,149 @@
+---
+/*
+  Camada viva do site inteiro (pedido do Gustavo, 19/10/2026), três peças fixas na tela:
+  - Fundo contínuo: manchas de luz bem desfocadas, sempre em movimento lento, atrás de todas as
+    seções escuras. O tom muda conforme a seção à vista (data-tom). As seções claras têm o próprio
+    fundo branco vivo (ui/Secao).
+  - Núcleo do B: o paralelogramo ciano do símbolo desce pela lateral conforme a página rola e vira
+    outra forma em cada seção (seta, check, preço, medidor, balão do WhatsApp). Gira com a
+    velocidade da rolagem e se inclina na direção do mouse.
+  - Luz do cursor: um brilho fraco que segue o mouse (ou o dedo) e acende o que está embaixo.
+  Tudo decorativo (aria-hidden, sem clique). Comportamento em scripts/camada-viva.ts.
+  Com movimento reduzido: fundo parado, núcleo troca de forma sem girar, sem luz do cursor.
+*/
+const formas: Record<string, string> = {
+  nucleo: "M12 12 L24 12 L38 36 L26 36 Z",
+  seta: "M8 8 L18 8 L24 14 L30 8 L40 8 L24 24 Z M8 22 L18 22 L24 28 L30 22 L40 22 L24 38 Z",
+  check: "M6 26 L14 18 L20 24 L34 10 L42 18 L20 40 Z",
+  preco: "M8 8 L28 8 L42 22 L42 26 L26 42 L8 24 Z M18 15 L22 15 L22 19 L18 19 Z",
+  quadro: "M10 4 L44 4 L44 34 L34 44 L4 44 L4 10 Z M12 12 L36 12 L36 31 L31 36 L12 36 Z",
+  medidor: "M4 32 L10 32 L16 16 L10 16 Z M18 32 L24 32 L30 16 L24 16 Z M32 32 L38 32 L44 16 L38 16 Z",
+  balao: "M8 6 L42 6 L42 30 L36 36 L20 36 L10 44 L10 36 L6 36 L6 8 Z",
+};
+---
+<div class="fundo-vivo" aria-hidden="true" data-fundo-vivo data-tom="padrao">
+  <span class="fundo-vivo__mancha fundo-vivo__mancha--1"></span>
+  <span class="fundo-vivo__mancha fundo-vivo__mancha--2"></span>
+  <span class="fundo-vivo__mancha fundo-vivo__mancha--3"></span>
+</div>
+
+<div class="nucleo-vivo" aria-hidden="true" data-nucleo>
+  <svg class="nucleo-vivo__svg" viewBox="0 0 48 48" data-nucleo-svg>
+    {Object.entries(formas).map(([nome, d]) => (
+      <path class="nucleo-vivo__forma" data-forma={nome} d={d} fill-rule="evenodd" />
+    ))}
+  </svg>
+</div>
+
+<div class="luz-cursor" aria-hidden="true" data-luz-cursor></div>
+
+<script>
+  import "../../scripts/camada-viva";
+</script>
+
+<style>
+  /* ---------- Fundo contínuo ---------- */
+  .fundo-vivo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--surface);
+  }
+  .fundo-vivo__mancha {
+    position: absolute;
+    width: 70vmax;
+    height: 70vmax;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.32;
+    transition: opacity 1.2s var(--ease-saida);
+    will-change: transform;
+  }
+  .fundo-vivo__mancha--1 { top: -30vmax; left: -20vmax; background: radial-gradient(closest-side, rgb(11 124 140 / 0.55), transparent); }
+  .fundo-vivo__mancha--2 { bottom: -35vmax; right: -25vmax; background: radial-gradient(closest-side, rgb(32 40 51 / 0.9), transparent); opacity: 0.6; }
+  .fundo-vivo__mancha--3 { top: 20vh; right: -30vmax; width: 50vmax; height: 50vmax; background: radial-gradient(closest-side, rgb(53 213 232 / 0.22), transparent); opacity: 0.2; }
+
+  /* Tom por seção: só a intensidade das manchas muda, com transição longa e sem cortes */
+  .fundo-vivo[data-tom="calmo"] .fundo-vivo__mancha--1 { opacity: 0.18; }
+  .fundo-vivo[data-tom="calmo"] .fundo-vivo__mancha--3 { opacity: 0.08; }
+  .fundo-vivo[data-tom="aceso"] .fundo-vivo__mancha--1 { opacity: 0.5; }
+  .fundo-vivo[data-tom="aceso"] .fundo-vivo__mancha--3 { opacity: 0.38; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fundo-vivo__mancha--1 { animation: fundo-deriva-1 46s ease-in-out infinite alternate; }
+    .fundo-vivo__mancha--2 { animation: fundo-deriva-2 58s ease-in-out infinite alternate; }
+    .fundo-vivo__mancha--3 { animation: fundo-deriva-3 38s ease-in-out infinite alternate; }
+  }
+  @keyframes fundo-deriva-1 { to { transform: translate(28vw, 34vh) scale(1.15); } }
+  @keyframes fundo-deriva-2 { to { transform: translate(-30vw, -26vh) scale(0.9); } }
+  @keyframes fundo-deriva-3 { to { transform: translate(-46vw, 30vh) scale(1.2); } }
+
+  /* ---------- Núcleo do B ---------- */
+  .nucleo-vivo {
+    --tamanho: 16px;
+    position: fixed;
+    top: 0;
+    right: 6px;
+    z-index: 40;
+    width: var(--tamanho);
+    height: var(--tamanho);
+    pointer-events: none;
+    color: var(--accent);
+    filter: drop-shadow(0 0 6px rgb(53 213 232 / 0.55));
+    transition: color 600ms var(--ease-saida), filter 600ms var(--ease-saida);
+    will-change: transform;
+  }
+  /* Sobre fundo claro: ciano profundo, sem halo (o ciano elétrico some no branco) */
+  .nucleo-vivo[data-claro] { color: var(--ciano-profundo); filter: none; }
+  .nucleo-vivo__svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .nucleo-vivo__forma {
+    fill: currentColor;
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: center;
+    scale: 0.4;
+    rotate: -45deg;
+  }
+  .nucleo-vivo__forma[data-ativa] { opacity: 1; scale: 1; rotate: 0deg; }
+  @media (prefers-reduced-motion: no-preference) {
+    .nucleo-vivo__forma {
+      transition: opacity 360ms var(--ease-saida), scale 520ms var(--ease-saida), rotate 520ms var(--ease-saida);
+    }
+  }
+  /* Computador: maior, centralizado na margem direita fora do conteúdo */
+  @media (min-width: 1200px) {
+    .nucleo-vivo { --tamanho: 30px; right: calc((100vw - var(--largura-max)) / 4 - 15px); }
+  }
+  @media (min-width: 720px) and (max-width: 1199.98px) {
+    .nucleo-vivo { --tamanho: 22px; right: 10px; }
+  }
+
+  /* ---------- Luz do cursor ---------- */
+  .luz-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 30;
+    width: 560px;
+    height: 560px;
+    margin: -280px 0 0 -280px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgb(53 213 232 / 0.07), transparent);
+    opacity: 0;
+    transition: opacity 500ms var(--ease-saida);
+    will-change: transform;
+  }
+  .luz-cursor[data-ligada] { opacity: 1; }
+  /* No branco, quase some: só um toque de ciano profundo */
+  .luz-cursor[data-claro] { background: radial-gradient(closest-side, rgb(11 124 140 / 0.05), transparent); }
+
+  @media (forced-colors: active) {
+    .fundo-vivo, .nucleo-vivo, .luz-cursor { display: none; }
+  }
+  @media print {
+    .fundo-vivo, .nucleo-vivo, .luz-cursor { display: none; }
+  }
+</style>

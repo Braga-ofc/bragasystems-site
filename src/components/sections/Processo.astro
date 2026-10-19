@@ -15,7 +15,7 @@ import { rich } from "../../lib/texto";
 const total = processo.etapas.length;
 const mistura = (i: number) => Math.round((i / Math.max(total - 1, 1)) * 80);
 ---
-<Secao>
+<Secao class="processo">
   <div class="processo">
     <header class="processo__cabeca">
       <Rotulo>{processo.rotulo}</Rotulo>

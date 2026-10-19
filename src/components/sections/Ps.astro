@@ -24,7 +24,7 @@ const { vagas } = Astro.props;
 // O espaço depois do "PS:" entra no próprio rótulo pendurado, para o texto alinhar na margem.
 const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<strong>$1 </strong>");
 ---
-<Secao>
+<Secao class="ps">
   <div class="ps-palco">
     <span class="ps__retrato" aria-hidden="true">
       <Image
