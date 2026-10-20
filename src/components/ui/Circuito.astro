@@ -26,18 +26,43 @@ const desenhos = [
   ["M-40 480 H300 L500 280 H1000 L1200 480 H1480", "M-40 900 H1480", "M200 -40 V1040", "M1260 -40 V160 L1060 360 V1040"],
 ];
 const linhas = desenhos[((variante % 4) + 4) % 4];
+
+// Celular: desenho próprio, em retrato (no da tela larga, ampliado numa seção estreita e alta, só
+// sobrava uma faixa do meio). Seis linhas; as variantes espelham e deslocam o mesmo desenho.
+const linhasCel = [
+  "M-20 110 H150 L250 210 H420",
+  "M-20 360 H70 L170 460 V640 L270 740 H420",
+  "M330 -20 V250 L230 350 V1020",
+  "M60 -20 V200 L120 260 V560",
+  "M-20 880 H190 L290 780 H420",
+  "M370 520 V1020",
+];
+const espelha = variante % 2 === 1;
+const desloca = (variante % 3) * 90;
 ---
 <div class="circuito" aria-hidden="true" data-circuito-fundo>
   <span class="circuito__trilho circuito__trilho--centro"><span class="circuito__pulso"></span></span>
   <span class="circuito__trilho circuito__trilho--borda"><span class="circuito__pulso"></span></span>
   {!soTrilhos && (
-    <svg class="circuito__linhas" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice">
+    <svg class="circuito__linhas circuito__linhas--larga" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice">
       {linhas.map((d, i) => (
         <>
           <path class="circuito__fio" d={d} />
           {i % 2 === 0 && <path class="circuito__luz" d={d} pathLength="1000" style={`--i:${i}`} />}
         </>
       ))}
+    </svg>
+  )}
+  {!soTrilhos && (
+    <svg class="circuito__linhas circuito__linhas--cel" viewBox="0 0 400 1000" preserveAspectRatio="none">
+      <g transform={`${espelha ? "translate(400 0) scale(-1 1) " : ""}translate(0 ${desloca})`}>
+        {linhasCel.map((d, i) => (
+          <>
+            <path class="circuito__fio" d={d} />
+            {i % 2 === 0 && <path class="circuito__luz" d={d} pathLength="1000" style={`--i:${i}`} />}
+          </>
+        ))}
+      </g>
     </svg>
   )}
 </div>
@@ -101,9 +126,12 @@ const linhas = desenhos[((variante % 4) + 4) % 4];
     vector-effect: non-scaling-stroke;
   }
 
-  /* No celular as linhas aparecem mais (pedido do Gustavo) */
+  /* No celular as linhas aparecem mais (pedido do Gustavo): desenho próprio e mais forte */
+  .circuito__linhas--cel { display: none; }
   @media (max-width: 959.98px) {
-    .circuito { --forca: 1.4; }
+    .circuito { --forca: 1.7; }
+    .circuito__linhas--larga { display: none; }
+    .circuito__linhas--cel { display: block; }
     .circuito__luz { stroke-width: 2; }
     .circuito__trilho { background: var(--line); }
   }
