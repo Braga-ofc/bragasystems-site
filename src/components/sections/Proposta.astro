@@ -7,18 +7,51 @@
     e a frase entra em foco logo abaixo.
   - Placa de benefícios: cada linha acende quando passa pelo meio da tela, uma por vez, na ordem;
     com mouse, um brilho neutro segue o cursor na linha (Magic Card do Magic UI, MIT).
-  O único ciano do bloco é o nó (o marca-texto é a assinatura das frases-chave do site).
+  Elementos gráficos (pedido do Gustavo, 20/10/2026): no trilho, antes do nó, três estações com as
+  formas do núcleo do B (página, dúvida respondida, preço) acendem uma a uma: é a metade da venda
+  que a página faz antes de o cliente chamar. Cada benefício tem o seu ícone nas mesmas formas.
+  No fundo, linhas finas em 0°/45° com uma luz que circula por elas, bem apagadas, só com a seção
+  à vista. O único ciano forte do bloco é o nó (o marca-texto é a assinatura das frases-chave).
   Sem suporte ou com movimento reduzido: tudo aceso e parado.
 */
 import Secao from "../ui/Secao.astro";
 import { proposta } from "../../content/home";
 import { aspas } from "../../lib/texto";
 
+// Formas do núcleo do B (as mesmas de ui/CamadaViva), em viewBox 48
+const formas = {
+  quadro: "M10 4 L44 4 L44 34 L34 44 L4 44 L4 10 Z M12 12 L36 12 L36 31 L31 36 L12 36 Z",
+  check: "M6 26 L14 18 L20 24 L34 10 L42 18 L20 40 Z",
+  preco: "M8 8 L28 8 L42 22 L42 26 L26 42 L8 24 Z M18 15 L22 15 L22 19 L18 19 Z",
+  balao: "M8 6 L42 6 L42 30 L36 36 L20 36 L10 44 L10 36 L6 36 L6 8 Z",
+  seta: "M8 8 L18 8 L24 14 L30 8 L40 8 L24 24 Z M8 22 L18 22 L24 28 L30 22 L40 22 L24 38 Z",
+};
+// Antes do nó: a página apresenta, responde as dúvidas e mostra o valor
+const estacoes = [formas.quadro, formas.check, formas.preco];
+// Um ícone por benefício, na ordem da copy
+const icones = [formas.balao, formas.preco, formas.quadro, formas.seta];
+
+// Linhas do fundo: só 0°, 45° e 90°, como o símbolo (viewBox 1440 × 1000)
+const linhas = [
+  "M-40 180 H320 L520 380 H900 L1100 180 H1480",
+  "M-40 620 H180 L380 820 H760 L960 620 H1480",
+  "M260 -40 V140 L460 340 V1040",
+  "M1180 -40 V420 L980 620 V1040",
+];
+
 // "Um site bonito não basta." | "Ele precisa vender." — a segunda frase leva o marca-texto em "vender"
 const [afirmacao, ...resto] = proposta.titulo.split(/(?<=\.)\s+/);
 const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vender</mark>');
 ---
 <Secao class="proposta">
+  <svg class="proposta__fundo" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" data-proposta-fundo>
+    {linhas.map((d, i) => (
+      <>
+        <path class="proposta__fio" d={d} />
+        <path class="proposta__luz" d={d} pathLength="1000" style={`--i:${i}`} />
+      </>
+    ))}
+  </svg>
   <div class="proposta__grade">
     <h2 class="proposta__titulo">
       <span class="proposta__afirmacao foco-rolagem">{afirmacao}</span>
@@ -27,6 +60,11 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 
     <div class="proposta__virada">
       <span class="proposta__trilho" aria-hidden="true"></span>
+      <span class="proposta__estacoes" aria-hidden="true">
+        {estacoes.map((d, i) => (
+          <svg class="proposta__estacao" viewBox="0 0 48 48" style={`--i:${i}`}><path d={d} fill-rule="evenodd" /></svg>
+        ))}
+      </span>
       <span class="proposta__no" aria-hidden="true"><span class="proposta__onda"></span></span>
       <p class="proposta__frase sobe-rolagem">{proposta.frase}</p>
     </div>
@@ -34,9 +72,12 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
     <h3 class="proposta__subtitulo foco-rolagem">{proposta.beneficiosTitulo}</h3>
     <div class="proposta__placa chanfrado">
       <ul class="proposta__lista" role="list" data-proposta-luz>
-        {proposta.beneficios.map((item) => (
+        {proposta.beneficios.map((item, i) => (
           <li class="proposta__item">
-            <p class="proposta__destaque">{item.destaque}</p>
+            <p class="proposta__destaque">
+              <svg class="proposta__icone" viewBox="0 0 48 48" aria-hidden="true"><path d={icones[i]} fill-rule="evenodd" /></svg>
+              {item.destaque}
+            </p>
             <p class="proposta__texto">{aspas(item.texto)}</p>
           </li>
         ))}
@@ -46,6 +87,12 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 
   {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
   <script>
+    // As linhas do fundo só correm com a seção à vista
+    const fundo = document.querySelector<SVGElement>("[data-proposta-fundo]");
+    if (fundo && "IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => fundo.classList.toggle("is-na-tela", e.isIntersecting)).observe(fundo);
+    }
+
     // Brilho que segue o cursor na linha sob ele. Só com mouse; no toque e com movimento reduzido, nada.
     const lista = document.querySelector<HTMLElement>("[data-proposta-luz]");
     if (lista && matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -69,7 +116,48 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 </Secao>
 
 <style>
-  .proposta__grade { display: grid; min-width: 0; }
+  .proposta__grade { position: relative; display: grid; min-width: 0; }
+
+  /* ---------- Fundo: linhas apagadas com uma luz que circula ---------- */
+  .proposta { overflow: clip; }
+  .proposta__fundo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    -webkit-mask-image: linear-gradient(transparent, #000 15%, #000 85%, transparent);
+    mask-image: linear-gradient(transparent, #000 15%, #000 85%, transparent);
+  }
+  .proposta__fio { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.45; vector-effect: non-scaling-stroke; }
+  .proposta__luz {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linecap: square;
+    stroke-dasharray: 70 930;
+    stroke-dashoffset: 1000;
+    opacity: 0.28;
+    vector-effect: non-scaling-stroke;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .proposta__luz { animation: proposta-circula calc(11s + var(--i) * 2.5s) linear calc(var(--i) * -3s) infinite paused; }
+    .proposta__fundo:global(.is-na-tela) .proposta__luz { animation-play-state: running; }
+  }
+  @keyframes proposta-circula { to { stroke-dashoffset: 0; } }
+  @media (forced-colors: active) { .proposta__fundo { display: none; } }
+
+  /* ---------- Estações no trilho e ícones dos benefícios ---------- */
+  .proposta__estacoes { display: none; }
+  .proposta__estacao, .proposta__icone { fill: currentColor; }
+  .proposta__icone {
+    display: inline-block;
+    width: 0.95em;
+    height: 0.95em;
+    margin-right: 0.55em;
+    vertical-align: -0.1em;
+    color: var(--ink-muted);
+  }
 
   .proposta__titulo {
     max-width: 18ch;
@@ -99,6 +187,7 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
   }
   .proposta__no {
     position: relative;
+    align-self: center;
     justify-self: start;
     width: 14px;
     height: 14px;
@@ -189,11 +278,13 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       .proposta__trilho { animation: proposta-trilho linear both; animation-timeline: --proposta-virada; animation-range: entry 20% cover 45%; }
       .proposta__no::before { animation: proposta-no linear both; animation-timeline: --proposta-virada; animation-range: cover 40% cover 50%; }
       .proposta__onda { animation: proposta-onda linear both; animation-timeline: --proposta-virada; animation-range: cover 44% cover 62%; }
+      .proposta__estacao { animation: proposta-estacao linear both; animation-timeline: --proposta-virada; animation-range: cover calc(28% + var(--i) * 4%) cover calc(33% + var(--i) * 4%); }
       /* Cada linha acende quando passa pelo meio da tela e fica acesa em tom normal depois */
       .proposta__destaque, .proposta__texto { animation: proposta-linha linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
     }
   }
   @keyframes proposta-trilho { from { transform: scaleX(0); } }
+  @keyframes proposta-estacao { from { opacity: 0; scale: 0.4; } to { opacity: 1; scale: 1; } }
   @keyframes proposta-no { from { opacity: 0.15; scale: 0.3; rotate: -90deg; } }
   @keyframes proposta-onda {
     0% { opacity: 0.9; scale: 0.5; }
@@ -224,6 +315,23 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
     /* O nó cai no meio do trilho, no início da coluna 7, onde a frase começa */
     .proposta__no { grid-column: 7 / -1; translate: -7px 0; }
     .proposta__frase { grid-column: 7 / -1; margin-top: var(--s-6); }
+    /* As três estações dividem a metade de antes do nó; o fundo delas recorta o trilho */
+    .proposta__estacoes {
+      grid-row: 1;
+      grid-column: 1 / 7;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding-right: var(--s-5);
+    }
+    .proposta__estacao {
+      width: 30px;
+      height: 30px;
+      padding: 6px;
+      box-sizing: content-box;
+      color: var(--ink-muted);
+      background: var(--surface);
+    }
     .proposta__subtitulo { grid-column: 1 / -1; }
     .proposta__placa { grid-column: 1 / -1; }
     /* Tabela: o que muda (5/12) | como (7/12), com a régua vertical na divisa */
