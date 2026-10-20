@@ -10,7 +10,6 @@ const MAPA: Array<[string, string, string]> = [
   ["dor", "seta", "calmo"],
   ["proposta", "nucleo", "padrao"],
   ["metodo", "seta", "aceso"],
-  ["beneficios", "check", "padrao"],
   ["projetos", "quadro", "aceso"],
   ["planos", "preco", "aceso"],
   ["processo", "seta", "padrao"],

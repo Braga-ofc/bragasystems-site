@@ -80,12 +80,16 @@ export const dor = {
   fechamento: "Seu serviço é excelente. Só falta uma página que trabalhe enquanto você descansa.",
 } as const;
 
+// Copy 2.11: Proposta + Benefícios numa seção só (escolhida pelo Gustavo em 20/10/2026)
 export const proposta = {
-  paragrafos: [
-    "A maioria dos sites só é bonita. Fica no ar, ninguém lê e nada acontece.",
-    "Enquanto os da BRAGA SYSTEMS são construídos para trabalhar. Eles explicam o seu serviço, mostram por que ele vale o preço e respondem as dúvidas antes de o cliente perguntar.",
-    "Quando ele te chama, a conversa já começa no meio da venda, não no começo.",
-    "Você para de explicar a mesma coisa vinte vezes por dia e passa a falar só com quem está pronto para contratar.",
+  titulo: "Um site bonito não basta. Ele precisa vender.",
+  frase: "Quando o cliente te chama, a conversa já começa no meio da venda, não no começo.",
+  beneficiosTitulo: "O que muda no seu dia",
+  beneficios: [
+    { destaque: "Você para de repetir explicação.", texto: "A página responde por você." },
+    { destaque: "Seu preço deixa de parecer caro.", texto: "Quem entende o valor não pede desconto." },
+    { destaque: "Você não escreve nada.", texto: "A copy vem pronta, a partir de um briefing de 10 minutos." },
+    { destaque: "Seu anúncio rende mais.", texto: "O clique cai numa página feita para converter." },
   ],
 } as const;
 
@@ -118,19 +122,6 @@ export const metodo = {
       titulo: "Um caminho só: até o seu WhatsApp",
       texto: "Cada seção leva ao mesmo lugar. O cliente chega com uma mensagem pronta e você sabe de onde ele veio.",
     },
-  ],
-} as const;
-
-export const beneficios = {
-  titulo: "O que muda no seu dia a dia",
-  itens: [
-    { destaque: "Você para de repetir explicação.", texto: "A página responde por você, 24 horas por dia." },
-    { destaque: "O cliente chega decidido.", texto: 'A conversa começa no orçamento, não no "o que você faz?".' },
-    { destaque: "Seu preço deixa de parecer caro.", texto: "Quem entende o valor não pede desconto." },
-    { destaque: "Você não precisa escrever nada.", texto: "A copy vem pronta, a partir de um briefing de 10 minutos." },
-    { destaque: "Seu anúncio rende mais.", texto: "O dinheiro do tráfego cai numa página feita para converter." },
-    { destaque: "Você parece do tamanho que quer ser.", texto: "Uma presença que transmite confiança antes da primeira mensagem." },
-    { destaque: "Você fala com quem faz.", texto: "Sem atendente nem repasse: quem te atende é quem desenvolve o seu site." },
   ],
 } as const;
 
