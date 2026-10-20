@@ -1,110 +1,72 @@
 ---
 /*
-  Método Pré-Venda (copy §6): o gesto assinado da home.
-  As 4 camadas são módulos ligados por um trilho de 1 px, com os números da copy como nós.
-  Depois da camada 04 o trilho desce, dobra em 45° e corre reto até o nó do WhatsApp,
-  o único ciano do circuito. Ao entrar na tela, o traço se desenha e um pulso de luz corre
-  uma vez de 01 até a camada 04; a saída (curva, linha e nó do WhatsApp) só se desenha e acende
-  quando o nó de destino entra na tela, para o fim do gesto acontecer à vista (Animated Beam do
-  Magic UI, MIT, recriado em CSS, com dois IntersectionObserver no próprio componente).
-  Sem JavaScript ou com movimento reduzido, o circuito já aparece desenhado e aceso.
+  Método Pré-Venda (copy §6), redesenhado em 20/10/2026 a pedido do Gustavo ("junção"):
+  - O circuito fica no início da coluna 7, sobre o trilho central de ui/Circuito: o mesmo trilho
+    que sai do nó da Proposta desce e vira o circuito das 4 camadas. As seções viram uma linha só.
+  - Conforme a rolagem, a luz enche o circuito até o meio da tela, com uma cabeça em losango; cada
+    nó acende quando a luz chega nele, a haste até o módulo se desenha, o módulo ganha as marcas de
+    enquadramento e o ícone da camada acende. Subindo a página, tudo apaga de volta.
+  - No computador o título fica fixo à esquerda e um ponteiro tracejado, com dados correndo, liga o
+    texto ao circuito na altura do meio da tela: o texto e as camadas ficam conectados.
+  - A saída (curva em 45° e linha até o WhatsApp) se desenha quando a luz chega ao fim.
+  Tudo preso à rolagem em CSS (animation-timeline), sem script. Sem suporte ou com movimento
+  reduzido: o circuito aparece inteiro e aceso.
 */
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
 import Icone from "../ui/Icone.astro";
 import { metodo } from "../../content/home";
+
+// Formas do núcleo do B (as mesmas de ui/CamadaViva), uma por camada, na ordem da copy:
+// copy (a página), design (o preço que faz sentido), tecnologia (rápida), caminho (a conversa)
+const icones = [
+  "M10 4 L44 4 L44 34 L34 44 L4 44 L4 10 Z M12 12 L36 12 L36 31 L31 36 L12 36 Z",
+  "M8 8 L28 8 L42 22 L42 26 L26 42 L8 24 Z M18 15 L22 15 L22 19 L18 19 Z",
+  "M8 8 L18 8 L24 14 L30 8 L40 8 L24 24 Z M8 22 L18 22 L24 28 L30 22 L40 22 L24 38 Z",
+  "M8 6 L42 6 L42 30 L36 36 L20 36 L10 44 L10 36 L6 36 L6 8 Z",
+];
 ---
 <Secao id="metodo" class="metodo">
   <div class="metodo__grade">
     <header class="metodo__cabeca">
       <Rotulo>{metodo.rotulo}</Rotulo>
-      <h2 class="metodo__titulo">{metodo.titulo}</h2>
-      <p class="metodo__texto">{metodo.texto}</p>
+      <h2 class="metodo__titulo foco-rolagem">{metodo.titulo}</h2>
+      <p class="metodo__texto sobe-rolagem">{metodo.texto}</p>
+      <span class="metodo__ponteiro" aria-hidden="true"></span>
     </header>
 
-    <div class="metodo__circuito" data-circuito>
+    <div class="metodo__circuito">
       <p class="metodo__intro">{metodo.intro}</p>
 
+      <div class="metodo__trilho">
+      <span class="metodo__carga" aria-hidden="true"></span>
+      <span class="metodo__cabeca-luz" aria-hidden="true"><span></span></span>
       <ol class="metodo__camadas" role="list">
         {metodo.camadas.map((camada, i) => (
           <li class="metodo__camada" style={`--i:${i}`}>
             <span class="metodo__no chanfrado num">{camada.numero}</span>
             <div class="metodo__modulo chanfrado">
+              <svg class="metodo__icone" viewBox="0 0 48 48" aria-hidden="true"><path d={icones[i]} fill-rule="evenodd" /></svg>
+              <span class="metodo__marca metodo__marca--topo" aria-hidden="true"></span>
+              <span class="metodo__marca metodo__marca--base" aria-hidden="true"></span>
               <h3 class="metodo__nome">{camada.titulo}</h3>
               <p class="metodo__descricao">{camada.texto}</p>
             </div>
           </li>
         ))}
       </ol>
+      </div>
 
       {/* Saída do circuito: desce, dobra em 45° e segue reta até o WhatsApp */}
-      <div class="metodo__saida" aria-hidden="true" data-saida>
+      <div class="metodo__saida" aria-hidden="true">
         <svg class="metodo__curva" width="25" height="41" viewBox="0 0 25 41" fill="none">
           <path class="metodo__curva-traco" d="M0.5 0V16.5L24.5 40.5" stroke="currentColor" pathLength="1" />
-          <path class="metodo__curva-luz" d="M0.5 0V16.5L24.5 40.5" stroke-width="2" pathLength="1" />
         </svg>
         <span class="metodo__linha"></span>
         <span class="metodo__destino chanfrado"><Icone nome="whatsapp" tamanho={22} /></span>
       </div>
     </div>
   </div>
-
-  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
-  <script>
-    // Liga o circuito do Método uma vez, em dois tempos:
-    // 1. quando o circuito entra na tela, o trilho se desenha e o pulso corre pelos nós 01 a 04;
-    // 2. quando o nó do WhatsApp entra na tela, a saída se desenha e a luz chega até ele.
-    // Se os dois acontecem juntos, a saída espera o pulso chegar (mesmo ritmo de antes).
-    // Só apaga antes o que ainda está abaixo da tela: nada pisca no carregamento,
-    // e quem chega por /#metodo já encontra o circuito aceso.
-    const circuito = document.querySelector<HTMLElement>("[data-circuito]");
-    const saida = circuito?.querySelector<HTMLElement>("[data-saida]");
-    const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Momento, depois do acender do circuito, em que o pulso chega à saída (casa com o CSS).
-    const PULSO_NA_SAIDA = 560;
-
-    if (
-      circuito &&
-      saida &&
-      !semMovimento &&
-      "IntersectionObserver" in window &&
-      circuito.getBoundingClientRect().top > window.innerHeight * 0.7
-    ) {
-      circuito.dataset.circuito = "pendente";
-      saida.dataset.saida = "pendente";
-      let acesoEm = -1;
-      let saidaNaTela = false;
-
-      const acenderSaida = () => {
-        if (acesoEm < 0 || !saidaNaTela || saida.dataset.saida === "acesa") return;
-        const atraso = Math.max(0, Math.round(acesoEm + PULSO_NA_SAIDA - performance.now()));
-        saida.style.setProperty("--saida-atraso", `${atraso}ms`);
-        saida.dataset.saida = "acesa";
-      };
-
-      const observaCircuito = new IntersectionObserver(
-        (entradas) => {
-          if (!entradas.some((entrada) => entrada.isIntersecting)) return;
-          observaCircuito.disconnect();
-          circuito.dataset.circuito = "aceso";
-          acesoEm = performance.now();
-          acenderSaida();
-        },
-        { rootMargin: "0px 0px -30% 0px" },
-      );
-      const observaSaida = new IntersectionObserver(
-        (entradas) => {
-          if (!entradas.some((entrada) => entrada.isIntersecting)) return;
-          observaSaida.disconnect();
-          saidaNaTela = true;
-          acenderSaida();
-        },
-        { rootMargin: "0px 0px -15% 0px" },
-      );
-      observaCircuito.observe(circuito);
-      observaSaida.observe(saida);
-    }
-  </script>
 </Secao>
 
 <style>
@@ -113,11 +75,14 @@ import { metodo } from "../../content/home";
     --haste: var(--s-3); /* traço do nó até o módulo */
     --trilho-x: calc(var(--no) / 2);
     --traco: var(--line-forte);
+    position: relative;
     display: grid;
     min-width: 0;
+    container-type: inline-size;
   }
 
   .metodo__cabeca {
+    position: relative;
     display: grid;
     gap: var(--s-4);
     align-content: start;
@@ -137,6 +102,7 @@ import { metodo } from "../../content/home";
     line-height: 1.6;
     color: var(--ink);
   }
+  .metodo__ponteiro { display: none; }
 
   .metodo__circuito { min-width: 0; margin-top: var(--s-7); }
   .metodo__intro { color: var(--ink-muted); }
@@ -150,7 +116,8 @@ import { metodo } from "../../content/home";
     padding: var(--s-5) 0 0;
     list-style: none;
   }
-  /* Trilho: 1 px, com um ponto quadrado de origem no alto */
+  .metodo__trilho { position: relative; view-timeline: --metodo-trilho block; }
+  /* Trilho apagado: 1 px, com um ponto quadrado de origem no alto */
   .metodo__camadas::before {
     content: "";
     position: absolute;
@@ -163,18 +130,37 @@ import { metodo } from "../../content/home";
       linear-gradient(var(--traco), var(--traco)) 0 0 / 5px 5px no-repeat,
       linear-gradient(var(--traco), var(--traco)) 2px 0 / 1px 100% no-repeat;
   }
-  /* Pulso de luz: só existe durante a animação de entrada */
-  .metodo__camadas::after {
-    content: "";
+  /* A carga: a luz que enche o trilho até o meio da tela */
+  .metodo__carga {
     position: absolute;
-    top: 0;
+    z-index: 1;
+    top: var(--s-4);
     bottom: 0;
     left: calc(var(--trilho-x) - 1px);
     width: 3px;
     pointer-events: none;
-    opacity: 0;
-    background: linear-gradient(to bottom, transparent, var(--accent-hover) 80%, transparent) 0 -120px / 3px 120px no-repeat;
-    filter: drop-shadow(0 0 6px var(--accent));
+    background: linear-gradient(var(--accent-hover), var(--accent));
+    box-shadow: 0 0 10px var(--accent);
+    transform-origin: top;
+  }
+  /* A cabeça da luz: um losango que desce junto (camada da altura da lista, movida por transform) */
+  .metodo__cabeca-luz {
+    position: absolute;
+    z-index: 2;
+    inset: var(--s-4) auto 0 calc(var(--trilho-x) - 7px);
+    width: 14px;
+    pointer-events: none;
+    display: none;
+  }
+  .metodo__cabeca-luz span {
+    position: absolute;
+    top: -7px;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    background: var(--accent-hover);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    filter: drop-shadow(0 0 8px var(--accent));
   }
 
   .metodo__camada {
@@ -192,12 +178,13 @@ import { metodo } from "../../content/home";
     left: var(--no);
     width: var(--haste);
     height: 1px;
-    background: var(--traco);
+    background: var(--accent);
+    transform-origin: left;
   }
 
   .metodo__no {
     --c: var(--chanfro-sm);
-    --cor-borda: var(--traco);
+    --cor-borda: var(--accent);
     --cor-fundo: var(--surface);
     z-index: 1;
     display: grid;
@@ -211,27 +198,44 @@ import { metodo } from "../../content/home";
 
   .metodo__modulo {
     --c: var(--chanfro);
-    --cor-borda: var(--line);
+    --cor-borda: var(--line-forte);
     --cor-fundo: var(--surface-sunken);
+    position: relative;
     display: grid;
     gap: var(--s-2);
     min-width: 0;
     padding: var(--s-4);
+    padding-right: calc(var(--s-4) + 30px);
   }
   /* A camada 04 é o destino de tudo: ganha a superfície grafite */
-  .metodo__camada:last-child .metodo__modulo {
-    --cor-borda: var(--line-forte);
-    --cor-fundo: var(--surface-raised);
-  }
+  .metodo__camada:last-child .metodo__modulo { --cor-fundo: var(--surface-raised); }
   .metodo__nome { font-size: var(--t-h3); line-height: 1.3; }
   .metodo__descricao { line-height: 1.6; color: var(--ink-muted); }
 
+  /* Ícone da camada (formas do núcleo do B) e marcas de enquadramento em 90° */
+  .metodo__icone {
+    position: absolute;
+    top: var(--s-4);
+    right: var(--s-4);
+    width: 22px;
+    height: 22px;
+    fill: var(--accent);
+  }
+  .metodo__marca {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+  }
+  .metodo__marca--topo { top: 6px; right: 6px; border-top: 1px solid var(--ink-muted); border-right: 1px solid var(--ink-muted); }
+  .metodo__marca--base { bottom: 6px; left: 6px; border-bottom: 1px solid var(--ink-muted); border-left: 1px solid var(--ink-muted); }
+
   /* Saída: continua o trilho, dobra em 45° e corre até o nó do WhatsApp */
   .metodo__saida {
-    --saida-atraso: 0ms; /* o script ajusta para a luz não chegar antes do pulso */
     position: relative;
     height: 64px;
-    color: var(--traco);
+    color: var(--accent);
+    view-timeline: --metodo-saida block;
   }
   .metodo__curva {
     position: absolute;
@@ -242,29 +246,16 @@ import { metodo } from "../../content/home";
     overflow: visible;
   }
   .metodo__curva-traco { stroke-dasharray: 1; stroke-dashoffset: 0; }
-  .metodo__curva-luz {
-    stroke: var(--accent-hover);
-    stroke-dasharray: 0.5 1.5;
-    stroke-dashoffset: 0.5;
-    opacity: 0;
-  }
   .metodo__linha {
     position: absolute;
     top: 40px;
     left: calc(var(--trilho-x) + 24px);
     right: 48px;
     height: 1px;
-    background: var(--traco);
+    background: var(--accent);
+    transform-origin: left;
   }
-  .metodo__linha::after {
-    content: "";
-    position: absolute;
-    inset: -1px 0;
-    opacity: 0;
-    background: linear-gradient(to right, transparent, var(--accent-hover) 80%, transparent) -120px 0 / 120px 3px no-repeat;
-    filter: drop-shadow(0 0 6px var(--accent));
-  }
-  /* O nó final: o único ciano do bloco */
+  /* O nó final: o destino do circuito */
   .metodo__destino {
     --c: var(--chanfro);
     --cor-borda: var(--accent);
@@ -294,63 +285,74 @@ import { metodo } from "../../content/home";
       position: sticky;
       top: calc(72px + var(--s-7));
     }
-    .metodo__circuito { grid-column: 7 / -1; margin-top: 0; }
+    /*
+      O circuito começa meio nó para a esquerda: o trilho cai no início da coluna 7, sobre o
+      trilho central que vem da Proposta (ui/Circuito)
+    */
+    .metodo__circuito { grid-column: 7 / -1; margin-top: 0; margin-left: calc(var(--no) / -2); }
+    .metodo__intro { padding-left: calc(var(--no) + var(--haste)); }
     .metodo__camadas { gap: var(--s-6); }
-    .metodo__modulo { padding: var(--s-5) var(--s-6) var(--s-6); }
+    .metodo__modulo { padding: var(--s-5) calc(var(--s-6) + 30px) var(--s-6) var(--s-6); }
+    .metodo__icone { top: var(--s-5); right: var(--s-5); }
+
+    /*
+      Ponteiro: do fim do texto até o trilho, na altura do meio da tela (o título é fixo, então ele
+      fica parado e as camadas passam por ele). Distância até o trilho: 1 coluna e 2 vãos da grade.
+    */
+    .metodo__ponteiro {
+      position: absolute;
+      top: calc(50vh - 72px - var(--s-7));
+      left: 100%;
+      display: block;
+      width: calc((100cqw - 11 * var(--s-5)) / 12 + 2 * var(--s-5));
+      height: 1px;
+      background: repeating-linear-gradient(90deg, var(--line-forte) 0 6px, transparent 6px 12px);
+    }
+    .metodo__ponteiro::after {
+      content: "";
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      width: 11px;
+      height: 11px;
+      border: 1px solid var(--accent);
+      rotate: 45deg;
+    }
   }
 
-  /*
-    Entrada (uma vez, em dois tempos). Circuito (~1,3 s): o trilho desce, cada nó pisca quando o
-    pulso passa. Saída (~1,5 s, quando o nó do WhatsApp aparece): a curva e a linha se desenham e a
-    luz corre até o WhatsApp, que acende. Antes de cada tempo, a parte dele fica em espera.
-  */
-  @media (prefers-reduced-motion: no-preference) {
-    [data-circuito="pendente"] .metodo__camadas::before { clip-path: inset(0 0 100% 0); }
-    [data-circuito="pendente"] .metodo__camada::before { clip-path: inset(0 100% 0 0); }
-    [data-circuito="pendente"] .metodo__no { --cor-borda: var(--line); color: var(--ink-muted); }
+  /* ---------- Movimento preso à rolagem ---------- */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* A luz enche o trilho até o meio da tela; a cabeça desce junto */
+      .metodo__carga { animation: metodo-enche linear both; animation-timeline: --metodo-trilho; animation-range: cover 50vh cover calc(100% - 50vh); }
+      .metodo__cabeca-luz { display: block; animation: metodo-cabeca linear both; animation-timeline: --metodo-trilho; animation-range: cover 50vh cover calc(100% - 50vh); }
 
-    [data-saida="pendente"] .metodo__linha { clip-path: inset(0 100% 0 0); }
-    [data-saida="pendente"] .metodo__curva-traco { stroke-dashoffset: 1; }
-    [data-saida="pendente"] .metodo__destino { --cor-borda: var(--line); color: var(--ink-muted); filter: none; }
+      /* Cada camada acende quando a luz chega no nó dela (o topo da camada no meio da tela) */
+      .metodo__no { animation: metodo-no linear both; animation-timeline: view(); animation-range: cover calc(50vh - 30px) cover calc(50vh + 20px); }
+      .metodo__camada::before { animation: metodo-haste linear both; animation-timeline: view(); animation-range: cover calc(50vh - 10px) cover calc(50vh + 50px); }
+      .metodo__modulo { animation: metodo-modulo linear both; animation-timeline: view(); animation-range: cover calc(50vh - 10px) cover calc(50vh + 70px); }
+      .metodo__icone, .metodo__marca { animation: metodo-acende linear both; animation-timeline: view(); animation-range: cover calc(50vh + 10px) cover calc(50vh + 90px); }
 
-    [data-circuito="aceso"] .metodo__camadas::before { animation: metodo-desce 700ms var(--ease-saida) both; }
-    [data-circuito="aceso"] .metodo__camada::before { animation: metodo-abre var(--dur) calc(120ms + var(--i) * 140ms) var(--ease-saida) both; }
-    [data-circuito="aceso"] .metodo__camadas::after { animation: metodo-pulso 1000ms 250ms linear both; }
-    [data-circuito="aceso"] .metodo__no { animation: metodo-no var(--dur-lenta) calc(300ms + var(--i) * 220ms) var(--ease-saida) both; }
+      /* A saída se desenha quando a luz chega ao fim */
+      .metodo__curva-traco { animation: metodo-traco linear both; animation-timeline: --metodo-saida; animation-range: cover calc(50vh - 10px) cover calc(50vh + 30px); }
+      .metodo__linha { animation: metodo-linha linear both; animation-timeline: --metodo-saida; animation-range: cover calc(50vh + 20px) cover calc(50vh + 90px); }
+      .metodo__destino { animation: metodo-destino linear both; animation-timeline: --metodo-saida; animation-range: cover calc(50vh + 80px) cover calc(50vh + 120px); }
 
-    /* Tempos da saída contados a partir de --saida-atraso (antes: 560, 720, 1230, 1340 e 1620 ms) */
-    [data-saida="acesa"] .metodo__curva-traco { animation: metodo-traco var(--dur) var(--saida-atraso) var(--ease-saida) both; }
-    [data-saida="acesa"] .metodo__linha { animation: metodo-abre var(--dur-lenta) calc(var(--saida-atraso) + 160ms) var(--ease-saida) both; }
-    [data-saida="acesa"] .metodo__curva-luz { animation: metodo-luz-curva 140ms calc(var(--saida-atraso) + 670ms) linear both; }
-    [data-saida="acesa"] .metodo__linha::after { animation: metodo-luz-linha 360ms calc(var(--saida-atraso) + 780ms) linear both; }
-    [data-saida="acesa"] .metodo__destino { animation: metodo-destino var(--dur-lenta) calc(var(--saida-atraso) + 1060ms) var(--ease-saida) both; }
+      /* Dados correndo pelo ponteiro, do texto até o circuito */
+      .metodo__ponteiro { animation: metodo-dados 1.2s linear infinite; }
+      .metodo__ponteiro::after { animation: metodo-gira 6s linear infinite; }
+    }
   }
 
-  @keyframes metodo-desce { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
-  @keyframes metodo-abre { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-  @keyframes metodo-traco { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-  @keyframes metodo-pulso {
-    0% { opacity: 1; background-position: 0 -120px; }
-    90% { opacity: 1; }
-    100% { opacity: 0; background-position: 0 calc(100% + 120px); }
-  }
-  @keyframes metodo-luz-curva {
-    0% { opacity: 1; stroke-dashoffset: 0.5; }
-    95% { opacity: 1; }
-    100% { opacity: 0; stroke-dashoffset: -1; }
-  }
-  @keyframes metodo-luz-linha {
-    0% { opacity: 1; background-position: -120px 0; }
-    85% { opacity: 1; }
-    100% { opacity: 0; background-position: calc(100% + 120px) 0; }
-  }
-  /* O nó pisca em prata quando o pulso passa e assenta aceso */
-  @keyframes metodo-no {
-    0% { --cor-borda: var(--line); color: var(--ink-muted); }
-    35% { --cor-borda: var(--ink-strong); color: var(--ink-strong); }
-    100% { --cor-borda: var(--traco); color: var(--ink-strong); }
-  }
-  @keyframes metodo-destino {
-    from { --cor-borda: var(--line); color: var(--ink-muted); filter: drop-shadow(0 0 0 transparent); }
-  }
+  @keyframes metodo-enche { from { transform: scaleY(0); } }
+  @keyframes metodo-cabeca { from { transform: translateY(0); } to { transform: translateY(100%); } }
+  @keyframes metodo-no { from { --cor-borda: var(--line); color: var(--ink-muted); } }
+  @keyframes metodo-haste { from { transform: scaleX(0); } }
+  @keyframes metodo-modulo { from { --cor-borda: var(--line); } }
+  @keyframes metodo-acende { from { opacity: 0; } }
+  @keyframes metodo-traco { from { stroke-dashoffset: 1; } }
+  @keyframes metodo-linha { from { transform: scaleX(0); } }
+  @keyframes metodo-destino { from { --cor-borda: var(--line); color: var(--ink-muted); filter: drop-shadow(0 0 0 transparent); } }
+  @keyframes metodo-dados { from { background-position: 0 0; } to { background-position: 12px 0; } }
+  @keyframes metodo-gira { to { rotate: 405deg; } }
 </style>

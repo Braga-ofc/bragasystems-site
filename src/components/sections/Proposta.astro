@@ -10,8 +10,9 @@
   Elementos gráficos (pedido do Gustavo, 20/10/2026): no trilho, antes do nó, três estações com as
   formas do núcleo do B (página, dúvida respondida, preço) acendem uma a uma: é a metade da venda
   que a página faz antes de o cliente chamar. Cada benefício tem o seu ícone nas mesmas formas.
-  No fundo, linhas finas em 0°/45° com uma luz que circula por elas, bem apagadas, só com a seção
-  à vista. O único ciano forte do bloco é o nó (o marca-texto é a assinatura das frases-chave).
+  As linhas que circulam no fundo vêm de ui/Secao (o site inteiro). Benefícios: o ícone e a frase
+  entram da esquerda, a resposta entra da direita, presos à rolagem. O único ciano forte do bloco é
+  o nó (o marca-texto é a assinatura das frases-chave).
   Sem suporte ou com movimento reduzido: tudo aceso e parado.
 */
 import Secao from "../ui/Secao.astro";
@@ -31,27 +32,11 @@ const estacoes = [formas.quadro, formas.check, formas.preco];
 // Um ícone por benefício, na ordem da copy
 const icones = [formas.balao, formas.preco, formas.quadro, formas.seta];
 
-// Linhas do fundo: só 0°, 45° e 90°, como o símbolo (viewBox 1440 × 1000)
-const linhas = [
-  "M-40 180 H320 L520 380 H900 L1100 180 H1480",
-  "M-40 620 H180 L380 820 H760 L960 620 H1480",
-  "M260 -40 V140 L460 340 V1040",
-  "M1180 -40 V420 L980 620 V1040",
-];
-
 // "Um site bonito não basta." | "Ele precisa vender." — a segunda frase leva o marca-texto em "vender"
 const [afirmacao, ...resto] = proposta.titulo.split(/(?<=\.)\s+/);
 const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vender</mark>');
 ---
 <Secao class="proposta">
-  <svg class="proposta__fundo" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true" data-proposta-fundo>
-    {linhas.map((d, i) => (
-      <>
-        <path class="proposta__fio" d={d} />
-        <path class="proposta__luz" d={d} pathLength="1000" style={`--i:${i}`} />
-      </>
-    ))}
-  </svg>
   <div class="proposta__grade">
     <h2 class="proposta__titulo">
       <span class="proposta__afirmacao foco-rolagem">{afirmacao}</span>
@@ -87,12 +72,6 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 
   {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
   <script>
-    // As linhas do fundo só correm com a seção à vista
-    const fundo = document.querySelector<SVGElement>("[data-proposta-fundo]");
-    if (fundo && "IntersectionObserver" in window) {
-      new IntersectionObserver(([e]) => fundo.classList.toggle("is-na-tela", e.isIntersecting)).observe(fundo);
-    }
-
     // Brilho que segue o cursor na linha sob ele. Só com mouse; no toque e com movimento reduzido, nada.
     const lista = document.querySelector<HTMLElement>("[data-proposta-luz]");
     if (lista && matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -118,34 +97,6 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 <style>
   .proposta__grade { position: relative; display: grid; min-width: 0; }
 
-  /* ---------- Fundo: linhas apagadas com uma luz que circula ---------- */
-  .proposta { overflow: clip; }
-  .proposta__fundo {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    -webkit-mask-image: linear-gradient(transparent, #000 15%, #000 85%, transparent);
-    mask-image: linear-gradient(transparent, #000 15%, #000 85%, transparent);
-  }
-  .proposta__fio { fill: none; stroke: var(--line); stroke-width: 1; opacity: 0.45; vector-effect: non-scaling-stroke; }
-  .proposta__luz {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 1.5;
-    stroke-linecap: square;
-    stroke-dasharray: 70 930;
-    stroke-dashoffset: 1000;
-    opacity: 0.28;
-    vector-effect: non-scaling-stroke;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .proposta__luz { animation: proposta-circula calc(11s + var(--i) * 2.5s) linear calc(var(--i) * -3s) infinite paused; }
-    .proposta__fundo:global(.is-na-tela) .proposta__luz { animation-play-state: running; }
-  }
-  @keyframes proposta-circula { to { stroke-dashoffset: 0; } }
-  @media (forced-colors: active) { .proposta__fundo { display: none; } }
 
   /* ---------- Estações no trilho e ícones dos benefícios ---------- */
   .proposta__estacoes { display: none; }
@@ -279,8 +230,9 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       .proposta__no::before { animation: proposta-no linear both; animation-timeline: --proposta-virada; animation-range: cover 40% cover 50%; }
       .proposta__onda { animation: proposta-onda linear both; animation-timeline: --proposta-virada; animation-range: cover 44% cover 62%; }
       .proposta__estacao { animation: proposta-estacao linear both; animation-timeline: --proposta-virada; animation-range: cover calc(28% + var(--i) * 4%) cover calc(33% + var(--i) * 4%); }
-      /* Cada linha acende quando passa pelo meio da tela e fica acesa em tom normal depois */
-      .proposta__destaque, .proposta__texto { animation: proposta-linha linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+      /* Cada benefício: o ícone e a frase vêm da esquerda, a resposta vem da direita */
+      .proposta__destaque { animation: proposta-da-esquerda linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+      .proposta__texto { animation: proposta-da-direita linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
     }
   }
   @keyframes proposta-trilho { from { transform: scaleX(0); } }
@@ -290,11 +242,8 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
     0% { opacity: 0.9; scale: 0.5; }
     100% { opacity: 0; scale: 1.8; }
   }
-  @keyframes proposta-linha {
-    0%, 30% { opacity: 0.35; }
-    45%, 58% { opacity: 1; }
-    75%, 100% { opacity: 0.75; }
-  }
+  @keyframes proposta-da-esquerda { from { opacity: 0; translate: -48px 0; filter: blur(4px); } }
+  @keyframes proposta-da-direita { from { opacity: 0; translate: 48px 0; filter: blur(4px); } }
 
   @media (min-width: 960px) {
     .proposta__grade,

@@ -1,0 +1,126 @@
+---
+/*
+  Fundo de circuito de todas as seções (pedido do Gustavo, 20/10/2026), em duas peças:
+  - Trilhos verticais que atravessam a página inteira, nas mesmas posições em toda seção: é o que
+    liga uma seção à outra conforme a rolagem. O do centro (50% + 12 px) passa exatamente no início
+    da coluna 7 da grade, onde ficam o nó da Proposta e o circuito do Método. Um pulso de luz desce
+    por eles sem parar (uma faixa movida só por transform).
+  - Linhas finas em 0°/45°/90° com uma luz que circula por elas (stroke-dashoffset), em quatro
+    desenhos diferentes, escolhidos pela seção. Duas luzes por seção (cada quadro redesenha o SVG)
+    e só com a seção à vista.
+  Tudo decorativo, atrás do conteúdo (z-index -1). Movimento reduzido: linhas paradas, sem luz.
+*/
+interface Props {
+  /** Qual dos quatro desenhos (0 a 3); a Secao escolhe pelo nome da seção. */
+  variante?: number;
+  /** Sem as linhas de 45° (seções claras, que têm fundo próprio): ficam só os trilhos. */
+  soTrilhos?: boolean;
+}
+const { variante = 0, soTrilhos = false } = Astro.props;
+
+// viewBox 1440 × 1000; as pontas passam das bordas para as linhas entrarem e saírem da seção
+const desenhos = [
+  ["M-40 180 H320 L520 380 H900 L1100 180 H1480", "M-40 620 H180 L380 820 H760 L960 620 H1480", "M260 -40 V140 L460 340 V1040", "M1180 -40 V420 L980 620 V1040"],
+  ["M-40 300 H400 L600 500 H1480", "M-40 760 H700 L900 560 H1480", "M980 -40 V200 L1180 400 V1040", "M120 -40 V600 L320 800 V1040"],
+  ["M-40 140 H560 L760 340 H1480", "M-40 860 H260 L460 660 H1100 L1300 860 H1480", "M1320 -40 V380 L1120 580 V1040", "M160 -40 V300 L360 500 V1040"],
+  ["M-40 480 H300 L500 280 H1000 L1200 480 H1480", "M-40 900 H1480", "M200 -40 V1040", "M1260 -40 V160 L1060 360 V1040"],
+];
+const linhas = desenhos[((variante % 4) + 4) % 4];
+---
+<div class="circuito" aria-hidden="true" data-circuito-fundo>
+  <span class="circuito__trilho circuito__trilho--centro"><span class="circuito__pulso"></span></span>
+  <span class="circuito__trilho circuito__trilho--borda"><span class="circuito__pulso"></span></span>
+  {!soTrilhos && (
+    <svg class="circuito__linhas" viewBox="0 0 1440 1000" preserveAspectRatio="xMidYMid slice">
+      {linhas.map((d, i) => (
+        <>
+          <path class="circuito__fio" d={d} />
+          {i % 2 === 0 && <path class="circuito__luz" d={d} pathLength="1000" style={`--i:${i}`} />}
+        </>
+      ))}
+    </svg>
+  )}
+</div>
+
+<script>
+  // Só anima o que está à vista: fora da tela, as linhas e os pulsos param
+  const fundos = document.querySelectorAll<HTMLElement>("[data-circuito-fundo]");
+  if (fundos.length && "IntersectionObserver" in window) {
+    const observador = new IntersectionObserver((entradas) => {
+      for (const e of entradas) e.target.classList.toggle("is-na-tela", e.isIntersecting);
+    });
+    fundos.forEach((f) => observador.observe(f));
+  }
+</script>
+
+<style>
+  .circuito {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: clip;
+    pointer-events: none;
+    --forca: 1;
+  }
+
+  /* ---------- Trilhos que ligam as seções ---------- */
+  .circuito__trilho {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    overflow: clip;
+    background: color-mix(in srgb, var(--line) 80%, transparent);
+  }
+  .circuito__trilho--centro { left: calc(50% + 12px); display: none; }
+  .circuito__trilho--borda { right: calc(max(var(--gutter), (100% - var(--largura-max)) / 2) - min(18px, var(--gutter) * 0.5)); }
+  /* O pulso: uma faixa de luz de 140 px dentro de uma camada da altura da seção, movida por transform */
+  .circuito__pulso {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent, var(--accent) 70%, transparent) 0 0 / 1px 140px no-repeat;
+    opacity: 0;
+  }
+
+  /* ---------- Linhas de 45° com a luz que circula ---------- */
+  .circuito__linhas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .circuito__fio { fill: none; stroke: var(--line); stroke-width: 1; opacity: calc(0.6 * var(--forca)); vector-effect: non-scaling-stroke; }
+  .circuito__luz {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linecap: square;
+    stroke-dasharray: 70 930;
+    stroke-dashoffset: 1000;
+    opacity: calc(0.5 * var(--forca));
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* No celular as linhas aparecem mais (pedido do Gustavo) */
+  @media (max-width: 959.98px) {
+    .circuito { --forca: 1.4; }
+    .circuito__luz { stroke-width: 2; }
+    .circuito__trilho { background: var(--line); }
+  }
+  @media (min-width: 960px) {
+    .circuito__trilho--centro { display: block; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .circuito__luz { animation: circuito-circula calc(11s + var(--i) * 2.5s) linear calc(var(--i) * -3s) infinite paused; }
+    .circuito__pulso { opacity: 0.9; animation: circuito-pulso 7s linear infinite paused; }
+    .circuito__trilho--borda .circuito__pulso { animation-duration: 9s; animation-delay: -4s; }
+    .circuito:global(.is-na-tela) :is(.circuito__luz, .circuito__pulso) { animation-play-state: running; }
+  }
+  @keyframes circuito-circula { to { stroke-dashoffset: 0; } }
+  @keyframes circuito-pulso {
+    from { transform: translateY(-140px); }
+    to { transform: translateY(100%); }
+  }
+  @media (forced-colors: active) { .circuito { display: none; } }
+</style>

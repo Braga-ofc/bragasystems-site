@@ -5,12 +5,16 @@ interface Props {
   largura?: "normal" | "estreita";
   class?: string;
 }
+import Circuito from "./Circuito.astro";
 const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
+// Cada seção ganha um dos quatro desenhos de linhas, sempre o mesmo para ela (pelo nome)
+const variante = [...(classe ?? id ?? "")].reduce((soma, c) => soma + c.charCodeAt(0), 0);
 ---
 <section id={id} class:list={["secao", `secao--${tema}`, tema === "claro" && "tema-claro", classe]}>
   {tema === "claro" && (
     <div class="secao__fundo-claro" aria-hidden="true"><span></span><span></span></div>
   )}
+  <Circuito variante={variante} soTrilhos={tema === "claro"} />
   <span class="linha" aria-hidden="true"></span>
   <div class="fio" aria-hidden="true">
     <span class="fio__linha"></span>
@@ -28,6 +32,8 @@ const { id, tema = "escuro", largura = "normal", class: classe } = Astro.props;
   /* As seções escuras são transparentes: o fundo contínuo e vivo (ui/CamadaViva) aparece por trás */
   .secao {
     position: relative;
+    /* Nada que entra de lado (animações, linhas) cria rolagem lateral; não atrapalha o sticky */
+    overflow-x: clip;
     color: var(--ink);
     padding-block: var(--secao-respiro);
   }
