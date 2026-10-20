@@ -1,15 +1,237 @@
 ---
+/*
+  404 (a partir da página "sim" do site da EBEN, pedido do Gustavo em 20/10/2026): "4 · 4" com o
+  zero virado num mostrador do painel. Três camadas de profundidade se movem com o mouse (longe,
+  meio e perto); o mostrador gira devagar, solta ondas e tem o núcleo do B no centro; cunhas em 45°
+  piscam pelo fundo. Hover: os 4 falham como terminal (Letter Glitch, reservado para esta página em
+  docs/referencias.md), o mostrador acelera e o núcleo acende. Tudo em CSS e SVG; o único script
+  move as camadas com transform, só com mouse. Movimento reduzido: tudo parado e legível.
+*/
 import Base from "../layouts/Base.astro";
+import Botao from "../components/ui/Botao.astro";
 import { montarLinkWhatsapp } from "../lib/whatsapp";
+
+// Textos que já estavam nesta página; o do mostrador é rótulo técnico (erro + nome da marca)
+const textos = {
+  titulo: "Essa página não existe (ainda).",
+  texto: "O endereço pode estar errado ou a página mudou de lugar.",
+  inicio: "Voltar para o início",
+  whatsapp: "Falar no WhatsApp",
+  mostrador: "ERRO 404 · PÁGINA NÃO ENCONTRADA · BRAGA SYSTEMS · ",
+};
+
+// Cunhas do fundo: posição (%), tamanho (px), atraso (s) e camada
+const cunhas = [
+  { x: 9, y: 14, t: 14, d: 0 }, { x: 86, y: 20, t: 9, d: 1.2 }, { x: 5, y: 38, t: 8, d: 2.1 },
+  { x: 92, y: 78, t: 16, d: 0.6 }, { x: 22, y: 88, t: 11, d: 1.7 }, { x: 48, y: 7, t: 7, d: 2.6 },
+  { x: 70, y: 92, t: 9, d: 0.9 }, { x: 34, y: 24, t: 6, d: 3.1 },
+];
 ---
 <Base titulo="Página não encontrada | BRAGA SYSTEMS">
-  <main style="min-height:100svh;display:grid;place-content:center;gap:20px;padding:24px;max-width:560px;margin:0 auto">
-    <h1 style="font-family:'Space Grotesk',system-ui,sans-serif;margin:0">Essa página não existe (ainda).</h1>
-    <p style="margin:0;color:#8A96A6">O endereço pode estar errado ou a página mudou de lugar.</p>
-    <p style="margin:0;display:flex;gap:16px;flex-wrap:wrap">
-      <a href="/" style="color:#35D5E8">Voltar para o início</a>
-      <a href={montarLinkWhatsapp("topo")} style="color:#35D5E8">Falar no WhatsApp</a>
-    </p>
+  <main id="conteudo" class="perdido" data-perdido>
+    <div class="perdido__palco">
+      <div class="perdido__camada perdido__camada--longe" aria-hidden="true">
+        <span class="perdido__brilho"></span>
+        {cunhas.map((c) => (
+          <span class="perdido__cunha" style={`--x:${c.x}%;--y:${c.y}%;--t:${c.t}px;--d:${c.d}s`}></span>
+        ))}
+      </div>
+
+      <div class="perdido__conteudo">
+        <p class="perdido__codigo" aria-hidden="true">
+          <span class="perdido__camada perdido__camada--meio">
+            <span class="perdido__digito" data-texto="4">4</span>
+          </span>
+          <span class="perdido__camada perdido__camada--perto">
+            <span class="perdido__mostrador">
+              <span class="perdido__onda"></span>
+              <span class="perdido__onda"></span>
+              <span class="perdido__onda"></span>
+              <svg viewBox="0 0 400 400" class="perdido__dial">
+                <defs>
+                  <path id="perdido-arco" d="M 200 200 m -150 0 a 150 150 0 1 1 300 0 a 150 150 0 1 1 -300 0" />
+                </defs>
+                <g class="perdido__giro">
+                  <circle cx="200" cy="200" r="186" pathLength="120" class="perdido__marcas" />
+                  <circle cx="200" cy="200" r="186" pathLength="12" class="perdido__marcas perdido__marcas--fortes" />
+                  <text class="perdido__arco"><textPath href="#perdido-arco" textLength="938" lengthAdjust="spacing">{textos.mostrador}</textPath></text>
+                </g>
+                <circle cx="200" cy="200" r="118" class="perdido__aro" />
+                <path class="perdido__nucleo" d="M168 168 H200 L236 232 H204 Z" />
+              </svg>
+            </span>
+          </span>
+          <span class="perdido__camada perdido__camada--meio">
+            <span class="perdido__digito" data-texto="4">4</span>
+          </span>
+        </p>
+
+        <h1 class="perdido__titulo">{textos.titulo}</h1>
+        <p class="perdido__texto">{textos.texto}</p>
+        <div class="perdido__acoes">
+          <Botao href="/" icone="seta">{textos.inicio}</Botao>
+          <Botao variante="secundario" href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="404">{textos.whatsapp}</Botao>
+        </div>
+      </div>
+    </div>
   </main>
 </Base>
-<style>:global(body){margin:0;background:#0B0F14;color:#D6DDE6;font-family:"Inter",system-ui,sans-serif}</style>
+
+<script>
+  // Profundidade com o mouse: cada camada anda uma fração da distância ao centro (só transform)
+  const palco = document.querySelector<HTMLElement>("[data-perdido]");
+  if (palco && matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    let x = 0, y = 0, ax = 0, ay = 0, quadro = 0;
+    const passo = () => {
+      ax += (x - ax) * 0.08;
+      ay += (y - ay) * 0.08;
+      palco.style.setProperty("--px", ax.toFixed(4));
+      palco.style.setProperty("--py", ay.toFixed(4));
+      quadro = Math.abs(x - ax) + Math.abs(y - ay) > 0.0005 ? requestAnimationFrame(passo) : 0;
+    };
+    palco.addEventListener("pointermove", (e) => {
+      x = e.clientX / innerWidth - 0.5;
+      y = e.clientY / innerHeight - 0.5;
+      if (!quadro) quadro = requestAnimationFrame(passo);
+    }, { passive: true });
+    palco.addEventListener("pointerleave", () => { x = y = 0; if (!quadro) quadro = requestAnimationFrame(passo); });
+  }
+</script>
+
+<style>
+  .perdido {
+    --px: 0;
+    --py: 0;
+    position: relative;
+    overflow: clip;
+    min-height: calc(100svh - 72px);
+    display: grid;
+  }
+  .perdido__palco { position: relative; display: grid; place-items: center; padding: var(--s-8) var(--gutter); }
+
+  /* Camadas: longe anda pouco, perto anda muito (e no sentido contrário, para dar profundidade) */
+  .perdido__camada { display: inline-block; will-change: transform; }
+  .perdido__camada--longe { position: absolute; inset: 0; pointer-events: none; translate: calc(var(--px) * -18px) calc(var(--py) * -18px); }
+  .perdido__camada--meio { translate: calc(var(--px) * 14px) calc(var(--py) * 10px); }
+  .perdido__camada--perto { translate: calc(var(--px) * 34px) calc(var(--py) * 26px); }
+
+  .perdido__brilho {
+    position: absolute;
+    left: 50%;
+    top: 42%;
+    width: min(900px, 140vw);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    background: radial-gradient(closest-side, rgb(53 213 232 / 0.16), rgb(11 124 140 / 0.08) 50%, transparent);
+  }
+
+  /* Cunhas em 45° (o núcleo do símbolo) que piscam no fundo */
+  .perdido__cunha {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: var(--t);
+    height: calc(var(--t) * 0.66);
+    background: var(--accent);
+    clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
+    opacity: 0.35;
+  }
+
+  .perdido__conteudo { position: relative; display: grid; justify-items: center; text-align: center; }
+
+  .perdido__codigo {
+    display: flex;
+    align-items: center;
+    gap: clamp(4px, 2vw, 24px);
+    margin: 0;
+    font: 600 clamp(7rem, 28vw, 15rem)/0.9 var(--font-display);
+    letter-spacing: -0.04em;
+    color: var(--ink-strong);
+  }
+
+  /* O 4: no hover falha como terminal, com duas cópias deslocadas em ciano e prata */
+  .perdido__digito { position: relative; display: inline-block; cursor: default; }
+  .perdido__digito::before,
+  .perdido__digito::after {
+    content: attr(data-texto);
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .perdido__digito::before { color: var(--accent); }
+  .perdido__digito::after { color: var(--ink-muted); }
+
+  /* O zero: mostrador que gira, com marcas, o rótulo em volta e o núcleo do B no centro */
+  .perdido__mostrador {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(7rem, 26vw, 14rem);
+    aspect-ratio: 1;
+    cursor: default;
+  }
+  .perdido__dial { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .perdido__giro { transform-origin: 200px 200px; }
+  .perdido__marcas { fill: none; stroke: var(--line-forte); stroke-width: 10; stroke-dasharray: 0.12 0.88; }
+  .perdido__marcas--fortes { stroke: var(--accent); stroke-width: 18; stroke-dasharray: 0.05 0.95; }
+  .perdido__arco { font: 500 21px var(--font-mono); fill: var(--ink-muted); }
+  .perdido__aro { fill: none; stroke: var(--line); stroke-width: 2; }
+  .perdido__nucleo { fill: var(--accent); filter: drop-shadow(0 0 10px rgb(53 213 232 / 0.6)); transform-origin: 202px 200px; transition: scale 400ms var(--ease-saida), filter 400ms var(--ease-saida); }
+  .perdido__mostrador:hover .perdido__nucleo { scale: 1.25; filter: drop-shadow(0 0 22px rgb(53 213 232 / 0.95)); }
+
+  .perdido__onda {
+    position: absolute;
+    inset: 22%;
+    border: 1px solid var(--accent);
+    rotate: 45deg;
+    opacity: 0;
+  }
+
+  .perdido__titulo {
+    max-width: 18ch;
+    margin-top: var(--s-6);
+    font-size: var(--t-h1);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .perdido__texto { max-width: 44ch; margin-top: var(--s-4); font-size: var(--t-body-lg); color: var(--ink-muted); }
+  .perdido__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-3); margin-top: var(--s-6); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .perdido__cunha { animation: perdido-pisca 3.6s ease-in-out var(--d) infinite; }
+    .perdido__giro { animation: perdido-gira 40s linear infinite; }
+    .perdido__mostrador:hover .perdido__giro { animation-duration: 8s; }
+    .perdido__onda { animation: perdido-onda 3.6s var(--ease-saida) infinite; }
+    .perdido__onda:nth-child(2) { animation-delay: 1.2s; }
+    .perdido__onda:nth-child(3) { animation-delay: 2.4s; }
+    .perdido__digito:hover::before { animation: perdido-falha-a 360ms steps(2) infinite; }
+    .perdido__digito:hover::after { animation: perdido-falha-b 300ms steps(2) infinite; }
+
+    /* Entrada: os 4 descem do desfoque, o mostrador gira e assenta, o texto sobe logo atrás */
+    .perdido__digito { animation: perdido-entra 900ms var(--ease-saida) 150ms backwards; }
+    .perdido__mostrador { animation: perdido-mostrador 1200ms var(--ease-saida) backwards; }
+    .perdido__titulo, .perdido__texto, .perdido__acoes { animation: perdido-sobe 700ms var(--ease-saida) backwards; }
+    .perdido__titulo { animation-delay: 500ms; }
+    .perdido__texto { animation-delay: 620ms; }
+    .perdido__acoes { animation-delay: 740ms; }
+  }
+  @keyframes perdido-pisca { 0%, 100% { opacity: 0.12; scale: 0.7; } 50% { opacity: 0.6; scale: 1; } }
+  @keyframes perdido-gira { to { transform: rotate(360deg); } }
+  @keyframes perdido-onda { 0% { opacity: 0.7; scale: 0.6; } 100% { opacity: 0; scale: 1.9; } }
+  @keyframes perdido-falha-a {
+    0% { opacity: 0.85; translate: -4px 2px; clip-path: inset(10% 0 55% 0); }
+    100% { opacity: 0.85; translate: 3px -2px; clip-path: inset(60% 0 8% 0); }
+  }
+  @keyframes perdido-falha-b {
+    0% { opacity: 0.7; translate: 4px -1px; clip-path: inset(40% 0 30% 0); }
+    100% { opacity: 0.7; translate: -3px 2px; clip-path: inset(5% 0 75% 0); }
+  }
+  @keyframes perdido-entra { from { opacity: 0; filter: blur(14px); translate: 0 -0.15em; } }
+  @keyframes perdido-mostrador { from { opacity: 0; rotate: -120deg; scale: 0.6; } }
+  @keyframes perdido-sobe { from { opacity: 0; filter: blur(8px); translate: 0 1.5rem; } }
+
+  @media (forced-colors: active) {
+    .perdido__camada--longe, .perdido__onda { display: none; }
+  }
+</style>
