@@ -19,9 +19,12 @@ import CtaFinal from "../components/sections/CtaFinal.astro";
 import Ps from "../components/sections/Ps.astro";
 import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
 import { Image } from "astro:assets";
-import fotoGustavo from "../assets/gustavo/gustavo-braga-sentado-hd.jpg";
 import recorteGustavo from "../assets/gustavo/gustavo-braga-recorte.png";
 import { hero } from "../content/home";
+import { rich } from "../lib/texto";
+
+// "BRAGA" da marca na legenda vai em ciano (pedido do Gustavo, 20/10/2026); o "Braga" do nome não
+const legenda = rich(hero.retrato.legenda).replace("BRAGA", '<span class="abertura__marca">BRAGA</span>');
 
 // Número de vagas do último build: a página já carrega com ele (mapa técnico, arquivo 03).
 const vagasBuild = await lerVagasNoBuild();
@@ -39,12 +42,12 @@ const vagas = vagasBuild ?? vagasMax;
           <div class="abertura__janela">
           <Image
             class="abertura__foto"
-            src={fotoGustavo}
+            src={recorteGustavo}
             alt={hero.retrato.alt}
             widths={[480, 720, 960, 1280]}
-            sizes="(min-width: 1024px) 680px, min(450px, 115vw)"
-            format="avif"
-            quality={70}
+            sizes="(min-width: 1024px) 560px, min(450px, 115vw)"
+            format="webp"
+            quality={75}
             loading="eager"
             fetchpriority="high"
           />
@@ -56,12 +59,12 @@ const vagas = vagasBuild ?? vagasMax;
           alt=""
           aria-hidden="true"
           widths={[480, 720, 960, 1280]}
-          sizes="(min-width: 1024px) 680px, min(450px, 115vw)"
+          sizes="(min-width: 1024px) 560px, min(450px, 115vw)"
           format="webp"
           quality={75}
           loading="eager"
         />
-        <figcaption class="abertura__legenda">{hero.retrato.legenda}</figcaption>
+        <figcaption class="abertura__legenda" set:html={legenda} />
       </figure>
       <Gerador />
     </div>
@@ -187,19 +190,30 @@ const vagas = vagasBuild ?? vagasMax;
     chanfrado com a luz correndo no contorno, e a cabeça passando por cima do contorno de cima.
     Duas camadas da mesma foto, na mesma posição: a inteira, cortada pelo quadro, e o recorte sem
     fundo (gustavo-braga-recorte.png), que só aparece acima da borda de cima. Medidas em cqw (largura
-    do retrato): o quadro é quadrado e fica 14cqw abaixo do topo; a foto, 125cqw de largura, sobe 2cqw (o contorno passa na testa).
+    do retrato): o quadro é quadrado e fica 14cqw abaixo do topo; a foto, 108cqw de largura, sobe 6cqw
+    (o contorno passa na testa e as mãos aparecem embaixo). Atrás de tudo, um brilho ciano suave;
+    dentro do quadro, outro brilho atrás do corpo (por isso as duas camadas usam o recorte).
   */
   .abertura__retrato {
     --sobra: 14cqw;
-    --foto-x: -12.5cqw;
-    --foto-y: -2cqw;
-    --foto-l: 125cqw;
+    --foto-x: -4cqw;
+    --foto-y: -6cqw;
+    --foto-l: 108cqw;
     position: relative;
     container-type: inline-size;
     margin: 0;
     width: min(100%, 420px);
     justify-self: center;
     min-width: 0;
+  }
+  /* Brilho atrás do quadro: gradiente, sem filtro de desfoque (leve no computador) */
+  .abertura__retrato::before {
+    content: "";
+    position: absolute;
+    inset: 4% -16% -4%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgb(53 213 232 / 0.26), rgb(11 124 140 / 0.12) 55%, transparent);
   }
   .abertura__quadro {
     --cor-borda: var(--line-forte);
@@ -213,7 +227,8 @@ const vagas = vagasBuild ?? vagasMax;
     position: absolute;
     inset: var(--borda);
     overflow: clip;
-    background: #000;
+    /* Brilho atrás do corpo, dentro do quadro */
+    background: radial-gradient(ellipse 62% 58% at 50% 38%, rgb(53 213 232 / 0.3), rgb(11 124 140 / 0.14) 48%, #05080B 78%);
     clip-path: polygon(var(--ci) 0, 100% 0, 100% calc(100% - var(--ci)), calc(100% - var(--ci)) 100%, 0 100%, 0 var(--ci));
   }
   /* :global: o <Image> é outro componente e não recebe o escopo deste arquivo */
@@ -227,9 +242,9 @@ const vagas = vagasBuild ?? vagasMax;
   }
   .abertura__retrato :global(.abertura__foto) {
     top: calc(var(--foto-y) - var(--sobra));
-    /* Dentro do quadro, a base escurece até o preto: o corpo some sem corte seco */
-    -webkit-mask-image: linear-gradient(#000 55%, transparent 92%);
-    mask-image: linear-gradient(#000 55%, transparent 92%);
+    /* A base escurece só no fim, para as mãos aparecerem */
+    -webkit-mask-image: linear-gradient(#000 78%, transparent 100%);
+    mask-image: linear-gradient(#000 78%, transparent 100%);
   }
   .abertura__retrato :global(.abertura__recorte) {
     top: var(--foto-y);
@@ -237,6 +252,7 @@ const vagas = vagasBuild ?? vagasMax;
     /* Só a parte acima do contorno de cima (e o próprio contorno, que passa por trás da cabeça) */
     clip-path: inset(0 0 calc(100% - var(--sobra) + var(--foto-y) - 2px) 0);
   }
+  .abertura__legenda :global(.abertura__marca) { color: var(--accent); }
   .abertura__legenda {
     margin-top: var(--s-4);
     text-align: center;
@@ -295,7 +311,7 @@ const vagas = vagasBuild ?? vagasMax;
       mask-image: radial-gradient(ellipse 75% 85% at 35% 5%, black 35%, transparent 100%);
     }
     .abertura > :global(.hero) { grid-column: 1 / span 6; align-self: center; }
-    .abertura__retrato { grid-column: 7 / span 6; width: min(100%, 540px); justify-self: end; }
+    .abertura__retrato { grid-column: 7 / span 6; width: min(100%, 500px, (100svh - 250px) / 1.2); justify-self: end; }
     /* O gerador desce para a linha de baixo, centrado: o rosto fica com a primeira impressão */
     .abertura > :global(.gerador) { grid-column: 3 / span 8; }
   }

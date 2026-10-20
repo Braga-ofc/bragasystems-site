@@ -1,18 +1,31 @@
 ---
 /*
-  Sobre (copy 2.8): logo depois da Dor, em fundo claro azul-gelo, a pessoa por trás da página:
+  Sobre (copy 2.9): logo depois da Dor, em fundo claro azul-gelo, a pessoa por trás da página:
   nome, missão e valor. A foto (outra pose, diferente da do hero) fica num encaixe chanfrado com
-  marcas de enquadramento em 90°. No celular vem acima do nome; no computador, em 4:5 à esquerda.
-  O único ciano é o botão do WhatsApp. Sem números (anos, projetos).
+  marcas de enquadramento em 90°. No celular vem acima do nome, centrada; no computador, em 4:5 à
+  esquerda. Fundo: dobras de luz e fios em ciano que deslizam devagar (a partir do "Background
+  premium" do Gustavo, redesenhado nas cores da marca). As bordas de cima e de baixo escurecem até
+  o preto, para a passagem da Dor e para a Proposta ser contínua. O único botão é o da história.
 */
 import Secao from "../ui/Secao.astro";
-import Botao from "../ui/Botao.astro";
 import { Image } from "astro:assets";
-import foto from "../../assets/gustavo/gustavo-braga-retrato.webp";
+import foto from "../../assets/gustavo/gustavo-braga-retrato-hd.jpg";
 import { sobre } from "../../content/home";
-import { montarLinkWhatsapp } from "../../lib/whatsapp";
+import { rich } from "../../lib/texto";
+
+// "pré-venda" leva o marca-texto (pedido do Gustavo, 19/10/2026); se a copy mudar, sai sem o destaque.
+const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<mark data-marca="pronta">$&</mark>'));
 ---
 <Secao id="sobre" tema="claro" class="sobre">
+  <div class="sobre__ceu" aria-hidden="true">
+    <span class="sobre__dobra sobre__dobra--1"></span>
+    <span class="sobre__dobra sobre__dobra--2"></span>
+    <span class="sobre__dobra sobre__dobra--3"></span>
+    <span class="sobre__traco sobre__traco--1"></span>
+    <span class="sobre__traco sobre__traco--2"></span>
+    <span class="sobre__traco sobre__traco--3"></span>
+    <span class="sobre__traco sobre__traco--4"></span>
+  </div>
   <div class="sobre__grade">
     <div class="sobre__retrato chanfrado">
       <Image
@@ -30,15 +43,18 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     </div>
 
     <header class="sobre__cabeca">
-      <h2 class="sobre__titulo">{sobre.titulo}</h2>
+      <h2 class="sobre__titulo foco-rolagem">{sobre.titulo}</h2>
     </header>
 
     <div class="sobre__corpo">
-      {sobre.paragrafos.map((paragrafo) => <p class="sobre__texto">{paragrafo}</p>)}
-      <div class="sobre__acoes">
-        <Botao variante="secundario" href="/quem-sou" icone="seta">{sobre.botaoHistoria}</Botao>
-        <Botao href={montarLinkWhatsapp("sobre")} icone="whatsapp" origem="sobre">{sobre.botaoWhatsapp}</Botao>
-      </div>
+      {paragrafos.map((paragrafo) => <p class="sobre__texto sobe-rolagem" set:html={paragrafo} />)}
+      <!-- Único botão da seção (pedido do Gustavo): base do cssbuttons-io-button (Uiverse), nas cores e no chanfro da marca -->
+      <a class="sobre__historia" href="/quem-sou">
+        <span class="sobre__historia-texto">{sobre.botaoHistoria}</span>
+        <span class="sobre__historia-icone" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+        </span>
+      </a>
     </div>
   </div>
 </Secao>
@@ -65,6 +81,7 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     --marca: 10px;
     --marca-recuo: 8px;
     grid-area: retrato;
+    justify-self: center;
     width: var(--retrato);
     aspect-ratio: 4 / 5;
     overflow: hidden;
@@ -132,16 +149,180 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     color: var(--ink);
   }
 
-  .sobre__acoes {
-    display: grid;
-    gap: var(--s-3);
-    margin-top: var(--s-4);
+  /*
+    O único botão (base: cssbuttons-io-button, Uiverse): de ponta a ponta da coluna, com o bloco da
+    seta à direita que se estende pelo botão inteiro no hover. Nas cores da marca e com o chanfro em
+    45° no lugar do raio. Entrada (pedido do Gustavo): conforme a rolagem, o botão é desenhado da
+    esquerda para a direita e o bloco da seta, que começa cobrindo tudo, recua até o canto e revela o
+    texto; subindo a página, desfaz. Sem suporte ou com movimento reduzido: já pronto.
+  */
+  .sobre__historia {
+    --c: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 60px;
+    margin-top: var(--s-5);
+    padding: 0 4.4rem 0 1.5rem;
+    overflow: hidden;
+    color: #fff;
+    background: var(--accent);
+    box-shadow: inset 0 0 1.6em -0.6em #04434C;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+    font: 600 1.0625rem/1.2 var(--font-sans);
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    view-timeline: --historia block;
   }
-  .sobre__acoes :global(.botao) { width: 100%; }
+  .sobre__historia-texto { position: relative; }
+  /*
+    O bloco da seta ocupa o botão todo e é recortado até os 48 px da direita; crescer é só mexer no
+    recorte (--abre), sem mudar a largura: nada no layout se move (CLS 0).
+  */
+  @property --abre { syntax: "<length-percentage>"; inherits: false; initial-value: 0px; }
+  .sobre__historia-icone {
+    --abre: calc(100% - 48px);
+    position: absolute;
+    inset: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 13px;
+    color: var(--accent);
+    background: #fff;
+    clip-path: polygon(calc(var(--abre) + 8px) 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, var(--abre) 100%, var(--abre) 8px);
+    transition: --abre 300ms var(--ease-saida), transform 150ms var(--ease-saida);
+  }
+  .sobre__historia-icone svg { width: 22px; height: 22px; transition: transform 300ms var(--ease-saida); }
+  .sobre__historia:hover .sobre__historia-icone,
+  .sobre__historia:focus-visible .sobre__historia-icone { --abre: 0px; }
+  .sobre__historia:hover .sobre__historia-icone svg,
+  .sobre__historia:focus-visible .sobre__historia-icone svg { transform: translateX(4px); }
+  .sobre__historia:active .sobre__historia-icone { transform: scale(0.97); }
+  .sobre__historia:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
-  @media (min-width: 640px) {
-    .sobre__acoes { display: flex; flex-wrap: wrap; }
-    .sobre__acoes :global(.botao) { width: auto; }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .sobre__historia {
+        animation: historia-desenha linear both;
+        animation-timeline: --historia;
+        animation-range: entry 0% cover 15%;
+      }
+      .sobre__historia-icone {
+        animation: historia-recua linear both;
+        animation-timeline: --historia;
+        animation-range: cover 12% cover 26%;
+      }
+      .sobre__historia-texto {
+        animation: historia-texto linear both;
+        animation-timeline: --historia;
+        animation-range: cover 18% cover 30%;
+      }
+    }
+  }
+  @keyframes historia-desenha {
+    from { clip-path: polygon(var(--c) 0, var(--c) 0, var(--c) 100%, var(--c) 100%, 0 100%, 0 var(--c)); }
+  }
+  @keyframes historia-recua {
+    from { --abre: 0px; }
+  }
+  @keyframes historia-texto {
+    from { opacity: 0; translate: -12px 0; filter: blur(4px); }
+  }
+  @media (forced-colors: active) {
+    .sobre__historia { border: 1px solid LinkText; }
+  }
+
+  /* ---------- Fundo: dobras de luz e fios em ciano, deslizando devagar ---------- */
+  .sobre__ceu {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  /* Passagem contínua: o alto vem do preto da Dor e a base volta ao preto da Proposta */
+  .sobre__ceu::before,
+  .sobre__ceu::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    height: var(--secao-respiro);
+  }
+  .sobre__ceu::before { top: 0; background: linear-gradient(#0B0F14, rgb(11 15 20 / 0.55) 35%, transparent); }
+  .sobre__ceu::after { bottom: 0; background: linear-gradient(transparent, rgb(11 15 20 / 0.55) 65%, #0B0F14); }
+
+  .sobre__dobra,
+  .sobre__traco {
+    position: absolute;
+    top: -30%;
+    height: 160%;
+    rotate: 32deg;
+    will-change: transform;
+  }
+  .sobre__dobra { width: 26%; }
+  .sobre__dobra--1 { left: -6%; background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.7) 55%, rgb(196 214 238 / 0.55) 56%, rgb(255 255 255 / 0)); }
+  .sobre__dobra--2 { left: 34%; width: 34%; background: linear-gradient(90deg, rgb(255 255 255 / 0), rgb(255 255 255 / 0.55) 60%, rgb(255 255 255 / 0)); }
+  .sobre__dobra--3 { left: 76%; background: linear-gradient(90deg, rgb(196 214 238 / 0), rgb(196 214 238 / 0.6) 45%, rgb(255 255 255 / 0.7) 46%, rgb(255 255 255 / 0)); }
+
+  /* Os fios: linhas finas em ciano profundo com o meio aceso, afinando nas pontas */
+  .sobre__traco {
+    width: 5px;
+    background: linear-gradient(transparent 4%, #0B7C8C 22%, #35D5E8 48%, #0B7C8C 74%, transparent 96%);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    opacity: 0.85;
+  }
+  .sobre__traco--1 { left: 10%; }
+  .sobre__traco--2 { left: 4%; top: -10%; width: 3px; opacity: 0.6; }
+  .sobre__traco--3 { left: 84%; }
+  .sobre__traco--4 { left: 92%; top: -14%; width: 4px; opacity: 0.7; }
+  /* No celular os fios cruzam o texto: mais apagados para não disputar com a leitura */
+  @media (max-width: 959.98px) { .sobre__traco { opacity: 0.4; } }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sobre__traco--1 { animation: sobre-desliza 16s ease-in-out infinite alternate; }
+    .sobre__traco--2 { animation: sobre-desliza 21s ease-in-out -6s infinite alternate-reverse; }
+    .sobre__traco--3 { animation: sobre-desliza 18s ease-in-out -3s infinite alternate; }
+    .sobre__traco--4 { animation: sobre-desliza 24s ease-in-out -9s infinite alternate-reverse; }
+    .sobre__dobra--1 { animation: sobre-dobra 30s ease-in-out infinite alternate; }
+    .sobre__dobra--3 { animation: sobre-dobra 36s ease-in-out -12s infinite alternate-reverse; }
+  }
+  /* Desliza ao longo da própria diagonal (o rotate fica no eixo do elemento) */
+  @keyframes sobre-desliza {
+    from { transform: translateY(-9%); }
+    to { transform: translateY(9%); }
+  }
+  @keyframes sobre-dobra {
+    from { transform: translateX(-4%); }
+    to { transform: translateX(4%); }
+  }
+  @media (forced-colors: active) { .sobre__ceu { display: none; } }
+
+  /* Entrada da foto: o encaixe abre de baixo para cima e a foto assenta, presos à rolagem */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .sobre__retrato {
+        animation: sobre-retrato linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 35%;
+      }
+      .sobre__retrato :global(.sobre__foto) {
+        animation: sobre-foto linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 40%;
+      }
+    }
+  }
+  @keyframes sobre-retrato {
+    from { opacity: 0.2; clip-path: inset(100% 0 0 0); translate: 0 40px; }
+    to { opacity: 1; clip-path: inset(0 0 0 0); translate: 0 0; }
+  }
+  @keyframes sobre-foto {
+    from { scale: 1.15; filter: blur(8px); }
+    to { scale: 1; filter: blur(0); }
   }
 
   /* Tablet: a foto à esquerda, nome e texto ao lado */
@@ -173,6 +354,7 @@ import { montarLinkWhatsapp } from "../../lib/whatsapp";
     }
     .sobre__retrato {
       grid-column: 1 / span 5;
+      justify-self: stretch;
       grid-row: 1 / -1;
       align-self: center;
       --marca: 18px;

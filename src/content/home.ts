@@ -237,7 +237,6 @@ export const sobre = {
   ],
   retratoAlt: "Gustavo Braga, de camiseta preta, com a mão no queixo, olhando para a câmera",
   botaoHistoria: "Conheça minha história",
-  botaoWhatsapp: "Falar comigo no WhatsApp",
 } as const;
 
 export const urgencia = {
