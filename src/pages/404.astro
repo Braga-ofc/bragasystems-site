@@ -11,13 +11,13 @@ import Base from "../layouts/Base.astro";
 import Botao from "../components/ui/Botao.astro";
 import { montarLinkWhatsapp } from "../lib/whatsapp";
 
-// Textos que já estavam nesta página; o do mostrador é rótulo técnico (erro + nome da marca)
+// Copy 2.10 (opção 3, "Venda perdida", escolhida pelo Gustavo em 20/10/2026)
 const textos = {
-  titulo: "Essa página não existe (ainda).",
-  texto: "O endereço pode estar errado ou a página mudou de lugar.",
+  titulo: "Quase uma venda perdida.",
+  texto: "Um link quebrado faz o cliente desistir. Este aqui você encontrou, e a gente te leva de volta.",
   inicio: "Voltar para o início",
-  whatsapp: "Falar no WhatsApp",
-  mostrador: "ERRO 404 · PÁGINA NÃO ENCONTRADA · BRAGA SYSTEMS · ",
+  whatsapp: "Quero uma página que não deixa ninguém perdido",
+  mostrador: "ERRO 404 · LINK QUEBRADO · BRAGA SYSTEMS · ",
 };
 
 // Cunhas do fundo: posição (%), tamanho (px), atraso (s) e camada
@@ -31,6 +31,7 @@ const cunhas = [
   <main id="conteudo" class="perdido" data-perdido>
     <div class="perdido__palco">
       <div class="perdido__camada perdido__camada--longe" aria-hidden="true">
+        <span class="perdido__grade"></span>
         <span class="perdido__brilho"></span>
         {cunhas.map((c) => (
           <span class="perdido__cunha" style={`--x:${c.x}%;--y:${c.y}%;--t:${c.t}px;--d:${c.d}s`}></span>
@@ -125,6 +126,16 @@ const cunhas = [
     background: radial-gradient(closest-side, rgb(53 213 232 / 0.16), rgb(11 124 140 / 0.08) 50%, transparent);
   }
 
+  /* Grade de pontos que desliza na diagonal sem parar (uma camada maior, movida só por transform) */
+  .perdido__grade {
+    position: absolute;
+    inset: -64px;
+    background-image: radial-gradient(circle at 1px 1px, rgb(74 87 104 / 0.7) 1px, transparent 1.6px);
+    background-size: 32px 32px;
+    -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 45%, #000 20%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 55% at 50% 45%, #000 20%, transparent 100%);
+  }
+
   /* Cunhas em 45° (o núcleo do símbolo) que piscam no fundo */
   .perdido__cunha {
     position: absolute;
@@ -137,7 +148,8 @@ const cunhas = [
     opacity: 0.35;
   }
 
-  .perdido__conteudo { position: relative; display: grid; justify-items: center; text-align: center; }
+  /* Largura fixa: a troca de fonte não empurra o bloco para os lados (CLS 0) */
+  .perdido__conteudo { position: relative; display: grid; justify-items: center; width: min(100%, 720px); text-align: center; }
 
   .perdido__codigo {
     display: flex;
@@ -199,7 +211,9 @@ const cunhas = [
   .perdido__acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-3); margin-top: var(--s-6); }
 
   @media (prefers-reduced-motion: no-preference) {
-    .perdido__cunha { animation: perdido-pisca 3.6s ease-in-out var(--d) infinite; }
+    .perdido__cunha { animation: perdido-pisca 3.6s ease-in-out var(--d) infinite, perdido-flutua 14s ease-in-out calc(var(--d) * -3) infinite alternate; }
+    .perdido__grade { animation: perdido-grade 9s linear infinite; }
+    .perdido__brilho { animation: perdido-respira 10s ease-in-out infinite alternate; }
     .perdido__giro { animation: perdido-gira 40s linear infinite; }
     .perdido__mostrador:hover .perdido__giro { animation-duration: 8s; }
     .perdido__onda { animation: perdido-onda 3.6s var(--ease-saida) infinite; }
@@ -217,6 +231,13 @@ const cunhas = [
     .perdido__acoes { animation-delay: 740ms; }
   }
   @keyframes perdido-pisca { 0%, 100% { opacity: 0.12; scale: 0.7; } 50% { opacity: 0.6; scale: 1; } }
+  @keyframes perdido-flutua { from { translate: 0 0; } to { translate: 18px -46px; } }
+  /* Anda exatamente um ladrilho (32 px) e recomeça: o laço não aparece */
+  @keyframes perdido-grade { from { transform: translate(0, 0); } to { transform: translate(32px, 32px); } }
+  @keyframes perdido-respira {
+    from { transform: scale(0.9); opacity: 0.7; }
+    to { transform: scale(1.15) translate(2%, -3%); opacity: 1; }
+  }
   @keyframes perdido-gira { to { transform: rotate(360deg); } }
   @keyframes perdido-onda { 0% { opacity: 0.7; scale: 0.6; } 100% { opacity: 0; scale: 1.9; } }
   @keyframes perdido-falha-a {
