@@ -189,6 +189,7 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
     align-items: center;
     justify-content: flex-end;
     padding-right: 13px;
+    container-type: inline-size;
     color: var(--accent);
     background: #fff;
     clip-path: polygon(calc(var(--abre) + 8px) 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, var(--abre) 100%, var(--abre) 8px);
@@ -197,8 +198,9 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
   .sobre__historia-icone svg { width: 22px; height: 22px; transition: transform 300ms var(--ease-saida); }
   .sobre__historia:hover .sobre__historia-icone,
   .sobre__historia:focus-visible .sobre__historia-icone { --abre: 0px; }
+  /* No hover a seta vai até o meio do botão: o centro dela está a 24 px da borda direita */
   .sobre__historia:hover .sobre__historia-icone svg,
-  .sobre__historia:focus-visible .sobre__historia-icone svg { transform: translateX(4px); }
+  .sobre__historia:focus-visible .sobre__historia-icone svg { transform: translateX(calc(-50cqw + 24px)); }
   .sobre__historia:active .sobre__historia-icone { transform: scale(0.97); }
   .sobre__historia:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
@@ -219,6 +221,14 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
         animation-timeline: --historia;
         animation-range: cover 18% cover 30%;
       }
+    }
+  }
+  /* No notebook e no computador a entrada começa um pouco antes (a pedido do Gustavo) */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+      .sobre__historia { animation-range: entry 0% entry 100%; }
+      .sobre__historia-icone { animation-range: entry 60% cover 14%; }
+      .sobre__historia-texto { animation-range: entry 80% cover 18%; }
     }
   }
   @keyframes historia-desenha {

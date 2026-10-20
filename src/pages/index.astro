@@ -23,8 +23,8 @@ import recorteGustavo from "../assets/gustavo/gustavo-braga-recorte.png";
 import { hero } from "../content/home";
 import { rich } from "../lib/texto";
 
-// "BRAGA" da marca na legenda vai em ciano (pedido do Gustavo, 20/10/2026); o "Braga" do nome não
-const legenda = rich(hero.retrato.legenda).replace("BRAGA", '<span class="abertura__marca">BRAGA</span>');
+// O "Braga" do nome vai em ciano na legenda (pedido do Gustavo, 20/10/2026); o da marca não
+const legenda = rich(hero.retrato.legenda).replace("Braga", '<span class="abertura__marca">$&</span>');
 
 // Número de vagas do último build: a página já carrega com ele (mapa técnico, arquivo 03).
 const vagasBuild = await lerVagasNoBuild();
@@ -188,11 +188,11 @@ const vagas = vagasBuild ?? vagasMax;
   /*
     O rosto de quem atende (copy 2.8, quadro pedido pelo Gustavo em 19/10/2026): a foto num quadro
     chanfrado com a luz correndo no contorno, e a cabeça passando por cima do contorno de cima.
-    Duas camadas da mesma foto, na mesma posição: a inteira, cortada pelo quadro, e o recorte sem
+    Atrás de todo o quadro, um brilho ciano desfocado. Duas camadas da mesma foto, na mesma posição: a inteira, cortada pelo quadro, e o recorte sem
     fundo (gustavo-braga-recorte.png), que só aparece acima da borda de cima. Medidas em cqw (largura
     do retrato): o quadro é quadrado e fica 14cqw abaixo do topo; a foto, 108cqw de largura, sobe 6cqw
-    (o contorno passa na testa e as mãos aparecem embaixo). Atrás de tudo, um brilho ciano suave;
-    dentro do quadro, outro brilho atrás do corpo (por isso as duas camadas usam o recorte).
+    (o contorno passa na testa e as mãos aparecem embaixo);
+    as duas camadas usam o recorte sem fundo, sobre o fundo escuro do quadro.
   */
   .abertura__retrato {
     --sobra: 14cqw;
@@ -202,24 +202,18 @@ const vagas = vagasBuild ?? vagasMax;
     position: relative;
     container-type: inline-size;
     margin: 0;
-    width: min(100%, 420px);
+    width: min(100%, 440px);
     justify-self: center;
     min-width: 0;
-  }
-  /* Brilho atrás do quadro: gradiente, sem filtro de desfoque (leve no computador) */
-  .abertura__retrato::before {
-    content: "";
-    position: absolute;
-    inset: 4% -16% -4%;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(closest-side, rgb(53 213 232 / 0.26), rgb(11 124 140 / 0.12) 55%, transparent);
   }
   .abertura__quadro {
     --cor-borda: var(--line-forte);
     --c: var(--chanfro-lg);
     margin-top: var(--sobra);
     aspect-ratio: 1;
+    /* Brilho atrás de todo o quadro, como um desfoque saindo do contorno. Sombra parada: o
+       navegador desenha uma vez (um drop-shadow seria refeito a cada quadro do feixe) */
+    box-shadow: 0 0 56px 4px rgb(53 213 232 / 0.32), 0 0 140px 24px rgb(11 124 140 / 0.22);
   }
   /* A janela da foto fica 1 px para dentro: a borda (e a luz que corre nela) aparece em volta */
   .abertura__janela {
@@ -227,8 +221,7 @@ const vagas = vagasBuild ?? vagasMax;
     position: absolute;
     inset: var(--borda);
     overflow: clip;
-    /* Brilho atrás do corpo, dentro do quadro */
-    background: radial-gradient(ellipse 62% 58% at 50% 38%, rgb(53 213 232 / 0.3), rgb(11 124 140 / 0.14) 48%, #05080B 78%);
+    background: #05080B;
     clip-path: polygon(var(--ci) 0, 100% 0, 100% calc(100% - var(--ci)), calc(100% - var(--ci)) 100%, 0 100%, 0 var(--ci));
   }
   /* :global: o <Image> é outro componente e não recebe o escopo deste arquivo */
@@ -311,7 +304,7 @@ const vagas = vagasBuild ?? vagasMax;
       mask-image: radial-gradient(ellipse 75% 85% at 35% 5%, black 35%, transparent 100%);
     }
     .abertura > :global(.hero) { grid-column: 1 / span 6; align-self: center; }
-    .abertura__retrato { grid-column: 7 / span 6; width: min(100%, 500px, (100svh - 250px) / 1.2); justify-self: end; }
+    .abertura__retrato { grid-column: 7 / span 6; width: min(100%, 540px, (100svh - 220px) / 1.15); justify-self: end; }
     /* O gerador desce para a linha de baixo, centrado: o rosto fica com a primeira impressão */
     .abertura > :global(.gerador) { grid-column: 3 / span 8; }
   }
