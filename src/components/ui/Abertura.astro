@@ -3,7 +3,8 @@
   Vídeo de abertura (videos-braga, Remotion; 5 s, desktop 1920×1080 e celular 1080×1920).
   Toca por cima do site já carregado, só na primeira visita, e se desfaz revelando o hero.
   Não toca: em visitas seguintes, com movimento reduzido, com economia de dados, quando o
-  endereço abre numa âncora (/#planos) ou se o vídeo não começar em 1,5 s. Nesses casos nada
+  endereço abre numa âncora (/#planos) ou se o vídeo não começar em 3 s (nesse caso tenta de
+  novo na próxima visita: "já viu" só conta se tocou ou se a pessoa pulou). Quando não toca, nada
   é baixado: o vídeo só ganha src pelo script, depois da decisão.
   Enquanto ele toca, as entradas do hero ficam pausadas (html[data-abertura]) e começam quando
   ele sai, para o visitante ver o site "ligar" depois do logo.
@@ -39,23 +40,26 @@
     raiz.dataset.abertura = "tocando";
 
     let fim = false;
-    const terminar = () => {
+    let tocou = false;
+    // "Já viu" só conta se o vídeo chegou a tocar (ou se a pessoa pulou): se ele falhou ou
+    // demorou a começar, a abertura tenta de novo na próxima visita
+    const terminar = (viu) => {
       if (fim) return;
       fim = true;
-      try { localStorage.setItem("braga-abertura", "1"); } catch {}
+      if (viu === true || tocou) try { localStorage.setItem("braga-abertura", "1"); } catch {}
       caixa.classList.add("is-saindo");
       delete raiz.dataset.abertura;
       document.dispatchEvent(new Event("abertura:fim"));
       setTimeout(() => caixa.remove(), 700);
     };
-    video.addEventListener("ended", terminar);
-    video.addEventListener("error", terminar, true);
-    caixa.querySelector("[data-abertura-pular]").addEventListener("click", terminar);
-    addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(); });
-    // Se não começar a tocar logo (rede lenta, autoplay bloqueado), o site não fica esperando
-    const guarda = setTimeout(terminar, 1500);
-    video.addEventListener("playing", () => { clearTimeout(guarda); setTimeout(terminar, 6500); }, { once: true });
-    video.play().catch(terminar);
+    video.addEventListener("ended", () => terminar());
+    video.addEventListener("error", () => terminar(), true);
+    caixa.querySelector("[data-abertura-pular]").addEventListener("click", () => terminar(true));
+    addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(true); });
+    // Se não começar a tocar logo (rede lenta, computador ocupado, autoplay bloqueado), o site não fica esperando
+    const guarda = setTimeout(terminar, 3000);
+    video.addEventListener("playing", () => { tocou = true; clearTimeout(guarda); setTimeout(terminar, 6500); }, { once: true });
+    video.play().catch(() => terminar());
   })();
 </script>
 
