@@ -5,7 +5,8 @@
   Não toca: em visitas seguintes, com movimento reduzido, com economia de dados, quando o
   endereço abre numa âncora (/#planos) ou se o vídeo não começar em 3 s (nesse caso tenta de
   novo na próxima visita: "já viu" só conta se tocou ou se a pessoa pulou). Quando não toca, nada
-  é baixado: o vídeo só ganha src pelo script, depois da decisão.
+  é baixado: o vídeo só ganha src pelo script, depois da decisão (um arquivo só: WebM onde o
+  navegador garante VP9, MP4 no resto, como o Safari do iPhone). Para testar: /?abertura força.
   Enquanto ele toca, as entradas do hero ficam pausadas (html[data-abertura]) e começam quando
   ele sai, para o visitante ver o site "ligar" depois do logo.
   O botão "Pular abertura" e Esc encerram na hora. Sem JavaScript: nada aparece.
@@ -21,8 +22,10 @@
   (() => {
     const caixa = document.querySelector("[data-abertura]");
     const video = caixa && caixa.querySelector("[data-abertura-video]");
+    // ?abertura no endereço força a abertura (para testar no celular sem limpar o navegador)
+    const forcar = /[?&]abertura(=|&|$)/.test(location.search);
     let visto = false;
-    try { visto = localStorage.getItem("braga-abertura") === "1"; } catch {}
+    try { visto = !forcar && localStorage.getItem("braga-abertura") === "1"; } catch {}
     const reduzido = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const economia = navigator.connection && navigator.connection.saveData;
     if (!video || visto || reduzido || economia || location.hash) return;
@@ -30,12 +33,10 @@
     const raiz = document.documentElement;
     const celular = matchMedia("(max-aspect-ratio: 1/1)").matches;
     const nome = celular ? "abertura-mobile" : "abertura-desktop";
-    for (const [ext, tipo] of [["webm", "video/webm"], ["mp4", "video/mp4"]]) {
-      const s = document.createElement("source");
-      s.src = "/videos/abertura/" + nome + "." + ext;
-      s.type = tipo;
-      video.append(s);
-    }
+    // Um arquivo só, o que este navegador garante tocar: o Safari do iPhone diz "maybe" para WebM
+    // VP9 e falha; com dois <source>, a falha do primeiro encerrava a abertura antes do MP4
+    const webm = video.canPlayType('video/webm; codecs="vp9"') === "probably";
+    video.src = "/videos/abertura/" + nome + (webm ? ".webm" : ".mp4");
     caixa.hidden = false;
     raiz.dataset.abertura = "tocando";
 
@@ -53,7 +54,7 @@
       setTimeout(() => caixa.remove(), 700);
     };
     video.addEventListener("ended", () => terminar());
-    video.addEventListener("error", () => terminar(), true);
+    video.addEventListener("error", () => terminar());
     caixa.querySelector("[data-abertura-pular]").addEventListener("click", () => terminar(true));
     addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(true); });
     // Se não começar a tocar logo (rede lenta, computador ocupado, autoplay bloqueado), o site não fica esperando
