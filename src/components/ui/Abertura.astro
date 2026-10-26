@@ -77,7 +77,17 @@
     video.addEventListener("playing", () => { tocou = true; nota("tocando"); clearTimeout(guarda); setTimeout(() => terminar(false, "teto de tempo"), 4500); }, { once: true });
     // 1,5× (pedido do Gustavo, 26/10/2026): os 5 s do vídeo viram ~3,3 s
     video.defaultPlaybackRate = video.playbackRate = 1.5;
-    video.play().catch((e) => terminar(false, "play recusado: " + (e && e.name)));
+    // Mudo por todos os caminhos: o Opera (Android) recusa o play automático se o vídeo não estiver
+    // marcado como mudo pela propriedade, além do atributo. Se recusar logo de cara, tenta de novo
+    // uma vez quando o vídeo já tem dados; só desiste se recusar de novo (ou pelo prazo de 3 s).
+    video.muted = video.defaultMuted = true;
+    video.setAttribute("muted", "");
+    video.autoplay = true;
+    const tocar = () => video.play();
+    tocar().catch((e) => {
+      nota("play recusado: " + (e && e.name) + " (tentando de novo)");
+      video.addEventListener("canplay", () => tocar().catch((e2) => terminar(false, "play recusado de novo: " + (e2 && e2.name))), { once: true });
+    });
   })();
 </script>
 
