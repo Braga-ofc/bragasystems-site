@@ -20,8 +20,37 @@ import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
 import { Image } from "astro:assets";
 import Abertura from "../components/ui/Abertura.astro";
 import recorteGustavo from "../assets/gustavo/gustavo-braga-recorte.png";
-import { hero } from "../content/home";
+import { hero, compartilhar } from "../content/home";
+import { faq } from "../content/faq";
+import { site } from "../config/site";
 import { rich } from "../lib/texto";
+
+// Dados estruturados do mapa técnico 10: o FAQPage sai do mesmo faq.ts da tela, para nunca divergir
+const dadosEstruturados = [
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: site.nome,
+    url: site.url,
+    logo: new URL("/favicon.svg", site.url).href,
+    image: new URL(compartilhar.imagem, site.url).href,
+    telephone: `+${site.whatsapp}`,
+    email: site.emailAvisos,
+    areaServed: "BR",
+    address: { "@type": "PostalAddress", addressLocality: "Brasília", addressRegion: "DF", addressCountry: "BR" },
+    founder: { "@type": "Person", name: "Gustavo Braga" },
+    sameAs: [site.instagram.url, site.facebook.url],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({
+      "@type": "Question",
+      name: f.pergunta,
+      acceptedAnswer: { "@type": "Answer", text: f.resposta },
+    })),
+  },
+];
 
 // O "Braga" do nome vai em ciano na legenda (pedido do Gustavo, 20/10/2026); o da marca não
 const legenda = rich(hero.retrato.legenda).replace("Braga", '<span class="abertura__marca">$&</span>');
@@ -30,7 +59,8 @@ const legenda = rich(hero.retrato.legenda).replace("Braga", '<span class="abertu
 const vagasBuild = await lerVagasNoBuild();
 const vagas = vagasBuild ?? vagasMax;
 ---
-<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild}>
+<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild} og={compartilhar}>
+  <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(dadosEstruturados)} />
   <Abertura />
   <main id="conteudo">
     <div class="abertura">

@@ -1,0 +1,72 @@
+---
+/*
+  Páginas de texto corrido (Política de Privacidade, Termos de uso): o mesmo topo e rodapé da home,
+  uma seção estreita e o texto vindo de src/content/juridico (Markdown).
+*/
+import Base from "./Base.astro";
+import Secao from "../components/ui/Secao.astro";
+import Rotulo from "../components/ui/Rotulo.astro";
+
+interface Props {
+  titulo: string;
+  descricao: string;
+  rotulo: string;
+  h1: string;
+}
+const { titulo, descricao, rotulo, h1 } = Astro.props;
+---
+<Base titulo={titulo} descricao={descricao}>
+  <main id="conteudo">
+    <Secao class="documento" largura="estreita">
+      <Rotulo destaque>{rotulo}</Rotulo>
+      <h1 class="documento__titulo">{h1}</h1>
+      <div class="documento__texto">
+        <slot />
+      </div>
+    </Secao>
+  </main>
+</Base>
+
+<style>
+  .documento { padding-top: calc(var(--secao-respiro) + var(--s-8)); }
+  .documento__titulo { margin: var(--s-4) 0 var(--s-6); text-wrap: balance; }
+  .documento__texto { max-width: var(--largura-texto); color: var(--ink); }
+  .documento__texto :global(h2) {
+    margin: var(--s-8) 0 var(--s-3);
+    font-size: var(--t-h3);
+    color: var(--ink-strong);
+    scroll-margin-top: var(--s-10);
+  }
+  .documento__texto :global(p),
+  .documento__texto :global(ul),
+  .documento__texto :global(ol) { margin: 0 0 var(--s-4); text-wrap: pretty; }
+  .documento__texto :global(ul),
+  .documento__texto :global(ol) { padding-left: var(--s-5); }
+  .documento__texto :global(li + li) { margin-top: var(--s-2); }
+  .documento__texto :global(strong) { color: var(--ink-strong); font-weight: 600; }
+  .documento__texto :global(a) { color: var(--accent); text-underline-offset: 3px; }
+  .documento__texto :global(a:hover) { color: var(--accent-hover); }
+  .documento__texto :global(code) { font: 500 0.875em/1 var(--font-mono); color: var(--ink-strong); }
+  /* Tabelas rolam sozinhas no celular, sem empurrar a página para o lado */
+  .documento__texto :global(table) {
+    display: block;
+    overflow-x: auto;
+    margin: 0 0 var(--s-6);
+    border-collapse: collapse;
+    font-size: var(--t-small);
+  }
+  .documento__texto :global(th),
+  .documento__texto :global(td) {
+    padding: var(--s-3) var(--s-4);
+    border-top: var(--borda) solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .documento__texto :global(th) {
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .documento__texto > :global(p:first-child) { font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); }
+</style>

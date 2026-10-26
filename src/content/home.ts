@@ -1,6 +1,14 @@
 // Textos da home (copy oficial v2.2, §1 a §18). Nada aqui é inventado: mudou a copy, mude aqui.
 // Convenções: **texto** vira negrito; {X} é trocado pelo número de vagas.
 
+// Copy §0: compartilhamento (Open Graph). Título e descrição da página ficam no index e no Base.
+export const compartilhar = {
+  titulo: "Seu cliente chega no WhatsApp pronto para fechar.",
+  descricao: "Landing pages e sites com copy inclusa, design personalizado e garantia no layout. BRAGA SYSTEMS.",
+  imagem: "/og/home.jpg",
+  imagemAlt: "Gustavo Braga ao lado da frase “Seu cliente chega no WhatsApp pronto para fechar.” e do logo da BRAGA SYSTEMS",
+} as const;
+
 export const topo = {
   links: [
     { texto: "Método", ancora: "metodo" },
@@ -298,6 +306,9 @@ export const rodape = {
   links: [
     { texto: "Quem sou eu", href: "/quem-sou" },
     { texto: "Política de Privacidade", href: "/privacidade" },
+
+    // Proposta §26 (26/10/2026, aguardando aprovação)
+    { texto: "Termos de uso", href: "/termos" },
   ],
   direitos: "© {ANO} BRAGA SYSTEMS. Todos os direitos reservados.",
 } as const;

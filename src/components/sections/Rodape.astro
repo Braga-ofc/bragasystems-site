@@ -6,6 +6,7 @@
 import Icone from "../ui/Icone.astro";
 import logo from "../../assets/logo/logo-vertical-escuro.svg?raw";
 import { rodape } from "../../content/home";
+import { cookies } from "../../content/cookies";
 import { site } from "../../config/site";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
 
@@ -62,6 +63,7 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
       {cnpj && <p class="rodape__cnpj">{rodape.cnpjRotulo} <span class="num">{cnpj}</span></p>}
       <ul class="rodape__links" role="list">
         {rodape.links.map((l) => <li><a class="rodape__link" href={l.href}>{l.texto}</a></li>)}
+        <li><button type="button" class="rodape__link rodape__link--botao" data-cookies-abrir>{cookies.linkRodape}</button></li>
       </ul>
       <p class="rodape__direitos num">{direitos}</p>
     </div>
@@ -199,6 +201,7 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
     transition: color var(--dur) var(--ease-saida), text-decoration-color var(--dur) var(--ease-saida);
   }
   .rodape__link:hover { color: var(--ink-strong); text-decoration-color: var(--accent); }
+  .rodape__link--botao { padding: 0; border: 0; background: none; font: inherit; cursor: pointer; }
 
   @media (min-width: 480px) {
     .rodape__local { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-3); }

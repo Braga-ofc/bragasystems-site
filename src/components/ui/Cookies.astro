@@ -1,0 +1,81 @@
+---
+/*
+  Banner de cookies (mapa técnico 09): aparece na primeira visita, Recusar e Aceitar com o mesmo
+  destaque, escolha por categoria sem nada marcado e o link "Cookies" do rodapé para mudar depois.
+  Nada de medição carrega antes do aceite (scripts/cookies.ts). Sem JavaScript, nada carrega e o banner não aparece.
+*/
+import Botao from "./Botao.astro";
+import Campo from "./Campo.astro";
+import Rotulo from "./Rotulo.astro";
+import { cookies } from "../../content/cookies";
+---
+<aside class="cookies chanfrado" aria-labelledby="cookies-rotulo" data-cookies hidden>
+  <Rotulo destaque><span id="cookies-rotulo">{cookies.rotulo}</span></Rotulo>
+  <p class="cookies__texto">
+    {cookies.texto} <a href={cookies.politica.href}>{cookies.politica.texto}</a>
+  </p>
+  <div class="cookies__categorias" data-cookies-categorias hidden>
+    <p class="cookies__titulo">{cookies.tituloPreferencias}</p>
+    <p class="cookies__necessarios">{cookies.necessarios}</p>
+    <Campo tipo="consentimento" id="cookies-medicao" nome="medicao">{cookies.medicao}</Campo>
+    <Campo tipo="consentimento" id="cookies-marketing" nome="marketing">{cookies.marketing}</Campo>
+  </div>
+  <div class="cookies__acoes">
+    <Botao variante="secundario" brilho={false} class="cookies__recusar">{cookies.recusar}</Botao>
+    <Botao variante="secundario" brilho={false} class="cookies__aceitar">{cookies.aceitar}</Botao>
+    <Botao variante="secundario" brilho={false} class="cookies__salvar">{cookies.salvar}</Botao>
+  </div>
+  <button type="button" class="cookies__escolher" data-cookies-escolher>{cookies.escolher}</button>
+</aside>
+
+<script>
+  import "../../scripts/cookies";
+</script>
+
+<style>
+  .cookies {
+    position: fixed;
+    z-index: 150; /* acima do topo, abaixo da abertura */
+    left: var(--s-4);
+    right: var(--s-4);
+    bottom: var(--s-4);
+    max-width: 30rem;
+    display: grid;
+    gap: var(--s-4);
+    padding: var(--s-5);
+    --cor-borda: var(--line-forte);
+    --cor-fundo: var(--surface-raised);
+    color: var(--ink);
+  }
+  .cookies[hidden] { display: none; }
+  .cookies__texto, .cookies__titulo, .cookies__necessarios { margin: 0; font-size: var(--t-small); text-wrap: pretty; }
+  .cookies__texto a { color: var(--accent); text-underline-offset: 3px; }
+  .cookies__titulo { color: var(--ink-strong); font-weight: 600; font-size: var(--t-body); }
+  .cookies__necessarios { color: var(--ink-muted); }
+  .cookies__categorias { display: grid; gap: var(--s-3); }
+  .cookies__categorias[hidden] { display: none; }
+  .cookies__acoes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+  /* Banner: Recusar e Aceitar lado a lado; nas preferências, um só botão de salvar */
+  .cookies:not([data-modo="preferencias"]) :global(.cookies__salvar),
+  .cookies[data-modo="preferencias"] :global(.cookies__recusar),
+  .cookies[data-modo="preferencias"] :global(.cookies__aceitar),
+  .cookies[data-modo="preferencias"] .cookies__escolher { display: none; }
+  .cookies[data-modo="preferencias"] .cookies__acoes { grid-template-columns: 1fr; }
+  .cookies__escolher {
+    justify-self: start;
+    min-height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ink-muted);
+    font: inherit;
+    font-size: var(--t-small);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .cookies__escolher:hover { color: var(--ink-strong); }
+  .cookies__escolher:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  @media (min-width: 768px) { .cookies { left: auto; right: var(--s-6); bottom: var(--s-6); } }
+  @media (forced-colors: active) { .cookies { border: 1px solid CanvasText; } }
+</style>

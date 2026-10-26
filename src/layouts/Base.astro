@@ -5,6 +5,7 @@ import "../styles/global.css";
 import Topo from "../components/sections/Topo.astro";
 import Rodape from "../components/sections/Rodape.astro";
 import CamadaViva from "../components/ui/CamadaViva.astro";
+import Cookies from "../components/ui/Cookies.astro";
 import { estadoDe } from "../lib/supabase";
 
 interface Props {
@@ -19,6 +20,8 @@ interface Props {
    * Liga os estados do contador (<html data-vagas-estado>). A página importa scripts/contador.
    */
   vagasBuild?: number | null;
+  /** Compartilhamento (Open Graph). Sem ele, a página usa o próprio título e descrição. */
+  og?: { titulo: string; descricao: string; imagem?: string; imagemAlt?: string };
 }
 const {
   titulo,
@@ -26,9 +29,13 @@ const {
   semIndexar = false,
   moldura = true,
   vagasBuild,
+  og = { titulo, descricao },
 } = Astro.props;
 
 const temContador = vagasBuild !== undefined;
+// Endereço oficial (mapa técnico 10): o canonical e o og apontam para o domínio, não para o link de teste
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImagem = og.imagem && new URL(og.imagem, Astro.site).href;
 ---
 <!doctype html>
 <html
@@ -42,19 +49,36 @@ const temContador = vagasBuild !== undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{titulo}</title>
     <meta name="description" content={descricao} />
-    {semIndexar && <meta name="robots" content="noindex" />}
+    {semIndexar ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="BRAGA SYSTEMS" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={og.titulo} />
+    <meta property="og:description" content={og.descricao} />
+    {ogImagem && (
+      <>
+        <meta property="og:image" content={ogImagem} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        {og.imagemAlt && <meta property="og:image:alt" content={og.imagemAlt} />}
+        <meta name="twitter:card" content="summary_large_image" />
+      </>
+    )}
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#0B0F14" />
     <link rel="preload" href="/fonts/space-grotesk-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <slot name="head" />
   </head>
   <body>
     {moldura && <CamadaViva />}
     {moldura && <Topo />}
     <slot />
     {moldura && <Rodape />}
+    {moldura && <Cookies />}
     <script>
       // Fora da primeira tela: liga depois que o hero começou a entrar, sem travar a abertura
       import { depois } from "../scripts/depois";
