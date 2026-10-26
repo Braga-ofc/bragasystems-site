@@ -16,7 +16,8 @@ export default defineConfig({
   session: false,
   // CSS dentro do HTML: sem ida e volta extra antes da primeira pintura (a headline é o LCP).
   // A home recebe sobretudo primeiras visitas, então o cache separado do CSS quase não ajuda.
-  build: { inlineStylesheets: "always" },
+  // Páginas como arquivo (privacidade.html): o Cloudflare serve /privacidade sem redirecionar para /privacidade/
+  build: { inlineStylesheets: "always", format: "file" },
   integrations: [
     sitemap({
       filter: (page) => !["/obrigado", "/briefing", "/404", "/amostra"].some((p) => page.includes(p)),
