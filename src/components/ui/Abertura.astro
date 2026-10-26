@@ -83,10 +83,23 @@
     video.muted = video.defaultMuted = true;
     video.setAttribute("muted", "");
     video.autoplay = true;
-    const tocar = () => video.play();
-    tocar().catch((e) => {
-      nota("play recusado: " + (e && e.name) + " (tentando de novo)");
-      video.addEventListener("canplay", () => tocar().catch((e2) => terminar(false, "play recusado de novo: " + (e2 && e2.name))), { once: true });
+    // Se o navegador bloqueia vídeo automático (o Opera no Android recusa até mudo), troca por uma
+    // imagem animada (WebP, já a 1,5×, ~550 KB): imagem não passa pela regra de autoplay
+    video.play().catch((e) => {
+      nota("play recusado: " + (e && e.name) + " (trocando pela imagem animada)");
+      const img = new Image();
+      img.className = video.className;
+      img.alt = "";
+      img.decoding = "async";
+      img.onload = () => {
+        tocou = true;
+        nota("imagem animada carregada");
+        clearTimeout(guarda);
+        video.replaceWith(img);
+        setTimeout(() => terminar(false, "imagem terminou"), 3400);
+      };
+      img.onerror = () => terminar(false, "imagem animada falhou");
+      img.src = "/videos/abertura/" + nome + ".webp";
     });
   })();
 </script>
@@ -103,7 +116,8 @@
   }
   .abertura-video[hidden] { display: none; }
   .abertura-video.is-saindo { opacity: 0; pointer-events: none; }
-  .abertura-video__video {
+  /* O mesmo enquadramento vale para a imagem animada que substitui o vídeo bloqueado */
+  .abertura-video :global(.abertura-video__video) {
     width: 100%;
     height: 100%;
     /* Inteiro, sem cortar os rótulos dos cantos: as sobras têm a mesma cor do fundo do vídeo */
