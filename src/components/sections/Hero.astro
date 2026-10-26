@@ -82,7 +82,10 @@ const digitado = [...hero.subtitulo.normalize("NFC")].map((c) => (c === " " ? " 
         if (k === letras.length) return caixa.classList.add("is-fim");
         setTimeout(passo, c === "." ? 220 : c === "," ? 64 : 16);
       };
-      if (letras.length) setTimeout(passo, 900);
+      // Com o vídeo de abertura tocando (ui/Abertura), a digitação espera ele sair
+      const comecar = () => letras.length && setTimeout(passo, 900);
+      if (document.documentElement.dataset.abertura) document.addEventListener("abertura:fim", comecar, { once: true });
+      else comecar();
     })();
   </script>
 

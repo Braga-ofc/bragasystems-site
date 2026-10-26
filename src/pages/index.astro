@@ -18,6 +18,7 @@ import CtaFinal from "../components/sections/CtaFinal.astro";
 import Ps from "../components/sections/Ps.astro";
 import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
 import { Image } from "astro:assets";
+import Abertura from "../components/ui/Abertura.astro";
 import recorteGustavo from "../assets/gustavo/gustavo-braga-recorte.png";
 import { hero } from "../content/home";
 import { rich } from "../lib/texto";
@@ -30,6 +31,7 @@ const vagasBuild = await lerVagasNoBuild();
 const vagas = vagasBuild ?? vagasMax;
 ---
 <Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild}>
+  <Abertura />
   <main id="conteudo">
     <div class="abertura">
       <canvas class="abertura__nevoa" aria-hidden="true" data-nevoa></canvas>

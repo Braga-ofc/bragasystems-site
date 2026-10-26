@@ -1,0 +1,102 @@
+---
+/*
+  Vídeo de abertura (videos-braga, Remotion; 5 s, desktop 1920×1080 e celular 1080×1920).
+  Toca por cima do site já carregado, só na primeira visita, e se desfaz revelando o hero.
+  Não toca: em visitas seguintes, com movimento reduzido, com economia de dados, quando o
+  endereço abre numa âncora (/#planos) ou se o vídeo não começar em 1,5 s. Nesses casos nada
+  é baixado: o vídeo só ganha src pelo script, depois da decisão.
+  Enquanto ele toca, as entradas do hero ficam pausadas (html[data-abertura]) e começam quando
+  ele sai, para o visitante ver o site "ligar" depois do logo.
+  O botão "Pular abertura" e Esc encerram na hora. Sem JavaScript: nada aparece.
+*/
+---
+<div class="abertura-video" hidden data-abertura>
+  <video class="abertura-video__video" muted playsinline preload="none" aria-hidden="true" data-abertura-video></video>
+  <button class="abertura-video__pular" type="button" data-abertura-pular>Pular abertura</button>
+</div>
+
+<script is:inline>
+  // Roda antes da primeira pintura: decide se a abertura aparece, sem piscar o site por baixo
+  (() => {
+    const caixa = document.querySelector("[data-abertura]");
+    const video = caixa && caixa.querySelector("[data-abertura-video]");
+    let visto = false;
+    try { visto = localStorage.getItem("braga-abertura") === "1"; } catch {}
+    const reduzido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const economia = navigator.connection && navigator.connection.saveData;
+    if (!video || visto || reduzido || economia || location.hash) return;
+
+    const raiz = document.documentElement;
+    const celular = matchMedia("(max-aspect-ratio: 1/1)").matches;
+    const nome = celular ? "abertura-mobile" : "abertura-desktop";
+    for (const [ext, tipo] of [["webm", "video/webm"], ["mp4", "video/mp4"]]) {
+      const s = document.createElement("source");
+      s.src = "/videos/abertura/" + nome + "." + ext;
+      s.type = tipo;
+      video.append(s);
+    }
+    caixa.hidden = false;
+    raiz.dataset.abertura = "tocando";
+
+    let fim = false;
+    const terminar = () => {
+      if (fim) return;
+      fim = true;
+      try { localStorage.setItem("braga-abertura", "1"); } catch {}
+      caixa.classList.add("is-saindo");
+      delete raiz.dataset.abertura;
+      document.dispatchEvent(new Event("abertura:fim"));
+      setTimeout(() => caixa.remove(), 700);
+    };
+    video.addEventListener("ended", terminar);
+    video.addEventListener("error", terminar, true);
+    caixa.querySelector("[data-abertura-pular]").addEventListener("click", terminar);
+    addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(); });
+    // Se não começar a tocar logo (rede lenta, autoplay bloqueado), o site não fica esperando
+    const guarda = setTimeout(terminar, 1500);
+    video.addEventListener("playing", () => { clearTimeout(guarda); setTimeout(terminar, 6500); }, { once: true });
+    video.play().catch(terminar);
+  })();
+</script>
+
+<style>
+  .abertura-video {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background: #0B0F14;
+    transition: opacity 600ms var(--ease-saida);
+  }
+  .abertura-video[hidden] { display: none; }
+  .abertura-video.is-saindo { opacity: 0; pointer-events: none; }
+  .abertura-video__video {
+    width: 100%;
+    height: 100%;
+    /* Inteiro, sem cortar os rótulos dos cantos: as sobras têm a mesma cor do fundo do vídeo */
+    object-fit: contain;
+  }
+  .abertura-video__pular {
+    position: absolute;
+    left: 50%;
+    translate: -50% 0;
+    bottom: calc(var(--gutter) + env(safe-area-inset-bottom));
+    min-height: 44px;
+    padding: 0 var(--s-4);
+    font: 500 var(--t-label, 0.75rem)/1 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: color 200ms, border-color 200ms;
+  }
+  .abertura-video__pular:hover,
+  .abertura-video__pular:focus-visible { color: var(--ink-strong); border-color: var(--accent); }
+  .abertura-video__pular:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* Enquanto a abertura toca, as entradas do site esperam */
+  :global(html[data-abertura] body *) { animation-play-state: paused !important; }
+</style>
