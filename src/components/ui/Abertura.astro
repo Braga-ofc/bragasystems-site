@@ -1,6 +1,6 @@
 ---
 /*
-  Vídeo de abertura (videos-braga, Remotion; 5 s, desktop 1920×1080 e celular 1080×1920).
+  Vídeo de abertura (videos-braga, Remotion; 5 s tocados a 1,3× = ~3,8 s; desktop 1920×1080 e celular 1080×1920).
   Toca por cima do site já carregado, só na primeira visita, e se desfaz revelando o hero.
   Não toca: em visitas seguintes, com movimento reduzido, com economia de dados, quando o
   endereço abre numa âncora (/#planos) ou se o vídeo não começar em 3 s (nesse caso tenta de
@@ -58,7 +58,9 @@
     addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(true); });
     // Se não começar a tocar logo (rede lenta, computador ocupado, autoplay bloqueado), o site não fica esperando
     const guarda = setTimeout(terminar, 3000);
-    video.addEventListener("playing", () => { tocou = true; clearTimeout(guarda); setTimeout(terminar, 6500); }, { once: true });
+    video.addEventListener("playing", () => { tocou = true; clearTimeout(guarda); setTimeout(terminar, 5000); }, { once: true });
+    // 1,3× (pedido do Gustavo, 26/10/2026): os 5 s do vídeo viram ~3,8 s
+    video.defaultPlaybackRate = video.playbackRate = 1.3;
     video.play().catch(() => terminar());
   })();
 </script>
