@@ -22,13 +22,20 @@
   (() => {
     const caixa = document.querySelector("[data-abertura]");
     const video = caixa && caixa.querySelector("[data-abertura-video]");
-    // ?abertura no endereço força a abertura (para testar no celular sem limpar o navegador)
-    const forcar = /[?&]abertura(=|&|$)/.test(location.search);
+    if (!video) return;
+    // ?abertura força a abertura (testar no celular sem limpar o navegador). ?abertura=diag força
+    // também com movimento reduzido e economia de dados, e mostra na tela o que aconteceu.
+    const busca = location.search;
+    const forcar = /[?&]abertura(=|&|$)/.test(busca);
+    const diag = /[?&]abertura=diag/.test(busca);
+    const log = [];
+    const nota = (t) => log.push(Math.round(performance.now()) + "ms " + t);
     let visto = false;
     try { visto = !forcar && localStorage.getItem("braga-abertura") === "1"; } catch {}
     const reduzido = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const economia = navigator.connection && navigator.connection.saveData;
-    if (!video || visto || reduzido || economia || location.hash) return;
+    const economia = !!(navigator.connection && navigator.connection.saveData);
+    nota("visto=" + visto + " reduzido=" + reduzido + " economia=" + economia + " ancora=" + !!location.hash);
+    if (!diag && (visto || reduzido || economia || location.hash)) return;
 
     const raiz = document.documentElement;
     const celular = matchMedia("(max-aspect-ratio: 1/1)").matches;
@@ -37,6 +44,7 @@
     // VP9 e falha; com dois <source>, a falha do primeiro encerrava a abertura antes do MP4
     const webm = video.canPlayType('video/webm; codecs="vp9"') === "probably";
     video.src = "/videos/abertura/" + nome + (webm ? ".webm" : ".mp4");
+    nota("arquivo=" + video.src.split("/").pop() + " rede=" + ((navigator.connection && navigator.connection.effectiveType) || "?"));
     caixa.hidden = false;
     raiz.dataset.abertura = "tocando";
 
@@ -44,25 +52,32 @@
     let tocou = false;
     // "Já viu" só conta se o vídeo chegou a tocar (ou se a pessoa pulou): se ele falhou ou
     // demorou a começar, a abertura tenta de novo na próxima visita
-    const terminar = (viu) => {
+    const terminar = (viu, motivo) => {
       if (fim) return;
       fim = true;
+      nota("fim: " + (motivo || "?"));
       if (viu === true || tocou) try { localStorage.setItem("braga-abertura", "1"); } catch {}
       caixa.classList.add("is-saindo");
       delete raiz.dataset.abertura;
       document.dispatchEvent(new Event("abertura:fim"));
       setTimeout(() => caixa.remove(), 700);
+      if (diag) {
+        const p = document.createElement("pre");
+        p.textContent = log.join("\n");
+        p.style.cssText = "position:fixed;left:8px;right:8px;bottom:8px;z-index:300;margin:0;padding:10px;font:11px/1.4 monospace;white-space:pre-wrap;color:#D6DDE6;background:#202833;border:1px solid #35D5E8";
+        setTimeout(() => document.body.append(p), 800);
+      }
     };
-    video.addEventListener("ended", () => terminar());
-    video.addEventListener("error", () => terminar());
-    caixa.querySelector("[data-abertura-pular]").addEventListener("click", () => terminar(true));
-    addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(true); });
-    // Se não começar a tocar logo (rede lenta, computador ocupado, autoplay bloqueado), o site não fica esperando
-    const guarda = setTimeout(terminar, 3000);
-    video.addEventListener("playing", () => { tocou = true; clearTimeout(guarda); setTimeout(terminar, 4500); }, { once: true });
+    video.addEventListener("ended", () => terminar(false, "terminou"));
+    video.addEventListener("error", () => terminar(false, "erro do vídeo " + (video.error && video.error.code)));
+    caixa.querySelector("[data-abertura-pular]").addEventListener("click", () => terminar(true, "pulou"));
+    addEventListener("keydown", (e) => { if (e.key === "Escape") terminar(true, "Esc"); });
+    // Se não começar a tocar logo (rede lenta, aparelho ocupado, autoplay bloqueado), o site não fica esperando
+    const guarda = setTimeout(() => terminar(false, "não começou em 3 s"), 3000);
+    video.addEventListener("playing", () => { tocou = true; nota("tocando"); clearTimeout(guarda); setTimeout(() => terminar(false, "teto de tempo"), 4500); }, { once: true });
     // 1,5× (pedido do Gustavo, 26/10/2026): os 5 s do vídeo viram ~3,3 s
     video.defaultPlaybackRate = video.playbackRate = 1.5;
-    video.play().catch(() => terminar());
+    video.play().catch((e) => terminar(false, "play recusado: " + (e && e.name)));
   })();
 </script>
 
