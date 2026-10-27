@@ -109,3 +109,7 @@ export const continuo = {
 
 export const pagamento =
   "**Pagamento:** 50% para começar, 50% na entrega · **5% off no Pix** · ou em até 6x no cartão.";
+
+// Copy 2.16 (letra miúda dos Planos, pedida pelo Gustavo em 27/10/2026)
+export const dominio =
+  "Domínio e hospedagem não entram no preço do projeto: ficam no seu nome, e o custo, quando houver, você paga direto ao fornecedor. Eu configuro tudo.";

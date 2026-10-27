@@ -11,7 +11,7 @@
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
 import CartaoPlano from "../ui/CartaoPlano.astro";
-import { continuo, pagamento, planos, secaoPlanos } from "../../content/planos";
+import { continuo, dominio, pagamento, planos, secaoPlanos } from "../../content/planos";
 import { rich } from "../../lib/texto";
 
 // Performance primeiro, depois os outros na ordem da copy (Essencial, Signature).
@@ -55,7 +55,10 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
         </div>
         <p class="planos-continuo__texto">{continuo.texto}</p>
       </div>
-      <p class="planos__pagamento num" set:html={rich(pagamento)} />
+      <div class="planos__notas">
+        <p class="planos__pagamento num" set:html={rich(pagamento)} />
+        <p class="planos__pagamento planos__miuda">{dominio}</p>
+      </div>
     </div>
   </div>
 </Secao>
@@ -157,6 +160,8 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
     color: var(--ink-muted);
   }
   .planos__pagamento :global(strong) { font-weight: 600; color: var(--ink-strong); }
+  .planos__notas { display: grid; gap: var(--s-2); }
+  .planos__miuda { font-size: var(--t-label); }
 
   /* Tablet: o Performance numa linha inteira, Essencial e Signature lado a lado embaixo */
   @media (min-width: 720px) {
