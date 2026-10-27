@@ -1,4 +1,4 @@
-// Planos, preços e prazos (copy oficial §9). Preço de fundador = 25% de desconto, valores da copy.
+// Planos, preços e prazos (copy oficial 2.13, §9). Preço de fundador = 25% de desconto, valores da copy.
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
@@ -31,8 +31,8 @@ export const planos: Plano[] = [
   {
     id: "essencial",
     nome: "PLANO ESSENCIAL",
-    precoCheio: "R$ 1.497",
-    precoFundador: "R$ 1.123",
+    precoCheio: "R$ 932",
+    precoFundador: "R$ 699",
     para: "Para quem precisa de uma página bem feita, rápido.",
     itens: [
       "Landing page com até 8 seções",
@@ -49,8 +49,8 @@ export const planos: Plano[] = [
   {
     id: "performance",
     nome: "PLANO PERFORMANCE",
-    precoCheio: "R$ 2.497",
-    precoFundador: "R$ 1.873",
+    precoCheio: "R$ 1.600",
+    precoFundador: "R$ 1.200",
     para: "Para quem vai anunciar e quer cada clique valendo.",
     itens: [],
     prazo: "Entrega em até 12 dias úteis.",
@@ -62,8 +62,8 @@ export const planos: Plano[] = [
     id: "signature",
     nome: "PLANO SIGNATURE",
     aPartirDe: true,
-    precoCheio: "R$ 4.497",
-    precoFundador: "R$ 3.373",
+    precoCheio: "R$ 2.800",
+    precoFundador: "R$ 2.100",
     para: "Para empresas que querem ser referência no que fazem.",
     itens: [
       "Site com até 5 páginas",
@@ -93,9 +93,9 @@ export const performance = {
   valorTotalRotulo: "Valor total:",
   valorTotal: "R$ 4.200",
   vocePagaRotulo: "Você paga:",
-  vocePagaFundador: "R$ 1.873 no preço de fundador",
-  // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 2.497.
-  vocePagaCheio: "R$ 2.497",
+  vocePagaFundador: "R$ 1.200 no preço de fundador",
+  // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 1.600.
+  vocePagaCheio: "R$ 1.600",
   tambem:
     "Também inclui: até 12 seções, animações personalizadas, relatório de performance na entrega e 3 rodadas de revisão.",
 } as const;

@@ -26,7 +26,7 @@ const idNome = `plano-${plano.id}-nome`;
 // Copy §9: o Signature tem "A partir de" antes do preço.
 const aPartirDe = secaoPlanos.aPartirDe;
 
-// "R$ 1.123" → moeda e número, para o número ganhar o tamanho da leitura. O texto não muda.
+// "R$ 699" → moeda e número, para o número ganhar o tamanho da leitura. O texto não muda.
 function separar(preco: string) {
   const i = preco.indexOf(" ");
   return i > 0 ? { moeda: preco.slice(0, i), valor: preco.slice(i + 1) } : { moeda: "", valor: preco };
@@ -34,7 +34,7 @@ function separar(preco: string) {
 const cheio = separar(plano.precoCheio);
 const fundador = separar(plano.precoFundador);
 
-// "R$ 1.873 no preço de fundador" → o valor em destaque e o resto como legenda.
+// "R$ 1.200 no preço de fundador" → o valor em destaque e o resto como legenda.
 const pagaMatch = performance.vocePagaFundador.match(/^(R\$\s?[\d.,]+)(.*)$/);
 const pagaFundador = pagaMatch
   ? { valor: pagaMatch[1], legenda: pagaMatch[2] }

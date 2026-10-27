@@ -1,4 +1,4 @@
-// Banner e preferências de cookies (proposta §25, rascunho de 26/10/2026 aguardando aprovação)
+// Banner e preferências de cookies (copy oficial 2.12, §25)
 export const cookies = {
   rotulo: "Cookies",
   texto: "Uso cookies para medir as visitas e melhorar esta página. Os de medição e marketing só ligam se você aceitar.",
