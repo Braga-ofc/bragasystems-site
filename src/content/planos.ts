@@ -1,4 +1,4 @@
-// Planos, preços e prazos (copy oficial 2.14, §9). Preço de fundador = 25% de desconto, valores da copy.
+// Planos, preços e prazos (copy oficial 2.15, §9). Preço de fundador = 25% de desconto, valores da copy.
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
@@ -35,11 +35,11 @@ export const planos: Plano[] = [
     precoFundador: "R$ 699",
     para: "Para quem precisa de uma página bem feita, rápido.",
     itens: [
-      "Landing page com até 8 seções",
+      "Landing page com até 6 seções",
       "Copy de conversão inclusa",
       "Layout responsivo e de carregamento rápido",
       "WhatsApp e formulário integrados",
-      "2 rodadas de revisão",
+      "1 rodada de revisão",
       "7 dias de ajustes após a publicação",
     ],
     prazo: "Entrega em até 7 dias úteis.",
@@ -49,8 +49,8 @@ export const planos: Plano[] = [
   {
     id: "performance",
     nome: "PLANO PERFORMANCE",
-    precoCheio: "R$ 1.600",
-    precoFundador: "R$ 1.200",
+    precoCheio: "R$ 1.596",
+    precoFundador: "R$ 1.197",
     para: "Para quem vai anunciar e quer cada clique valendo.",
     itens: [],
     prazo: "Entrega em até 12 dias úteis.",
@@ -62,18 +62,18 @@ export const planos: Plano[] = [
     id: "signature",
     nome: "PLANO SIGNATURE",
     aPartirDe: true,
-    precoCheio: "R$ 2.800",
-    precoFundador: "R$ 2.100",
+    precoCheio: "R$ 2.796",
+    precoFundador: "R$ 2.097",
     para: "Para empresas que querem ser referência no que fazem.",
     itens: [
-      "Site com até 5 páginas",
+      "Site com até 3 páginas",
       "Tudo do Plano Performance",
       "Copy de conversão em todas as páginas",
       "SEO essencial para aparecer no Google",
-      "1 integração extra (CRM, agenda ou e-mail)",
+      "Página extra por R$ 400",
       "30 dias de ajustes após a publicação",
     ],
-    prazo: "Entrega em até 25 dias úteis.",
+    prazo: "Entrega em até 20 dias úteis.",
     botao: "Quero o Signature",
     origem: "signature",
   },
@@ -93,11 +93,11 @@ export const performance = {
   valorTotalRotulo: "Valor total:",
   valorTotal: "R$ 4.100",
   vocePagaRotulo: "Você paga:",
-  vocePagaFundador: "R$ 1.200 no preço de fundador",
-  // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 1.600.
-  vocePagaCheio: "R$ 1.600",
+  vocePagaFundador: "R$ 1.197 no preço de fundador",
+  // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 1.596.
+  vocePagaCheio: "R$ 1.596",
   tambem:
-    "Também inclui: até 12 seções, animações personalizadas, relatório de performance na entrega e 3 rodadas de revisão.",
+    "Também inclui: até 12 seções, animações personalizadas, relatório de performance na entrega e 2 rodadas de revisão.",
 } as const;
 
 export const continuo = {

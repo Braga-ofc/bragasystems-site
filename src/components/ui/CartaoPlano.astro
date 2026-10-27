@@ -34,7 +34,7 @@ function separar(preco: string) {
 const cheio = separar(plano.precoCheio);
 const fundador = separar(plano.precoFundador);
 
-// "R$ 1.200 no preço de fundador" → o valor em destaque e o resto como legenda.
+// "R$ 1.197 no preço de fundador" → o valor em destaque e o resto como legenda.
 const pagaMatch = performance.vocePagaFundador.match(/^(R\$\s?[\d.,]+)(.*)$/);
 const pagaFundador = pagaMatch
   ? { valor: pagaMatch[1], legenda: pagaMatch[2] }

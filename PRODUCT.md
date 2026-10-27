@@ -26,7 +26,7 @@ O visitante lê no celular, entre um atendimento e outro, e decide se chama no W
 
 ## Capabilities and Constraints
 
-- Planos: Essencial (R$ 932), Performance (R$ 1.600, recomendado), Signature (a partir de R$ 2.800) e Contínuo (R$ 147/mês). 25% de desconto para as 5 primeiras empresas (fundadoras), com contador de vagas ao vivo.
+- Planos: Essencial (R$ 932), Performance (R$ 1.596, recomendado), Signature (a partir de R$ 2.796) e Contínuo (R$ 147/mês). 25% de desconto para as 5 primeiras empresas (fundadoras), com contador de vagas ao vivo.
 - Gerador de headline com IA (3 por pessoa a cada 24 h), formulário curto, botões de WhatsApp com mensagem própria por origem.
 - Astro, CSS puro, sem React; JavaScript só onde há interação; 90+ no PageSpeed no celular.
 - Fora do escopo por enquanto: blog, área de cliente, pagamento no site, chatbot.

@@ -2,7 +2,7 @@
 export const faq = [
   {
     pergunta: "Quanto tempo leva para ficar pronto?",
-    resposta: "De 7 a 25 dias úteis, conforme o plano. O prazo começa quando o briefing e os materiais chegam.",
+    resposta: "De 7 a 20 dias úteis, conforme o plano. O prazo começa quando o briefing e os materiais chegam.",
   },
   {
     pergunta: "Eu preciso escrever os textos?",
