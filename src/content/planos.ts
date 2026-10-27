@@ -1,4 +1,4 @@
-// Planos, preços e prazos (copy oficial 2.13, §9). Preço de fundador = 25% de desconto, valores da copy.
+// Planos, preços e prazos (copy oficial 2.14, §9). Preço de fundador = 25% de desconto, valores da copy.
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
@@ -86,12 +86,12 @@ export const performance = {
   itens: [
     { texto: "Landing page com design 100% personalizado", valor: "valor de mercado: R$ 2.500" },
     { texto: "Copy de conversão pelo Método Pré-Venda", valor: "R$ 800" },
-    { texto: "Pixel da Meta e Google Analytics configurados", valor: "R$ 300" },
+    { texto: "Pixel da Meta e Google Analytics configurados", valor: "R$ 200" },
     { texto: "Kit de divulgação (imagem de compartilhamento + 3 artes)", valor: "R$ 300" },
     { texto: "30 dias de ajustes depois de publicar", valor: "R$ 300" },
   ],
   valorTotalRotulo: "Valor total:",
-  valorTotal: "R$ 4.200",
+  valorTotal: "R$ 4.100",
   vocePagaRotulo: "Você paga:",
   vocePagaFundador: "R$ 1.200 no preço de fundador",
   // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 1.600.
