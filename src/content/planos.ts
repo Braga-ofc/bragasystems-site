@@ -1,4 +1,4 @@
-// Planos, preços e prazos (copy oficial 2.17, §9). Preço de fundador = 25% de desconto, valores da copy.
+// Planos, preços e prazos (copy oficial 2.18, §9). Preço de fundador = 25% de desconto, valores da copy.
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
@@ -40,7 +40,7 @@ export const planos: Plano[] = [
       "Animações personalizadas",
       "Layout responsivo e de carregamento rápido",
       "WhatsApp e formulário integrados",
-      "1 rodada de revisão",
+      "Revisão da copy e 1 rodada do layout",
       "7 dias de ajustes após a publicação",
     ],
     prazo: "Entrega em até 7 dias úteis.",
@@ -98,7 +98,7 @@ export const performance = {
   // Copy §9, estado sem vagas: o "Você paga" do Performance passa a R$ 1.596.
   vocePagaCheio: "R$ 1.596",
   tambem:
-    "Também inclui: até 12 seções, animações personalizadas, relatório de performance na entrega e 2 rodadas de revisão.",
+    "Também inclui: até 12 seções, animações personalizadas, relatório de performance na entrega, revisão da copy e 2 rodadas do layout.",
 } as const;
 
 export const continuo = {
