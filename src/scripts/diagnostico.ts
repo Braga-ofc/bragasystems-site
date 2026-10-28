@@ -10,7 +10,9 @@ const porSecao = new Map<string, { quadros: number; travados: number; pior: numb
 const painel = document.createElement("div");
 painel.setAttribute("role", "status");
 painel.style.cssText =
-  "position:fixed;left:8px;bottom:8px;z-index:9999;padding:8px 10px;max-width:calc(100vw - 16px);font:500 11px/1.45 'JetBrains Mono',monospace;color:#F2F5F8;background:#080B0Fee;border:1px solid #35D5E8;white-space:pre;pointer-events:auto";
+  // No alto, logo abaixo do topo: embaixo, a barra do navegador do celular cobria o painel
+  "position:fixed;left:8px;top:calc(env(safe-area-inset-top) + 76px);z-index:2147483647;padding:8px 10px;max-width:calc(100vw - 16px);font:600 12px/1.45 'JetBrains Mono',monospace;color:#F2F5F8;background:#080B0F;border:2px solid #35D5E8;white-space:pre;pointer-events:auto";
+painel.textContent = "medindo…";
 document.body.append(painel);
 let aberto = false;
 painel.addEventListener("click", () => (aberto = !aberto));
