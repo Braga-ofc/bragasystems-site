@@ -6,7 +6,7 @@ export const compartilhar = {
   titulo: "Seu cliente chega no WhatsApp pronto para fechar.",
   descricao: "Landing pages e sites com copy inclusa, design personalizado e garantia no layout. BRAGA SYSTEMS.",
   imagem: "/og/home.jpg",
-  imagemAlt: "Gustavo Braga ao lado da frase “Seu cliente chega no WhatsApp pronto para fechar.” e do logo da BRAGA SYSTEMS",
+  imagemAlt: "Gustavo Braga, com a mão no queixo, ao lado da frase “Venda enquanto dorme.” e do logo da BRAGA SYSTEMS",
 } as const;
 
 export const topo = {
