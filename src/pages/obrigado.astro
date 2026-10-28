@@ -16,7 +16,7 @@ import Botao from "../components/ui/Botao.astro";
 import { obrigado } from "../content/obrigado";
 import { montarLinkWhatsapp } from "../lib/whatsapp";
 import { rich } from "../lib/texto";
-import retrato from "../assets/gustavo/gustavo-braga-retrato-hd.jpg";
+import retrato from "../assets/gustavo/gustavo-braga-blazer.jpg";
 
 // "Recebi!" letra por letra; o foguete é a última peça do título (o texto da copy não muda)
 const [palavra, ...resto] = obrigado.titulo.split(" ");
@@ -89,7 +89,7 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
 
       <div class="obg__fallback">
         <p>{obrigado.semAbrir}</p>
-        <span data-obrigado-botao><Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="obrigado">{obrigado.botao}</Botao></span>
+        <span class="obg__conecta" data-obrigado-botao><Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="obrigado">{obrigado.botao}</Botao></span>
       </div>
 
       {/* O bilhete do Gustavo: a pessoa lê com calma quando volta do WhatsApp */}
@@ -282,7 +282,21 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
     overflow: hidden;
     clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
   }
-  .obg__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+  .obg__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform: scale(1.5); transform-origin: 50% 32%; }
+
+  /* "Conectando": quando a barra fecha, duas ondas chanfradas saem do botão e o ícone do WhatsApp pulsa */
+  .obg__conecta { position: relative; display: inline-block; isolation: isolate; }
+  .obg__conecta::before,
+  .obg__conecta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--accent);
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    opacity: 0;
+    pointer-events: none;
+  }
 
   .obg__fallback { display: grid; justify-items: center; gap: var(--s-3); color: var(--ink-muted); font-size: var(--t-small); }
 
@@ -303,6 +317,9 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
   .obg .obg__barra-luz { animation: obg-barra 1450ms 2200ms cubic-bezier(0.4, 0, 0.6, 1) both; }
   .obg .obg__bilhete { animation: obg-sobe 280ms 2700ms var(--ease-saida) both; }
   .obg .obg__fallback { animation: obg-sobe 220ms 2550ms var(--ease-saida) both; }
+  .obg .obg__conecta::before { animation: obg-conecta 700ms 3650ms var(--ease-saida) forwards; }
+  .obg .obg__conecta::after { animation: obg-conecta 700ms 3850ms var(--ease-saida) forwards; }
+  .obg .obg__conecta :global(.botao__icone) { animation: obg-icone 420ms 3650ms cubic-bezier(0.34, 1.56, 0.64, 1); }
   .obg .obg__foguete { animation: obg-foguete 520ms 1560ms cubic-bezier(0.16, 1, 0.3, 1) both, obg-decola 760ms 3600ms cubic-bezier(0.5, 0, 0.2, 1) forwards; }
   /* Voltou do WhatsApp ou recarregou: a barra já está cheia */
   .obg[data-ja-abriu] .obg__barra-luz { animation: none; }
@@ -328,6 +345,8 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
     41% { translate: -1.2em 1.2em; opacity: 0; }
     100% { translate: 0 0; opacity: 1; }
   }
+  @keyframes obg-conecta { from { opacity: 0.55; scale: 1; } to { opacity: 0; scale: 1.25 1.9; } }
+  @keyframes obg-icone { 50% { scale: 1.35; rotate: -12deg; } }
   @keyframes obg-sobe { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
   @keyframes obg-barra { from { scale: 0 1; } to { scale: 1 1; } }
 

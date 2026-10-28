@@ -11,7 +11,7 @@ export const obrigado = {
   // para entrar na copy oficial (versão 2.22).
   bilhete: [
     "Obrigado por confiar na BRAGA SYSTEMS. Eu mesmo leio cada pedido e respondo em até 1 dia útil, já com os próximos passos do seu projeto.",
-    "Enquanto isso, pense em uma coisa: **o que você mais quer que o seu cliente faça ao entrar no site?** Essa resposta adianta muito a nossa conversa.",
+    "Enquanto isso, pense em uma coisa: **o que você mais quer que o seu cliente faça ao entrar no site?** Essa resposta adianta muito a nossa conversa. Até logo!",
   ],
   assinatura: { nome: "Gustavo Braga", cargo: "fundador" },
 } as const;
