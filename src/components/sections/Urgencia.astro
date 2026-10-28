@@ -9,6 +9,7 @@
   As versões têm h2; só a do estado atual fica visível (mapa técnico, arquivo 03).
   Desde 28/10/2026 abre a seção de fechamento (sections/CtaFinal), como na estrutura aprovada:
   "CTA final, com a Urgência e o PS".
+  O botão é contornado (secundário): no fechamento, o único ciano é o envio do formulário (decisão do Gustavo, 28/10/2026).
 */
 import Botao from "../ui/Botao.astro";
 import MedidorVagas from "../ui/MedidorVagas.astro";
@@ -50,7 +51,7 @@ const numero = (html: string) => html.replace(/\d+/, (n) => `<span class="num">$
     <div class="urgencia__corpo">
       {urgencia.paragrafos.map((paragrafo) => <p class="urgencia__texto" set:html={rich(paragrafo)} />)}
       <div class="urgencia__acao">
-        <Botao href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{urgencia.botao}</Botao>
+        <Botao variante="secundario" href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{urgencia.botao}</Botao>
       </div>
     </div>
   </div>
@@ -61,7 +62,7 @@ const numero = (html: string) => html.replace(/\d+/, (n) => `<span class="num">$
         {semVagas.fato && <span class="urgencia__fato">{semVagas.fato}</span>}{semVagas.fato && " "}<span class="urgencia__leitura">{semVagas.leitura}</span>
       </h2>
       <div class="urgencia__acao">
-        <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
+        <Botao variante="secundario" href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{urgencia.semVagas.botao}</Botao>
       </div>
     </div>
   </div>

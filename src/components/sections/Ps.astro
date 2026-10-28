@@ -8,6 +8,7 @@
   (alt vazio): o texto não depende dele. No celular fica atrás do texto, em cima e à direita;
   no computador, ao lado do texto. Foto: src/assets/gustavo/gustavo-braga-retrato.webp (1024×1536).
   Desde 28/10/2026 fecha a seção de fechamento (sections/CtaFinal), depois do formulário.
+  O botão é contornado (secundário): no fechamento, o único ciano é o envio do formulário (decisão do Gustavo, 28/10/2026).
 */
 import { Image } from "astro:assets";
 import Botao from "../ui/Botao.astro";
@@ -47,11 +48,11 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
 
       <div class="ps__acao">
         <span class="ps__botao" data-quando-vagas="com falha">
-          <Botao href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{ps.botao}</Botao>
+          <Botao variante="secundario" href={montarLinkWhatsapp("urgencia")} icone="whatsapp" origem="urgencia">{ps.botao}</Botao>
         </span>
         {/* Sem vagas, o botão e a mensagem seguem os da Urgência (§14): a de fundador não serve sem vaga. */}
         <span class="ps__botao" data-quando-vagas="esgotado">
-          <Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{ps.botaoSemVagas}</Botao>
+          <Botao variante="secundario" href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="urgencia">{ps.botaoSemVagas}</Botao>
         </span>
       </div>
     </div>
