@@ -1,0 +1,82 @@
+/*
+  Animações infinitas de relógio (luzes, auroras, derivas, ponteiros) só rodam quando alguém pode vê-las.
+  Medido em 27/10/2026: qualquer uma delas à vista fazia o Chrome produzir quadros sem parar, e com
+  dezenas rodando fora da tela a página nunca descansava (Lighthouse: 94 s de bloqueio na carga).
+  - Começam paradas e só andam na primeira interação ou 6 s depois da carga, e depois da abertura.
+  - Fora da tela (com meia tela de folga), pausam; perto da tela, voltam.
+  As animações presas à rolagem (animation-timeline) e as finitas não passam por aqui.
+  Só retoma o que este script pausou: o que a página pausa por conta própria continua com a página.
+*/
+const raiz = document.documentElement;
+const reduzido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** Áreas observadas: cada seção da página. Topo, rodapé e as camadas fixas ficam sempre "à vista". */
+const areas = [...document.querySelectorAll<HTMLElement>("main > *, footer")];
+const sempreVisiveis = [...document.querySelectorAll<HTMLElement>("header, [data-fundo-vivo], [data-nucleo]")];
+const visivel = new Set<Element>(sempreVisiveis);
+const pausadas = new WeakSet<Animation>();
+let liberado = false;
+
+const infinitas = (el: Element) =>
+  el.getAnimations({ subtree: true }).filter(
+    (a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations === Infinity,
+  );
+
+function aplicar(area: Element) {
+  const rodar = liberado && visivel.has(area);
+  for (const a of infinitas(area)) {
+    if (!rodar && a.playState === "running") {
+      a.pause();
+      pausadas.add(a);
+    } else if (rodar && pausadas.has(a)) {
+      a.play();
+      pausadas.delete(a);
+    }
+  }
+}
+const aplicarTudo = () => [...areas, ...sempreVisiveis].forEach(aplicar);
+
+if (!reduzido && "IntersectionObserver" in window) {
+  const observador = new IntersectionObserver(
+    (entradas) => {
+      for (const e of entradas) {
+        if (e.isIntersecting) visivel.add(e.target);
+        else visivel.delete(e.target);
+        aplicar(e.target);
+      }
+    },
+    { rootMargin: "50% 0px" },
+  );
+  areas.forEach((a) => observador.observe(a));
+  aplicarTudo();
+
+  // Libera depois da carga, com o navegador livre, e só quando a abertura em vídeo já saiu
+  const liberar = () => {
+    if (raiz.hasAttribute("data-abertura")) {
+      new MutationObserver((_, mo) => {
+        if (raiz.hasAttribute("data-abertura")) return;
+        mo.disconnect();
+        liberar();
+      }).observe(raiz, { attributes: true, attributeFilter: ["data-abertura"] });
+      return;
+    }
+    liberado = true;
+    aplicarTudo();
+  };
+  // Solta na primeira interação (rolar, tocar, mover o mouse, teclado) ou 6 s depois da carga,
+  // o que vier antes: a carga e a primeira tela não disputam a thread com as luzes decorativas
+  let solto = false;
+  const soltar = () => {
+    if (solto) return;
+    solto = true;
+    for (const t of eventos) removeEventListener(t, soltar);
+    liberar();
+  };
+  const eventos = ["scroll", "wheel", "pointerdown", "pointermove", "keydown", "touchstart"];
+  for (const t of eventos) addEventListener(t, soltar, { passive: true, once: true });
+  const depoisDaCarga = () => setTimeout(soltar, 6000);
+  if (document.readyState === "complete") depoisDaCarga();
+  else addEventListener("load", depoisDaCarga, { once: true });
+}
+
+export {};
