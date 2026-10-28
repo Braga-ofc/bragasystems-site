@@ -4,6 +4,9 @@
   como as vagas do medidor, que clareiam da primeira etapa até "No ar". Computador: 5 colunas
   sobre o trilho; celular: trilho vertical à esquerda. Os números de 1 a 5 vêm da sequência da copy.
   "Faça a conta" fecha num módulo grafite; o único ciano do bloco é "um único cliente a mais".
+  Com a rolagem (28/10/2026): o trilho se preenche em prata etapa por etapa, cada etapa acende quando
+  o trilho chega nela e, no fim, acende "Cada etapa só avança com o seu ok". Sem suporte ou com
+  movimento reduzido, tudo aceso e parado.
 */
 import Secao from "../ui/Secao.astro";
 import Rotulo from "../ui/Rotulo.astro";
@@ -24,7 +27,7 @@ const mistura = (i: number) => Math.round((i / Math.max(total - 1, 1)) * 80);
 
     <ol class="processo__etapas" role="list" data-revela>
       {processo.etapas.map((etapa, i) => (
-        <li class="processo__etapa" style={`--mistura:${mistura(i)}%`}>
+        <li class="processo__etapa" style={`--mistura:${mistura(i)}%;--i:${i}`}>
           <span class="processo__trilho" aria-hidden="true"></span>
           <span class="processo__numero num">{i + 1}</span>
           <h3 class="processo__nome">{etapa.titulo}</h3>
@@ -96,6 +99,32 @@ const mistura = (i: number) => Math.round((i / Math.max(total - 1, 1)) * 80);
   }
   .processo__nome { font-size: var(--t-h3); font-weight: 500; line-height: 1.25; }
   .processo__texto { max-width: 34ch; margin-top: var(--s-1); color: var(--ink-muted); }
+
+
+  /* ---------- O processo andando com a rolagem ---------- */
+  .processo__trilho::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    transform-origin: top;
+    scale: 1;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .processo { timeline-scope: --processo; }
+      .processo__etapas { view-timeline: --processo block; }
+      /* Celular e tablet: cada etapa preenche o seu trecho do trilho ao passar pelo meio da tela */
+      .processo__trilho::after { animation: processo-enche linear both; animation-timeline: view(); animation-range: cover 25% cover 50%; }
+      .processo__nome, .processo__numero { animation: processo-acende linear both; animation-timeline: view(); animation-range: cover 40% cover 50%; }
+      .processo__nota { animation: processo-ok linear both; animation-timeline: view(); animation-range: entry 60% cover 40%; }
+      .processo__nota :global(svg) { animation: processo-check linear both; animation-timeline: view(); animation-range: entry 60% cover 40%; }
+    }
+  }
+  @keyframes processo-enche { from { scale: 1 0; } }
+  @keyframes processo-acende { from { color: var(--ink-muted); } }
+  @keyframes processo-ok { from { color: var(--ink-muted); } }
+  @keyframes processo-check { from { color: var(--line-forte); } to { color: var(--ink-strong); } }
 
   /* Fecho: a regra do processo e a conta */
   .processo__fecho { display: grid; gap: var(--s-6); }
@@ -186,4 +215,14 @@ const mistura = (i: number) => Math.round((i / Math.max(total - 1, 1)) * 80);
     .processo__nota { grid-column: 1 / span 4; }
     .processo__conta { grid-column: 6 / span 7; }
   }
+
+  /* Computador: o trilho deitado se preenche da esquerda para a direita, uma etapa depois da outra */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+      .processo__trilho::after { transform-origin: left; animation-name: processo-enche-deitado; animation-timeline: --processo; animation-range: cover calc(30% + var(--i) * 7%) cover calc(37% + var(--i) * 7%); }
+      .processo__nome, .processo__numero { animation-timeline: --processo; animation-range: cover calc(35% + var(--i) * 7%) cover calc(37% + var(--i) * 7%); }
+      .processo__nota, .processo__nota :global(svg) { animation-timeline: --processo; animation-range: cover 66% cover 70%; }
+    }
+  }
+  @keyframes processo-enche-deitado { from { scale: 0 1; } }
 </style>

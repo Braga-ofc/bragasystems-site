@@ -4,6 +4,8 @@
   profundo (o único acento do bloco): a promessa em cima, a condição embaixo, separadas pela
   linha com corte em 45°. As cláusulas ficam fora do selo, à direita e assentadas na base dele
   no computador, como os termos de um contrato; a nota leva às dúvidas frequentes.
+  Com a rolagem (28/10/2026): a borda do selo acende em ciano profundo ao entrar, "sem custo" ganha o
+  marca-texto e as cláusulas recebem o check uma por vez, como um contrato sendo conferido.
 */
 import Secao from "../ui/Secao.astro";
 import Icone from "../ui/Icone.astro";
@@ -12,11 +14,13 @@ import { rich } from "../../lib/texto";
 
 // "Detalhes nas dúvidas frequentes": o trecho vira link para a seção #duvidas. O texto não muda.
 const nota = rich(garantia.nota).replace("dúvidas frequentes", '<a href="#duvidas">dúvidas frequentes</a>');
+// "sem custo" ganha o marca-texto do site (o texto não muda)
+const titulo = garantia.titulo.replace("sem custo", '<mark data-marca="pronta">sem custo</mark>');
 ---
 <Secao tema="claro" class="garantia">
   <div class="garantia__grade">
     <div class="garantia__selo chanfrado">
-      <h2 class="garantia__titulo">{garantia.titulo}</h2>
+      <h2 class="garantia__titulo" set:html={titulo} />
       <span class="garantia__divisa" aria-hidden="true"></span>
       <p class="garantia__texto">{garantia.texto}</p>
     </div>
@@ -24,8 +28,8 @@ const nota = rich(garantia.nota).replace("dúvidas frequentes", '<a href="#duvid
     <div class="garantia__termos">
       <p class="garantia__intro">{garantia.intro}</p>
       <ul class="garantia__itens" role="list">
-        {garantia.itens.map((item) => (
-          <li class="garantia__item">
+        {garantia.itens.map((item, i) => (
+          <li class="garantia__item" style={`--i:${i}`}>
             <Icone nome="check" class="garantia__check" />
             <p class="garantia__clausula">
               <strong>{item.destaque}</strong> <span>{item.texto}</span>
@@ -118,6 +122,19 @@ const nota = rich(garantia.nota).replace("dúvidas frequentes", '<a href="#duvid
     transition: color var(--dur) var(--ease-saida), text-decoration-color var(--dur) var(--ease-saida);
   }
   .garantia__nota :global(a:hover) { color: var(--ink-strong); text-decoration-color: currentColor; }
+
+
+  /* ---------- O selo fecha e o contrato é conferido, com a rolagem ---------- */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .garantia__selo { animation: garantia-sela linear both; animation-timeline: view(); animation-range: entry 40% cover 35%; }
+      .garantia__item :global(.garantia__check) { animation: garantia-confere linear both; animation-timeline: view(); animation-range: cover calc(30% + var(--i) * 6%) cover calc(36% + var(--i) * 6%); }
+      .garantia__clausula strong { animation: garantia-clausula linear both; animation-timeline: view(); animation-range: cover calc(30% + var(--i) * 6%) cover calc(36% + var(--i) * 6%); }
+    }
+  }
+  @keyframes garantia-sela { from { --cor-borda: var(--line); } }
+  @keyframes garantia-confere { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes garantia-clausula { from { color: var(--ink-muted); } }
 
   @media (min-width: 720px) {
     .garantia__selo { padding: var(--s-7) var(--s-7) var(--s-6); }
