@@ -7,8 +7,9 @@
   "agenda limitada", com a mensagem geral do WhatsApp (a de fundador não serve sem vaga), num
   módulo do mesmo painel: a mesma janela chanfrada, com o título e o botão na mesma coluna.
   As versões têm h2; só a do estado atual fica visível (mapa técnico, arquivo 03).
+  Desde 28/10/2026 abre a seção de fechamento (sections/CtaFinal), como na estrutura aprovada:
+  "CTA final, com a Urgência e o PS".
 */
-import Secao from "../ui/Secao.astro";
 import Botao from "../ui/Botao.astro";
 import MedidorVagas from "../ui/MedidorVagas.astro";
 import { urgencia } from "../../content/home";
@@ -32,7 +33,7 @@ const semVagas = dividir(urgencia.semVagas.titulo);
 // O "1" da forma singular sai em números tabulares, como o {X} do plural (mesmo desenho do algarismo).
 const numero = (html: string) => html.replace(/\d+/, (n) => `<span class="num">${n}</span>`);
 ---
-<Secao class="urgencia">
+<div class="urgencia">
   <div class="urgencia__com" data-quando-vagas="com">
     <div class="urgencia__instrumento">
       <div class="urgencia__janela chanfrado" data-urgencia-medidor>
@@ -101,7 +102,7 @@ const numero = (html: string) => html.replace(/\d+/, (n) => `<span class="num">$
       document.addEventListener("vagas:estado", decidir);
     }
   </script>
-</Secao>
+</div>
 
 <style>
   .urgencia__com,

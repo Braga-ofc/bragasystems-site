@@ -3,11 +3,15 @@
   §16 CTA final + formulário curto. O fechamento da página: a pergunta do cliente em display
   e o formulário num módulo grafite, o único botão ciano do bloco.
   Envio em scripts/formulario.ts (função enviar-lead, mapa técnico arquivo 08).
+  Desde 28/10/2026 é a seção de fechamento inteira, como na estrutura aprovada ("CTA final, com a
+  Urgência e o PS"): a Urgência abre, o formulário vem no meio e o PS assina no fim.
 */
 import Secao from "../ui/Secao.astro";
 import Campo from "../ui/Campo.astro";
 import Botao from "../ui/Botao.astro";
 import Icone from "../ui/Icone.astro";
+import Urgencia from "./Urgencia.astro";
+import Ps from "./Ps.astro";
 import { ctaFinal } from "../../content/home";
 import { comLinkPrivacidade } from "../../lib/texto";
 import { montarLinkWhatsapp } from "../../lib/whatsapp";
@@ -22,8 +26,15 @@ const tituloPergunta = corte >= 0 ? ctaFinal.titulo.slice(corte + 2).replace(/^"
 const codigos = ["landing", "site", "nao-sei"];
 const tipos = Object.fromEntries(ctaFinal.campos.tipo.opcoes.map((opcao, i) => [opcao, codigos[i]]));
 const [microResposta, microFundador] = ctaFinal.microcopy;
+
+interface Props {
+  /** Vagas do último build (o contador atualiza ao vivo), para a Urgência e o PS. */
+  vagas: number;
+}
+const { vagas } = Astro.props;
 ---
 <Secao id="contato" tema="elevado">
+  <Urgencia vagas={vagas} />
   <div class="cta">
     <div class="cta-texto">
       <h2 class="cta-titulo">
@@ -102,12 +113,15 @@ const [microResposta, microFundador] = ctaFinal.microcopy;
   <script>
     import "../../scripts/formulario";
   </script>
+  <Ps vagas={vagas} />
 </Secao>
 
 <style>
+  /* Fechamento: a Urgência abre, o formulário no meio e o PS assina no fim, com respiro entre as partes */
   .cta {
     display: grid;
     gap: var(--s-7);
+    margin-block: var(--s-9) var(--secao-respiro);
   }
 
   /* Texto: a cena em tom de prata, a pergunta em display */

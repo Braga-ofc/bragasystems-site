@@ -7,9 +7,9 @@
   dissolve no preto (a parte escura da foto some no fundo pelo modo "lighten"). É decorativo
   (alt vazio): o texto não depende dele. No celular fica atrás do texto, em cima e à direita;
   no computador, ao lado do texto. Foto: src/assets/gustavo/gustavo-braga-retrato.webp (1024×1536).
+  Desde 28/10/2026 fecha a seção de fechamento (sections/CtaFinal), depois do formulário.
 */
 import { Image } from "astro:assets";
-import Secao from "../ui/Secao.astro";
 import Botao from "../ui/Botao.astro";
 import retrato from "../../assets/gustavo/gustavo-braga-retrato.webp";
 import { ps } from "../../content/home";
@@ -24,7 +24,7 @@ const { vagas } = Astro.props;
 // O espaço depois do "PS:" entra no próprio rótulo pendurado, para o texto alinhar na margem.
 const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<strong>$1 </strong>");
 ---
-<Secao class="ps">
+<div class="ps-bloco">
   <div class="ps-palco">
     <span class="ps__retrato" aria-hidden="true">
       <Image
@@ -56,7 +56,7 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
       </div>
     </div>
   </div>
-</Secao>
+</div>
 
 <style>
   /*
@@ -138,6 +138,14 @@ const pendurar = (html: string) => html.replace(/^<strong>(.*?)<\/strong> /, "<s
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
+
+  /* A régua da margem desce do "PS:" até o botão conforme a carta é lida (sem suporte: já desenhada) */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .ps::before { transform-origin: top; animation: ps-regua linear both; animation-timeline: view(); animation-range: entry 50% cover 45%; }
+    }
+  }
+  @keyframes ps-regua { from { scale: 1 0; } }
 
   .ps__acao { margin-top: var(--s-6); }
   .ps__botao { display: block; }

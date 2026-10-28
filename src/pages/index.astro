@@ -11,10 +11,8 @@ import Planos from "../components/sections/Planos.astro";
 import Processo from "../components/sections/Processo.astro";
 import Garantia from "../components/sections/Garantia.astro";
 import Sobre from "../components/sections/Sobre.astro";
-import Urgencia from "../components/sections/Urgencia.astro";
 import Faq from "../components/sections/Faq.astro";
 import CtaFinal from "../components/sections/CtaFinal.astro";
-import Ps from "../components/sections/Ps.astro";
 import { lerVagasNoBuild, vagasMax } from "../lib/supabase";
 import { Image } from "astro:assets";
 import Abertura from "../components/ui/Abertura.astro";
@@ -106,10 +104,8 @@ const vagas = vagasBuild ?? vagasMax;
     <Planos />
     <Processo />
     <Garantia />
-    <Urgencia vagas={vagas} />
     <Faq />
-    <CtaFinal />
-    <Ps vagas={vagas} />
+    <CtaFinal vagas={vagas} />
   </main>
 </Base>
 
