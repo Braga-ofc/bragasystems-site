@@ -1,0 +1,285 @@
+---
+/*
+  Página de obrigado (copy §19; mapa técnico, arquivos 02, 08, 10 e 12). Depois do formulário:
+  confirma, dispara a conversão e abre o WhatsApp com a mensagem do formulário (nome e tipo de
+  projeto vêm do sessionStorage, nunca da URL).
+  Animação "a mensagem chegando" (o Gustavo pediu para exagerar, 28/10/2026), uma vez só:
+  o pacote corre pelo trilho com rastro de luz até o balão, o balão se desenha e acende, uma onda
+  em losango e uma chuva de estilhaços chanfrados; "Recebi!" sobe letra por letra e o foguete entra
+  em 45°; "Seus dados chegaram." ganha o check e a barra de "Estou abrindo o WhatsApp…" enche; o foguete decola e o WhatsApp abre.
+  Sem JavaScript ou com movimento reduzido: tudo pronto e parado (e o WhatsApp abre do mesmo jeito,
+  com o script). Não reabre sozinho ao voltar do WhatsApp nem ao recarregar. ?teste: não abre.
+*/
+import Base from "../layouts/Base.astro";
+import Botao from "../components/ui/Botao.astro";
+import { obrigado } from "../content/obrigado";
+import { montarLinkWhatsapp } from "../lib/whatsapp";
+
+// "Recebi!" letra por letra; o foguete é a última peça do título (o texto da copy não muda)
+const [palavra, ...resto] = obrigado.titulo.split(" ");
+const foguete = resto.join(" ");
+const letras = [...palavra];
+
+// Estilhaços da chegada: paralelogramos em 45°, posições pseudoaleatórias fixas (o build é sempre igual)
+let semente = 7;
+const aleatorio = () => ((semente = (semente * 16807) % 2147483647) / 2147483647);
+const estilhacos = Array.from({ length: 28 }, (_, i) => {
+  const angulo = (i / 28) * Math.PI * 2 + aleatorio() * 0.5;
+  const distancia = 90 + aleatorio() * 170;
+  return {
+    dx: Math.round(Math.cos(angulo) * distancia),
+    dy: Math.round(Math.sin(angulo) * distancia * 0.75),
+    giro: Math.round((aleatorio() - 0.5) * 540),
+    tamanho: 6 + Math.round(aleatorio() * 10),
+    atraso: Math.round(aleatorio() * 120),
+    ciano: i % 3 === 0,
+  };
+});
+
+// Trilho do circuito até o balão (ângulos de 0° e 45°, como o resto da marca), num viewBox de 600×240
+const trilho = "M0 196 H170 L222 144 H380";
+// Balão de conversa no desenho do núcleo do B (o mesmo da camada viva), em escala
+const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392 190 Z";
+---
+<Base titulo={obrigado.seo} descricao={obrigado.descricao} semIndexar>
+  <main id="conteudo" class="obg" data-obrigado>
+    <section class="obg__palco" aria-labelledby="obg-titulo">
+      <div class="obg__cena" aria-hidden="true">
+        <svg class="obg__circuito" viewBox="0 0 600 240" fill="none">
+          <path class="obg__trilho" d={trilho} />
+          <path class="obg__rastro" d={trilho} pathLength="1" />
+          <path class="obg__balao-fundo" d={balao} />
+          <path class="obg__balao" d={balao} pathLength="1" />
+          <path class="obg__linhas" d="M424 106 H516 M424 128 H500 M424 150 H476" pathLength="1" />
+          <polygon class="obg__pacote" points="-14,-7 2,-7 14,7 -2,7">
+            <animateMotion data-pacote dur="0.9s" begin="indefinite" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.55 0 0.25 1" path={trilho} />
+          </polygon>
+        </svg>
+        <span class="obg__onda"></span>
+        <span class="obg__estilhacos">
+          {estilhacos.map((e) => (
+            <i
+              class:list={["obg__estilhaco", e.ciano && "obg__estilhaco--ciano"]}
+              style={`--dx:${e.dx}px;--dy:${e.dy}px;--giro:${e.giro}deg;--tam:${e.tamanho}px;--atraso:${e.atraso}ms`}
+            ></i>
+          ))}
+        </span>
+      </div>
+
+      <h1 id="obg-titulo" class="obg__titulo" aria-label={obrigado.titulo}>
+        <span class="obg__palavra" aria-hidden="true">
+          {letras.map((l, i) => <span class="obg__letra" style={`--i:${i}`}>{l}</span>)}
+        </span>
+        {foguete && <span class="obg__foguete" aria-hidden="true">{foguete}</span>}
+      </h1>
+
+      <ol class="obg__status" role="list">
+        <li class="obg__passo obg__passo--chegou">
+          <svg class="obg__check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10.5 L8 15.5 L17 5" pathLength="1" /></svg>
+          <span>{obrigado.chegou}</span>
+        </li>
+        <li class="obg__passo obg__passo--abrindo">
+          <span>{obrigado.abrindo}</span>
+          <span class="obg__barra" aria-hidden="true"><span class="obg__barra-luz"></span></span>
+        </li>
+      </ol>
+
+      <div class="obg__fallback">
+        <p>{obrigado.semAbrir}</p>
+        <span data-obrigado-botao><Botao href={montarLinkWhatsapp("topo")} icone="whatsapp" origem="obrigado">{obrigado.botao}</Botao></span>
+      </div>
+    </section>
+  </main>
+</Base>
+
+<script>
+  import { montarLinkWhatsapp } from "../lib/whatsapp";
+
+  const raiz = document.querySelector<HTMLElement>("[data-obrigado]");
+  const botao = document.querySelector<HTMLAnchorElement>("[data-obrigado-botao] a");
+  const reduzido = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const teste = /[?&]teste\b/.test(location.search);
+
+  // A mensagem do formulário, com o nome e o tipo de projeto guardados no navegador; sem eles, a geral
+  let link = botao?.href ?? "";
+  try {
+    const lead = JSON.parse(sessionStorage.getItem("lead") ?? "null") as { nome?: string; tipo?: string } | null;
+    if (lead?.nome) link = montarLinkWhatsapp("formulario", { nome: lead.nome, tipo: lead.tipo ?? "" });
+  } catch {
+    /* sem sessionStorage: fica a mensagem geral */
+  }
+  if (botao && link) botao.href = link;
+
+  // Conversão (mapa técnico 12): o Pixel conta o cadastro completo, se a medição foi aceita e carregou.
+  // A visita a /obrigado já é a conversão no GA4.
+  addEventListener("load", () => {
+    window.setTimeout(() => {
+      const fbq = (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq;
+      fbq?.("track", "CompleteRegistration");
+    }, 600);
+  });
+
+  // Abre o WhatsApp uma vez por visita: ao voltar dele ou recarregar, fica só o botão
+  let jaAbriu = false;
+  try { jaAbriu = sessionStorage.getItem("braga-obrigado-abriu") === "1"; } catch {}
+  function abrir() {
+    if (jaAbriu || teste || !link) return;
+    try { sessionStorage.setItem("braga-obrigado-abriu", "1"); } catch {}
+    window.location.assign(link);
+  }
+
+  if (raiz && !reduzido) {
+    raiz.dataset.pacoteSaiu = "";
+    document.querySelector<SVGAnimateMotionElement>("[data-pacote]")?.beginElement();
+  }
+  // Com movimento, espera a barra encher e o foguete decolar; sem, abre logo
+  window.setTimeout(abrir, reduzido ? 1500 : 3900);
+  if (jaAbriu) raiz?.setAttribute("data-ja-abriu", "");
+</script>
+
+<style>
+  .obg {
+    position: relative;
+    display: grid;
+    min-height: calc(100svh - 64px);
+    padding: var(--s-8) var(--gutter) var(--s-9);
+    overflow-x: clip;
+    place-items: center;
+  }
+  .obg__palco {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--s-6);
+    width: min(100%, 720px);
+    text-align: center;
+  }
+
+  /* ---------- A cena: trilho, pacote, balão, onda e estilhaços ---------- */
+  .obg__cena { position: relative; width: min(100%, 560px); aspect-ratio: 600 / 240; }
+  .obg__cena::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10%;
+    z-index: -1;
+    background: radial-gradient(ellipse 50% 50% at 78% 55%, rgb(53 213 232 / 0.16), transparent 70%);
+  }
+  .obg__circuito { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .obg__trilho { stroke: var(--line-forte); stroke-width: 1.5; }
+  .obg__rastro { stroke: var(--accent); stroke-width: 2.5; filter: drop-shadow(0 0 4px rgb(53 213 232 / 0.7)); }
+  .obg__balao-fundo { fill: var(--surface-raised); }
+  .obg__balao { stroke: var(--accent); stroke-width: 2; stroke-linejoin: miter; }
+  .obg__linhas { stroke: var(--ink); stroke-width: 6; stroke-linecap: butt; }
+  .obg__pacote { fill: var(--accent); opacity: 0; }
+
+  /* Onda em losango e estilhaços nascem no centro do balão */
+  .obg__onda,
+  .obg__estilhacos { position: absolute; left: 78.3%; top: 53.5%; }
+  .obg__onda {
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    border: 1.5px solid var(--accent);
+    rotate: 45deg;
+    opacity: 0;
+  }
+  .obg__estilhaco {
+    position: absolute;
+    width: calc(var(--tam) * 1.6);
+    height: var(--tam);
+    margin: calc(var(--tam) / -2) 0 0 calc(var(--tam) * -0.8);
+    background: var(--ink);
+    clip-path: polygon(30% 0, 100% 0, 70% 100%, 0 100%);
+    opacity: 0;
+  }
+  .obg__estilhaco--ciano { background: var(--accent); }
+
+  /* ---------- "Recebi! 🚀" ---------- */
+  /* Largura toda e centro por flex: a troca da fonte não mexe na caixa do título (CLS 0) */
+  .obg__titulo {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: baseline;
+    font-size: clamp(3.5rem, 2rem + 8vw, 7.5rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--ink-strong);
+  }
+  .obg__palavra { display: contents; }
+  .obg__letra { display: inline-block; }
+  .obg__foguete { display: inline-block; margin-left: 0.3em; font-size: 0.72em; letter-spacing: 0; }
+
+  /* ---------- Os dois passos ---------- */
+  .obg__status { display: grid; gap: var(--s-4); width: min(100%, 520px); margin: 0; padding: 0; list-style: none; text-align: left; }
+  .obg__passo { display: grid; gap: var(--s-3); font-size: var(--t-body-lg); line-height: 1.5; color: var(--ink); }
+  .obg__passo--chegou { grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: var(--s-3); font-weight: 500; color: var(--ink-strong); }
+  .obg__check { width: 22px; height: 22px; }
+  .obg__check path { stroke: var(--accent); stroke-width: 2.4; stroke-linecap: square; }
+  .obg__barra {
+    --c: 6px;
+    position: relative;
+    display: block;
+    height: 12px;
+    background: var(--surface-raised);
+    clip-path: polygon(var(--c) 0, 100% 0, calc(100% - var(--c)) 100%, 0 100%);
+  }
+  .obg__barra-luz {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--ciano-profundo), var(--accent));
+    transform-origin: left;
+  }
+
+  .obg__fallback { display: grid; justify-items: center; gap: var(--s-3); color: var(--ink-muted); font-size: var(--t-small); }
+
+  /* ---------- A sequência (só com movimento; sem ela, tudo já aparece pronto) ---------- */
+  @media (prefers-reduced-motion: no-preference) {
+  .obg .obg__rastro { stroke-dasharray: 1; animation: obg-desenha 900ms cubic-bezier(0.55, 0, 0.25, 1) both; }
+  /* O pacote sai junto com o rastro quando o script o dispara (o relógio do SVG só começa no load) */
+  .obg[data-pacote-saiu] .obg__pacote { animation: obg-pacote 1000ms linear both; }
+  .obg .obg__balao { stroke-dasharray: 1; animation: obg-desenha 380ms 860ms var(--ease-saida) both; }
+  .obg .obg__balao-fundo { animation: obg-acende 260ms 1120ms var(--ease-saida) both; }
+  .obg .obg__linhas { stroke-dasharray: 1; animation: obg-desenha 320ms 1240ms var(--ease-saida) both; }
+  .obg .obg__onda { animation: obg-onda 700ms 1000ms var(--ease-saida) forwards; }
+  .obg .obg__estilhaco { animation: obg-estilhaco 1100ms calc(1000ms + var(--atraso)) cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .obg .obg__letra { animation: obg-letra 320ms calc(1150ms + var(--i) * 55ms) cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .obg .obg__passo--chegou { animation: obg-sobe 220ms 1800ms var(--ease-saida) both; }
+  .obg .obg__check path { stroke-dasharray: 1; animation: obg-desenha 240ms 1950ms var(--ease-saida) both; }
+  .obg .obg__passo--abrindo { animation: obg-sobe 220ms 2050ms var(--ease-saida) both; }
+  .obg .obg__barra-luz { animation: obg-barra 1450ms 2200ms cubic-bezier(0.4, 0, 0.6, 1) both; }
+  .obg .obg__fallback { animation: obg-sobe 220ms 2300ms var(--ease-saida) both; }
+  .obg .obg__foguete { animation: obg-foguete 520ms 1560ms cubic-bezier(0.16, 1, 0.3, 1) both, obg-decola 760ms 3600ms cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+  /* Voltou do WhatsApp ou recarregou: a barra já está cheia */
+  .obg[data-ja-abriu] .obg__barra-luz { animation: none; }
+  }
+
+  @keyframes obg-desenha { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes obg-pacote { 0% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes obg-acende { from { opacity: 0; } }
+  @keyframes obg-onda { from { opacity: 0.9; scale: 0.3; } to { opacity: 0; scale: 2.4; } }
+  @keyframes obg-estilhaco {
+    0% { opacity: 1; translate: 0 0; rotate: 0deg; }
+    70% { opacity: 1; }
+    100% { opacity: 0; translate: var(--dx) var(--dy); rotate: var(--giro); }
+  }
+  @keyframes obg-letra { from { opacity: 0; translate: 0 0.9em; } to { opacity: 1; translate: 0 0; } }
+  @keyframes obg-foguete {
+    from { opacity: 0; translate: -1.4em 1.4em; scale: 0.6; }
+    to { opacity: 1; translate: 0 0; scale: 1; }
+  }
+  @keyframes obg-decola {
+    0% { translate: 0 0; opacity: 1; }
+    40% { translate: 2.4em -2.4em; opacity: 0; }
+    41% { translate: -1.2em 1.2em; opacity: 0; }
+    100% { translate: 0 0; opacity: 1; }
+  }
+  @keyframes obg-sobe { from { opacity: 0; translate: 0 10px; } to { opacity: 1; translate: 0 0; } }
+  @keyframes obg-barra { from { scale: 0 1; } to { scale: 1 1; } }
+
+  @media (min-width: 720px) {
+    .obg { padding-top: var(--s-9); }
+    .obg__palco { gap: var(--s-7); }
+  }
+</style>
