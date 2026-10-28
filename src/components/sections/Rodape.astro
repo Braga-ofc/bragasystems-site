@@ -2,6 +2,9 @@
 /*
   Rodapé (copy §18): marca e slogan, contatos como leituras do painel (rótulo em mono, valor ao lado)
   e a linha de base com local, links e direitos. O ano sai do build; o CNPJ só entra quando existir.
+  O logo se monta uma vez quando o rodapé aparece (decisão 16 do Gustavo, 28/10/2026): a haste e o
+  corpo do B, o núcleo, as letras de BRAGA e as de SYSTEMS. Só posição e opacidade, e o fim é idêntico
+  ao arquivo; o build quebra se as peças não somarem o desenho original. Sem movimento: o logo pronto.
 */
 import Icone from "../ui/Icone.astro";
 import logo from "../../assets/logo/logo-vertical-escuro.svg?raw";
@@ -26,12 +29,44 @@ const contatos: Contato[] = [
   { rotulo: rodape.facebookRotulo, valor: site.facebook.nome, icone: "facebook", href: site.facebook.url || undefined },
 ];
 const cnpj: string = site.cnpj;
+
+// Peças do logo vertical, na ordem dos paths do arquivo: símbolo (corpo + haste), núcleo, BRAGA e SYSTEMS
+const svgAbre = logo.match(/<svg[^>]*>/)![0];
+const titulo = logo.match(/<title>.*?<\/title>/)?.[0] ?? "";
+const grupo = logo.match(/<g [^>]*>/)![0];
+const caminhos = [...logo.matchAll(/<path ([^>]*?)d="([^"]+)"/g)].map((m) => ({ atributos: m[1].trim(), d: m[2] }));
+const partes = (d: string) => d.split(/(?=M)/).filter(Boolean);
+if (caminhos.length !== 4) throw new Error("Rodapé: o logo vertical mudou de estrutura (esperava 4 paths)");
+const [simbolo, nucleo, braga, systems] = caminhos;
+const [corpo, haste] = partes(simbolo.d);
+const letrasBraga = (() => {
+  const s = partes(braga.d); // B (contorno + 2 furos), R (contorno + furo), A, G, A
+  return [s.slice(0, 3), s.slice(3, 5), [s[5]], [s[6]], [s[7]]].map((l) => l.join(""));
+})();
+const letrasSystems = partes(systems.d);
+if (corpo + haste !== simbolo.d || letrasBraga.join("") !== braga.d || letrasSystems.join("") !== systems.d || letrasBraga.length !== 5 || letrasSystems.length !== 7) {
+  throw new Error("Rodapé: as peças do logo não somam o arquivo");
+}
+const peca = (classe: string, cor: string, d: string, i = 0, furos = false) =>
+  `<path class="rodape__peca rodape__peca--${classe}" style="--i:${i}" fill="${cor}"${furos ? ' fill-rule="evenodd"' : ""} d="${d}"/>`;
+const prata = "#D6DDE6";
+const ciano = "#35D5E8";
+const logoMontado =
+  svgAbre + titulo +
+  peca("haste", prata, haste, 0, true) + peca("corpo", prata, corpo, 0, true) + peca("nucleo", ciano, nucleo.d) +
+  grupo +
+  letrasBraga.map((d, i) => peca("letra", prata, d, i, true)).join("") +
+  letrasSystems.map((d, i) => peca("sub", ciano, d, i)).join("") +
+  "</g></svg>";
+if (!braga.atributos.includes(prata) || !systems.atributos.includes(ciano) || !nucleo.atributos.includes(ciano)) {
+  throw new Error("Rodapé: as cores do logo mudaram no arquivo");
+}
 const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear()));
 ---
 <footer class="rodape">
   <div class="rodape__conteudo">
     <div class="rodape__marca">
-      <div class="rodape__logo" set:html={logo} />
+      <div class="rodape__logo" data-monta-logo set:html={logoMontado} />
       <p class="rodape__slogan">{rodape.slogan}</p>
     </div>
 
@@ -70,6 +105,23 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
   </div>
 </footer>
 
+
+<script>
+  // Monta o logo do rodapé uma vez, quando ele aparece. Só arma se ainda estiver fora da tela.
+  const logo = document.querySelector<HTMLElement>("[data-monta-logo]");
+  if (logo && !matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window && logo.getBoundingClientRect().top > innerHeight) {
+    logo.dataset.monta = "pronta";
+    const observador = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        observador.disconnect();
+        logo.dataset.monta = "montada";
+      },
+      { threshold: 0.6 },
+    );
+    observador.observe(logo);
+  }
+</script>
 <style>
   .rodape {
     position: relative;
@@ -102,6 +154,25 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
   .rodape__marca { display: grid; gap: var(--s-5); align-content: start; }
   .rodape__logo { width: 112px; }
   .rodape__logo :global(svg) { width: 100%; height: auto; }
+
+  /*
+    Montagem do logo (uma vez, ao aparecer): só arma com o script e com movimento (data-monta).
+    Haste sobe, corpo vem da direita, o núcleo encaixa na diagonal, BRAGA sobe letra por letra e
+    SYSTEMS acende em seguida. Unidades do SVG (o logo tem 574 de largura e aparece com ~120 px).
+  */
+  .rodape__logo :global(.rodape__peca) {
+    transition: opacity 200ms var(--ease-saida), translate 220ms var(--ease-saida);
+  }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca) { opacity: 0; }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca--haste) { translate: 0 60px; }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca--corpo) { translate: 70px 0; }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca--nucleo) { translate: -50px -50px; }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca--letra) { translate: 0 40px; }
+  .rodape__logo[data-monta="pronta"] :global(.rodape__peca--sub) { translate: 0 16px; }
+  .rodape__logo :global(.rodape__peca--corpo) { transition-delay: 60ms; }
+  .rodape__logo :global(.rodape__peca--nucleo) { transition-delay: 220ms; }
+  .rodape__logo :global(.rodape__peca--letra) { transition-delay: calc(320ms + var(--i) * 50ms); }
+  .rodape__logo :global(.rodape__peca--sub) { transition-delay: calc(600ms + var(--i) * 35ms); }
   .rodape__slogan {
     max-width: 20ch;
     font: 500 var(--t-h2)/1.2 var(--font-display);
