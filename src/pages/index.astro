@@ -59,7 +59,7 @@ const legenda = rich(hero.retrato.legenda).replace("Braga", '<span class="abertu
 const vagasBuild = await lerVagasNoBuild();
 const vagas = vagasBuild ?? vagasMax;
 ---
-<Base titulo="BRAGA SYSTEMS — Sites e landing pages de alta conversão" vagasBuild={vagasBuild} og={compartilhar}>
+<Base titulo="BRAGA SYSTEMS | Sites e landing pages de alta conversão" vagasBuild={vagasBuild} og={compartilhar}>
   <script slot="head" type="application/ld+json" is:inline set:html={JSON.stringify(dadosEstruturados)} />
   <Abertura />
   <main id="conteudo">

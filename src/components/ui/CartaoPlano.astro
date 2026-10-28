@@ -8,6 +8,10 @@
   botão preenchido e o feixe que dá 1 volta na borda ao entrar na tela e para.
   O brilho é uma camada parada atrás do cartão (.plano__brilho), e não um filtro no cartão:
   assim o feixe, que se redesenha a cada quadro, não obriga o navegador a refazer o desfoque.
+  Animação "A conta fecha" (copy 2.19, escolhida pelo Gustavo em 28/10/2026): ao entrar na tela, o
+  preço cheio é riscado e o de fundador cai contando; no Performance, os itens acendem um a um com o
+  valor de mercado, o total soma, é riscado, e o "Você paga" desce contando. Uma vez só, rápida.
+  Sem JavaScript ou com movimento reduzido, o cartão já nasce no estado final.
 */
 import Botao from "./Botao.astro";
 import Icone from "./Icone.astro";
@@ -39,6 +43,8 @@ const pagaMatch = performance.vocePagaFundador.match(/^(R\$\s?[\d.,]+)(.*)$/);
 const pagaFundador = pagaMatch
   ? { valor: pagaMatch[1], legenda: pagaMatch[2] }
   : { valor: performance.vocePagaFundador, legenda: "" };
+// "preço de fundador" ganha o marca-texto do site quando a conta fecha
+const legendaMarcada = pagaFundador.legenda.replace(secaoPlanos.precoFundadorRotulo, `<mark data-marca="pronta">${secaoPlanos.precoFundadorRotulo}</mark>`);
 
 // "Também inclui: ..." → o começo vira rótulo.
 const fimRotulo = performance.tambem.indexOf(":") + 1;
@@ -61,7 +67,7 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
         <p class="plano__valor" data-quando-vagas="com falha">
           {plano.aPartirDe && <span class="plano__apartir">{aPartirDe}</span>}
           <s class="plano__cheio num">{plano.precoCheio}</s>
-          <strong class="plano__numero num"><span class="plano__moeda">{fundador.moeda}</span> {fundador.valor}</strong>
+          <strong class="plano__numero num"><span class="plano__moeda">{fundador.moeda}</span> <span data-conta-de={plano.precoCheio}>{fundador.valor}</span></strong>
           <span class="plano__legenda">{secaoPlanos.precoFundadorRotulo}</span>
         </p>
         <p class="plano__valor" data-quando-vagas="esgotado">
@@ -77,8 +83,8 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
       <div class="plano__recebe">
         <p class="plano__recebe-titulo">{performance.recebeTitulo}</p>
         <ul class="plano__lista" role="list">
-          {performance.itens.map((item) => (
-            <li class="plano__item plano__item--valor">
+          {performance.itens.map((item, i) => (
+            <li class="plano__item plano__item--valor" style={`--i:${i}`}>
               <Icone nome="check" tamanho={18} class="plano__check" />
               <span class="plano__item-texto">{item.texto}</span>
               <span class="plano__item-valor num">{item.valor}</span>
@@ -89,12 +95,12 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
         <dl class="plano__conta">
           <div class="plano__conta-linha">
             <dt>{performance.valorTotalRotulo}</dt>
-            <dd><s class="plano__total num">{performance.valorTotal}</s></dd>
+            <dd><s class="plano__total num" data-conta-de="R$ 0">{performance.valorTotal}</s></dd>
           </div>
           <div class="plano__conta-linha plano__conta-linha--paga">
             <dt>{performance.vocePagaRotulo}</dt>
             <dd>
-              <span data-quando-vagas="com falha"><strong class="num">{pagaFundador.valor}</strong>{pagaFundador.legenda}</span>
+              <span data-quando-vagas="com falha"><strong class="num" data-conta-de={performance.valorTotal}>{pagaFundador.valor}</strong><Fragment set:html={legendaMarcada} /></span>
               <span data-quando-vagas="esgotado"><strong class="num">{performance.vocePagaCheio}</strong></span>
             </dd>
           </div>
@@ -128,24 +134,82 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
 
 <script>
   /*
-    Feixe na borda do Performance ao entrar na tela: 1 volta e para
-    (Border Beam do Magic UI, MIT, recriado em CSS no global.css). Sem movimento reduzido, nada liga.
+    Ao entrar na tela (uma vez): o feixe dá 1 volta na borda do Performance (Border Beam do Magic UI,
+    MIT, recriado no global.css) e a conta fecha. Os números contam de "data-conta-de" até o valor
+    do HTML, que é sempre o texto final. Só arma a animação em cartões que ainda estão abaixo da tela.
   */
   const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const cartoes = document.querySelectorAll<HTMLElement>("[data-feixe]");
+  const cartoes = [...document.querySelectorAll<HTMLElement>(".plano")];
+  const numero = (t: string) => Number(t.replace(/\D/g, "")) || 0;
+  const formato = new Intl.NumberFormat("pt-BR");
 
-  if (!semMovimento && cartoes.length && "IntersectionObserver" in window) {
+  // Arma o contador ainda fora da tela: guarda o texto final, trava a largura final (nada se mexe em
+  // volta) e mostra o valor inicial, para não piscar o final antes de contar
+  function armar(el: HTMLElement) {
+    if (el.offsetParent === null) return;
+    el.dataset.contaFinal = el.textContent ?? "";
+    el.style.display = "inline-block";
+    // Largura exata do texto final (com a fonte já carregada): os dígitos do Space Grotesk têm larguras diferentes
+    el.style.width = `${el.getBoundingClientRect().width}px`;
+    el.style.whiteSpace = "nowrap";
+    el.style.textAlign = "right";
+    const prefixo = el.dataset.contaFinal.match(/^\D*/)?.[0] ?? "";
+    el.textContent = prefixo + formato.format(numero(el.dataset.contaDe ?? ""));
+  }
+  function contar(el: HTMLElement | null, ms: number) {
+    if (!el?.dataset.contaFinal) return;
+    const final = el.dataset.contaFinal;
+    const prefixo = final.match(/^\D*/)?.[0] ?? "";
+    const de = numero(el.dataset.contaDe ?? "");
+    const ate = numero(final);
+    const inicio = performance.now();
+    const passo = (t: number) => {
+      const p = Math.min(1, (t - inicio) / ms);
+      const v = Math.round(de + (ate - de) * (1 - (1 - p) ** 3));
+      el.textContent = p < 1 ? prefixo + formato.format(v) : final;
+      if (p < 1) requestAnimationFrame(passo);
+    };
+    requestAnimationFrame(passo);
+  }
+
+  function fechar(cartao: HTMLElement) {
+    cartao.dataset.conta = "fechando";
+    const topo = cartao.querySelector<HTMLElement>('.plano__valor[data-quando-vagas="com falha"] [data-conta-de]');
+    window.setTimeout(() => contar(topo, 450), 180);
+    if (!cartao.classList.contains("plano--destaque")) return;
+    // Performance: itens (90 ms entre eles), total somando, risco e o "Você paga" descendo
+    const itens = cartao.querySelectorAll(".plano__item--valor").length;
+    const total = cartao.querySelector<HTMLElement>(".plano__total");
+    const paga = cartao.querySelector<HTMLElement>('.plano__conta-linha--paga [data-conta-de]');
+    const tTotal = 250 + itens * 90;
+    if (total) window.setTimeout(() => contar(total, 550), tTotal);
+    window.setTimeout(() => (cartao.dataset.conta = "riscada"), tTotal + 600);
+    window.setTimeout(() => contar(paga, 500), tTotal + 780);
+  }
+
+  if (cartoes.length && "IntersectionObserver" in window) {
     const observador = new IntersectionObserver(
       (entradas) => {
         for (const entrada of entradas) {
           if (!entrada.isIntersecting) continue;
-          entrada.target.classList.add("feixe--ativo");
-          observador.unobserve(entrada.target);
+          const cartao = entrada.target as HTMLElement;
+          observador.unobserve(cartao);
+          cartao.classList.add("feixe--ativo");
+          if (cartao.dataset.conta === "pronta") fechar(cartao);
         }
       },
       { threshold: 0.35 },
     );
-    cartoes.forEach((cartao) => observador.observe(cartao));
+    // Mede depois das fontes: medida com a fonte de reserva, a largura travada ficava errada
+    document.fonts.ready.then(() => {
+      for (const cartao of cartoes) {
+        if (!semMovimento && cartao.getBoundingClientRect().top > window.innerHeight) {
+          cartao.dataset.conta = "pronta";
+          cartao.querySelectorAll<HTMLElement>("[data-conta-de]").forEach(armar);
+        }
+        observador.observe(cartao);
+      }
+    });
   }
 </script>
 
@@ -370,6 +434,38 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
     background: var(--line-forte);
     clip-path: polygon(0 0, 50% 0, 100% 100%, 50% 100%);
   }
+
+
+  /* ---------- "A conta fecha" (só quando o script arma o cartão: data-conta) ---------- */
+  .plano[data-conta] .plano__cheio,
+  .plano[data-conta] .plano__total { position: relative; text-decoration: none; }
+  .plano[data-conta] .plano__cheio::after,
+  .plano[data-conta] .plano__total::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 52%;
+    height: 1px;
+    background: currentColor;
+    transform-origin: left;
+    scale: 0 1;
+    transition: scale 220ms var(--ease-saida);
+  }
+  .plano[data-conta] .plano__cheio::after { transition-delay: 40ms; }
+  .plano[data-conta="fechando"] .plano__cheio::after,
+  .plano[data-conta="riscada"] .plano__cheio::after,
+  .plano[data-conta="riscada"] .plano__total::after { scale: 1 1; }
+
+  /* Itens do Performance: o valor de mercado entra e o check acende, um por vez */
+  .plano[data-conta] .plano__item-valor,
+  .plano[data-conta] .plano__item--valor :global(.plano__check) {
+    transition: opacity 200ms var(--ease-saida), translate 200ms var(--ease-saida), color 200ms var(--ease-saida);
+    transition-delay: calc(150ms + var(--i, 0) * 90ms);
+  }
+  .plano[data-conta="pronta"] .plano__item-valor { opacity: 0; translate: 8px 0; }
+  .plano[data-conta="fechando"] .plano__item--valor :global(.plano__check),
+  .plano[data-conta="riscada"] .plano__item--valor :global(.plano__check) { color: var(--ink-strong); }
 
   @media (min-width: 720px) {
     .plano { --pad: var(--s-6); }

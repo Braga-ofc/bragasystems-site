@@ -1,4 +1,4 @@
-// Planos, preços e prazos (copy oficial 2.18, §9). Preço de fundador = 25% de desconto, valores da copy.
+// Planos, preços e prazos (copy oficial 2.19, §9). Preço de fundador = 25% de desconto, valores da copy.
 import type { Origem } from "./whatsapp";
 
 export const secaoPlanos = {
@@ -6,8 +6,8 @@ export const secaoPlanos = {
   custo:
     "Cada semana sem uma página que vende é mais uma semana explicando a mesma coisa, mandando o preço e torcendo para alguém responder.",
   rotulo: "PLANOS",
-  titulo: "Escolha o seu plano",
-  texto: "Preços abertos, sem surpresa. Todos os planos incluem a copy de conversão.",
+  titulo: "Preço aberto, sem surpresa.",
+  texto: "Você sabe quanto vai pagar antes de me chamar. Todos os planos incluem a copy de conversão.",
   nota: "Preço de fundador válido para as 5 primeiras vagas.",
   precoFundadorRotulo: "preço de fundador",
   aPartirDe: "A partir de",
