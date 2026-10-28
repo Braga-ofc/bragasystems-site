@@ -3,12 +3,15 @@
   §15 Dúvidas frequentes. Leitura calma, sem ciano: o título fica preso à esquerda no computador
   (4/12) enquanto a lista corre à direita (8/12). No celular, título e lista empilhados.
   As perguntas vêm de content/faq.ts, a mesma fonte do FAQPage do SEO.
+  Desde 28/10/2026 a seção abre com as Objeções (estrutura aprovada: "Dúvidas, com as Objeções").
 */
 import Secao from "../ui/Secao.astro";
 import Acordeao from "../ui/Acordeao.astro";
+import Objecoes from "./Objecoes.astro";
 import { faq, faqTitulo } from "../../content/faq";
 ---
 <Secao id="duvidas" class="faq">
+  <Objecoes />
   <div class="faq__grade">
     <h2 class="faq__titulo">{faqTitulo}</h2>
     <div class="faq__lista">
@@ -18,7 +21,7 @@ import { faq, faqTitulo } from "../../content/faq";
 </Secao>
 
 <style>
-  .faq__grade { display: grid; min-width: 0; }
+  .faq__grade { display: grid; min-width: 0; margin-top: var(--s-9); }
 
   .faq__titulo {
     max-width: 18ch;

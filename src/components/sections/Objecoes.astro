@@ -6,8 +6,10 @@
   primeira casa e a coluna da direita desce meio passo, para a leitura correr em zigue-zague.
   Sem ciano: a dúvida fica em tons neutros, e a luz volta na Garantia, logo abaixo.
   Vagas (mapa técnico, arquivo 03): a última resposta troca de texto quando as vagas esgotam.
+  Desde 28/10/2026 (estrutura aprovada em 19/10: "Dúvidas, com as Objeções") abre a seção Dúvidas,
+  dentro dela (sections/Faq). Com a rolagem, o ramo em 45° desenha da pergunta até a resposta e a
+  régua corre junto com o texto; sem suporte ou com movimento reduzido, tudo parado e aceso.
 */
-import Secao from "../ui/Secao.astro";
 import { objecoes } from "../../content/home";
 import { aspas, rich } from "../../lib/texto";
 
@@ -18,11 +20,11 @@ function pendurar(pergunta: string) {
   return { aspa, resto: texto.slice(aspa.length) };
 }
 ---
-<Secao class="objecoes">
+<div class="objecoes">
   <div class="objecoes__grade">
     <h2 class="objecoes__titulo">{objecoes.titulo}</h2>
 
-    <ul class="objecoes__lista" role="list" data-revela>
+    <ul class="objecoes__lista" role="list">
       {objecoes.itens.map((item) => {
         const pergunta = pendurar(item.pergunta);
         return (
@@ -32,7 +34,7 @@ function pendurar(pergunta: string) {
             </h3>
             <div class="objecao__resposta">
               <svg class="objecao__ramo" width="25" height="24" viewBox="0 0 25 24" fill="none" aria-hidden="true">
-                <path d="M0.5 0L24.5 24" stroke="currentColor" />
+                <path d="M0.5 0L24.5 24" stroke="currentColor" pathLength="1" />
               </svg>
               {"respostaSemVagas" in item ? (
                 <>
@@ -48,7 +50,7 @@ function pendurar(pergunta: string) {
       })}
     </ul>
   </div>
-</Secao>
+</div>
 
 <style>
   .objecoes__grade { display: grid; min-width: 0; }
@@ -120,6 +122,30 @@ function pendurar(pergunta: string) {
     color: var(--ink);
   }
   .objecao__resposta :global(strong) { font-weight: 600; color: var(--ink-strong); }
+
+
+  /* ---------- A resposta sai da pergunta, com a rolagem ---------- */
+  .objecao__resposta { border-left-color: transparent; }
+  .objecao__resposta::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -1px;
+    width: 1px;
+    background: var(--line);
+    transform-origin: top;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .objecao__ramo path { stroke-dasharray: 1; animation: objecao-ramo linear both; animation-timeline: view(); animation-range: entry 60% cover 30%; }
+      .objecao__resposta::before { animation: objecao-regua linear both; animation-timeline: view(); animation-range: entry 40% cover 40%; }
+      .objecao__resposta p { animation: objecao-resposta linear both; animation-timeline: view(); animation-range: entry 30% cover 35%; }
+    }
+  }
+  @keyframes objecao-ramo { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes objecao-regua { from { scale: 1 0; } }
+  @keyframes objecao-resposta { from { opacity: 0; translate: -12px 0; } }
 
   @media (min-width: 720px) {
     .objecao__resposta { padding-left: var(--s-5); }
