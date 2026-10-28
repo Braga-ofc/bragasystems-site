@@ -18,6 +18,19 @@
 import Secao from "../ui/Secao.astro";
 import { proposta } from "../../content/home";
 import { aspas } from "../../lib/texto";
+import simbolo from "../../assets/logo/simbolo-escuro.svg?raw";
+
+// O B da marca em três peças (haste, corpo e núcleo), só com translate e opacidade: no fim da
+// montagem, idêntico ao arquivo (manual: nunca distorcer nem girar). A conta abaixo quebra o build
+// se as peças deixarem de somar o desenho original.
+const caminhos = [...simbolo.matchAll(/<path fill="(#[0-9A-F]+)"[^>]*? d="([^"]+)"/gi)].map((m) => ({ cor: m[1], d: m[2] }));
+const [corpoD, hasteD] = caminhos[0].d.split(/(?=M)/);
+if (caminhos.length !== 2 || corpoD + hasteD !== caminhos[0].d) throw new Error("Proposta: as peças do B não somam o símbolo do arquivo");
+const pecas = [
+  { nome: "haste", d: hasteD, cor: caminhos[0].cor },
+  { nome: "corpo", d: corpoD, cor: caminhos[0].cor },
+  { nome: "nucleo", d: caminhos[1].d, cor: caminhos[1].cor },
+];
 
 // Formas do núcleo do B (as mesmas de ui/CamadaViva), em viewBox 48
 const formas = {
@@ -38,6 +51,9 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
 ---
 <Secao class="proposta">
   <div class="proposta__grade">
+    <svg class="proposta__marca" viewBox="0 0 256 256" aria-hidden="true">
+      {pecas.map((p) => <path class={`proposta__peca proposta__peca--${p.nome}`} fill={p.cor} fill-rule="evenodd" d={p.d} />)}
+    </svg>
     <h2 class="proposta__titulo">
       <span class="proposta__afirmacao foco-rolagem">{afirmacao}</span>
       {virada && <> <span class="proposta__vira" set:html={virada} /></>}
@@ -54,11 +70,14 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       <p class="proposta__frase sobe-rolagem">{proposta.frase}</p>
     </div>
 
+    {/* Benefícios um por vez (híbrido, 27/10/2026): o palco fica preso e as linhas trocam com a rolagem */}
+    <div class="proposta__palco">
+    <div class="proposta__fixo">
     <h3 class="proposta__subtitulo foco-rolagem">{proposta.beneficiosTitulo}</h3>
     <div class="proposta__placa chanfrado">
       <ul class="proposta__lista" role="list" data-proposta-luz>
         {proposta.beneficios.map((item, i) => (
-          <li class="proposta__item">
+          <li class="proposta__item" style={`--i:${i}`}>
             <p class="proposta__destaque">
               <svg class="proposta__icone" viewBox="0 0 48 48" aria-hidden="true"><path d={icones[i]} fill-rule="evenodd" /></svg>
               {item.destaque}
@@ -67,6 +86,11 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
           </li>
         ))}
       </ul>
+    </div>
+    <span class="proposta__progresso" aria-hidden="true">
+      {proposta.beneficios.map((_, i) => <i style={`--i:${i}`}></i>)}
+    </span>
+    </div>
     </div>
   </div>
 
@@ -109,6 +133,11 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
     vertical-align: -0.1em;
     color: var(--ink-muted);
   }
+
+
+  /* ---------- O B da marca, montado pela rolagem ---------- */
+  .proposta__marca { display: block; width: 72px; height: 72px; margin-bottom: var(--s-5); overflow: visible; }
+  .proposta__progresso { display: none; }
 
   .proposta__titulo {
     max-width: 18ch;
@@ -233,8 +262,77 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       /* Cada benefício: o ícone e a frase vêm da esquerda, a resposta vem da direita */
       .proposta__destaque { animation: proposta-da-esquerda linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
       .proposta__texto { animation: proposta-da-direita linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
+
+      /* O B se monta: a haste sobe, o corpo chega da direita e o núcleo encaixa em 45°. Termina idêntico ao arquivo. */
+      .proposta__peca { animation: linear both; animation-timeline: view(); }
+      .proposta__peca--haste { animation-name: peca-haste; animation-range: entry 30% cover 42%; }
+      .proposta__peca--corpo { animation-name: peca-corpo; animation-range: entry 45% cover 48%; }
+      .proposta__peca--nucleo { animation-name: peca-nucleo; animation-range: cover 40% cover 56%; }
+
+      /* Benefícios um por vez: a placa fica presa e cada linha ocupa um quarto da passagem */
+      .proposta__palco { height: 300vh; view-timeline: --beneficios block; }
+      .proposta__fixo {
+        position: sticky;
+        top: 64px;
+        min-height: calc(100vh - 64px);
+        display: grid;
+        align-content: center;
+        padding-block: var(--s-6);
+      }
+      .proposta__lista { display: grid; }
+      .proposta__item {
+        grid-area: 1 / 1;
+        animation: beneficio linear both;
+        animation-timeline: --beneficios;
+        animation-range: contain calc(var(--i) * 25%) contain calc((var(--i) + 1) * 25%);
+      }
+      .proposta__item + .proposta__item { border-top: 0; }
+      .proposta__item:first-child { animation-name: beneficio-primeiro; }
+      .proposta__item:last-child { animation-name: beneficio-ultimo; }
+      .proposta__item::before,
+      .proposta__item::after { display: none; }
+      .proposta__destaque, .proposta__texto { animation: none; }
+      /* Presa, a placa mostra uma frase por vez em tamanho de título, com a resposta embaixo */
+      .proposta__item.proposta__item {
+        grid-template-columns: minmax(0, 1fr);
+        align-content: center;
+        gap: var(--s-4);
+        padding: var(--s-7) var(--s-6);
+      }
+      .proposta__item .proposta__destaque {
+        max-width: 20ch;
+        padding: 0;
+        font-size: clamp(1.75rem, 1.05rem + 3vw, 3.25rem);
+        font-weight: 600;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+        color: var(--ink-strong);
+        text-wrap: balance;
+      }
+      .proposta__item .proposta__icone { display: block; width: 0.8em; height: 0.8em; margin: 0 0 var(--s-4); color: var(--ink-muted); }
+      .proposta__item .proposta__texto { max-width: 40ch; padding: 0; font-size: var(--t-body-lg); color: var(--ink); }
+      /* Preso, o subtítulo fica nítido (o foco por rolagem é para quem passa, não para quem para) */
+      .proposta__fixo .proposta__subtitulo { animation: none; }
+      .proposta__fixo .proposta__placa { max-width: 46rem; }
+      .proposta__progresso { display: flex; gap: var(--s-2); margin-top: var(--s-5); }
+      .proposta__progresso i {
+        width: var(--s-6);
+        height: 2px;
+        background: var(--ink-strong);
+        transform-origin: left;
+        animation: beneficio-marca linear both;
+        animation-timeline: --beneficios;
+        animation-range: contain calc(var(--i) * 25%) contain calc((var(--i) + 1) * 25%);
+      }
     }
   }
+  @keyframes peca-haste { from { opacity: 0; translate: 0 64px; } }
+  @keyframes peca-corpo { from { opacity: 0; translate: 72px 0; } }
+  @keyframes peca-nucleo { from { opacity: 0; translate: -56px -56px; } }
+  @keyframes beneficio { 0% { opacity: 0; translate: 0 28px; } 18%, 82% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 -28px; } }
+  @keyframes beneficio-primeiro { 0%, 82% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 -28px; } }
+  @keyframes beneficio-ultimo { 0% { opacity: 0; translate: 0 28px; } 18%, 100% { opacity: 1; translate: 0 0; } }
+  @keyframes beneficio-marca { from { opacity: 0.25; scale: 0.35 1; } to { opacity: 1; scale: 1 1; } }
   @keyframes proposta-trilho { from { transform: scaleX(0); } }
   @keyframes proposta-estacao { from { opacity: 0; scale: 0.4; } to { opacity: 1; scale: 1; } }
   @keyframes proposta-no { from { opacity: 0.15; scale: 0.3; rotate: -90deg; } }
@@ -259,6 +357,8 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       line-height: 1.06;
       letter-spacing: -0.03em;
     }
+    /* O B ao lado do título, do tamanho do bloco de duas linhas */
+    .proposta__marca { grid-column: 11 / -1; grid-row: 1; justify-self: end; align-self: center; width: 168px; height: 168px; margin: 0; }
     .proposta__virada { grid-column: 1 / -1; margin-top: var(--s-9); }
     .proposta__trilho { grid-column: 1 / -1; }
     /* O nó cai no meio do trilho, no início da coluna 7, onde a frase começa */
@@ -281,6 +381,8 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       color: var(--ink-muted);
       background: var(--surface);
     }
+    .proposta__palco { grid-column: 1 / -1; }
+    .proposta__fixo { top: 72px; min-height: calc(100vh - 72px); }
     .proposta__subtitulo { grid-column: 1 / -1; }
     .proposta__placa { grid-column: 1 / -1; }
     /* Tabela: o que muda (5/12) | como (7/12), com a régua vertical na divisa */

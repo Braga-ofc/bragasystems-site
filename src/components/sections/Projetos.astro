@@ -36,60 +36,70 @@ const { eben, fundador } = projetos;
       <h2 class="projetos__titulo">{projetos.titulo}</h2>
     </header>
 
+    {/*
+      Palco da EBEN (híbrido, 27/10/2026): o quadro começa do tamanho do cartão e cresce até a tela
+      inteira conforme a rolagem, com o vídeo tocando. No celular, cresce até as bordas.
+    */}
+    <div class="projetos-palco">
+      <div class="projetos-palco__fixo">
+        <div class="projetos-palco__quadro chanfrado">
+          {/*
+            A tela é decorativa: quem lê o case tem o nome, o desafio, a solução e o botão.
+            A capa fica atrás do vídeo e só carrega perto da tela (lazy, no tamanho certo);
+            o vídeo (preload="none") só baixa quando o script manda tocar.
+          */}
+          <div class="projetos-tela-area">
+          <div class="projetos-tela" aria-hidden="true">
+            <Image
+              class="projetos-tela__capa"
+              src={capaEben}
+              alt=""
+              widths={[640, 960, 1280]}
+              sizes="100vw"
+              format="webp"
+              quality={75}
+              loading="lazy"
+              decoding="async"
+            />
+            <video
+              class="projetos-tela__video"
+              width="1280"
+              height="800"
+              muted
+              loop
+              playsinline
+              preload="none"
+              disablepictureinpicture
+              disableRemotePlayback
+              aria-hidden="true"
+              data-tela-video
+            >
+              <source src="/videos/eben/site-eben.webm" type="video/webm; codecs=av01.0.05M.08" />
+              <source src="/videos/eben/site-eben.mp4" type="video/mp4" />
+            </video>
+          </div>
+            {/* Pausar e tocar (WCAG 2.2.2): só aparece quando o vídeo começa a tocar */}
+            <button
+              type="button"
+              class="projetos-tela__controle chanfrado"
+              aria-label={eben.videoPausar}
+              data-tela-controle
+              data-rotulo-pausar={eben.videoPausar}
+              data-rotulo-tocar={eben.videoTocar}
+              hidden
+            >
+              <Icone nome="pausar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--pausar" />
+              <Icone nome="tocar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--tocar" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="projetos__grade">
       <article class="projetos-case" aria-labelledby="projetos-eben" data-revela>
         <div class="projetos-case__corpo">
           <div class="projetos-ficha chanfrado">
-            {/*
-              A tela é decorativa: quem lê o case tem o nome, o desafio, a solução e o botão.
-              A capa fica atrás do vídeo e só carrega perto da tela (lazy, no tamanho certo);
-              o vídeo (preload="none") só baixa quando o script manda tocar.
-            */}
-            <div class="projetos-tela-area">
-            <div class="projetos-tela" aria-hidden="true">
-              <Image
-                class="projetos-tela__capa"
-                src={capaEben}
-                alt=""
-                widths={[640, 960, 1280]}
-                sizes="(min-width: 1184px) 644px, (min-width: 960px) 58vw, (min-width: 640px) calc(100vw - 64px), calc(100vw - 40px)"
-                format="webp"
-                quality={75}
-                loading="lazy"
-                decoding="async"
-              />
-              <video
-                class="projetos-tela__video"
-                width="1280"
-                height="800"
-                muted
-                loop
-                playsinline
-                preload="none"
-                disablepictureinpicture
-                disableRemotePlayback
-                aria-hidden="true"
-                data-tela-video
-              >
-                <source src="/videos/eben/site-eben.webm" type="video/webm; codecs=av01.0.05M.08" />
-                <source src="/videos/eben/site-eben.mp4" type="video/mp4" />
-              </video>
-            </div>
-              {/* Pausar e tocar (WCAG 2.2.2): só aparece quando o vídeo começa a tocar */}
-              <button
-                type="button"
-                class="projetos-tela__controle chanfrado"
-                aria-label={eben.videoPausar}
-                data-tela-controle
-                data-rotulo-pausar={eben.videoPausar}
-                data-rotulo-tocar={eben.videoTocar}
-                hidden
-              >
-                <Icone nome="pausar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--pausar" />
-                <Icone nome="tocar" tamanho={18} class="projetos-tela__icone projetos-tela__icone--tocar" />
-              </button>
-            </div>
-
             <div class="projetos-ficha__cabeca">
               <h3 id="projetos-eben" class="projetos-ficha__nome">{eben.nome}</h3>
               <p class="projetos-ficha__tipo">{eben.tipo}</p>
@@ -243,19 +253,38 @@ const { eben, fundador } = projetos;
   .projetos-ficha > :not(.projetos-tela-area) { padding-inline: var(--pad); }
 
   /*
-    A tela: o vídeo vai de ponta a ponta dentro da borda do módulo e herda o chanfro de cima
-    (mesmo recorte do preenchimento do .chanfrado). Proporção fixa de 16:10, sem pulo de layout.
-    A capa e o vídeo ocupam a mesma célula; o vídeo, transparente até ter imagem, fica por cima.
+    Palco da EBEN: o quadro chanfrado com a tela dentro, recortada no mesmo chanfro do preenchimento.
+    Proporção fixa de 16:10 (sem pulo de layout); capa e vídeo na mesma célula, o vídeo por cima.
+    Com rolagem por tempo (animation-timeline) e movimento: o palco sai da coluna e o quadro cresce
+    do tamanho do cartão até a tela inteira (no celular, até as bordas). Só `scale`, no compositor.
   */
+  .projetos-palco__quadro.chanfrado { --c: var(--chanfro-lg); --cor-borda: var(--line-forte); --cor-fundo: var(--surface-sunken); }
   .projetos-tela {
     --ci: calc(var(--c) - var(--espessura) * 0.586);
     display: grid;
-    margin: var(--espessura) var(--espessura) 0;
+    margin: var(--espessura);
     background: var(--surface-sunken);
-    border-bottom: 1px solid var(--line);
-    clip-path: polygon(var(--ci) 0, 100% 0, 100% 100%, 0 100%, 0 var(--ci));
+    clip-path: polygon(var(--ci) 0, 100% 0, 100% calc(100% - var(--ci)), calc(100% - var(--ci)) 100%, 0 100%, 0 var(--ci));
     overflow: hidden;
   }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Celular: de ponta a ponta da tela, crescendo das margens até as bordas */
+      .projetos-palco {
+        width: 100vw;
+        margin-inline: calc(50% - 50vw);
+        view-timeline: --palco block;
+      }
+      .projetos-palco__quadro.chanfrado {
+        --c: var(--chanfro);
+        scale: 0.9;
+        animation: palco-cresce linear both;
+        animation-timeline: --palco;
+        animation-range: entry 10% cover 50%;
+      }
+    }
+  }
+  @keyframes palco-cresce { from { scale: var(--palco-inicio, 0.9); } to { scale: 1; } }
   .projetos-tela > :global(*) {
     grid-area: 1 / 1;
     display: block;
@@ -427,6 +456,31 @@ const { eben, fundador } = projetos;
 
   @media (min-width: 960px) {
     .projetos { gap: var(--s-8); }
+    /* Sem a rolagem por tempo: a tela fica no tamanho do case, à esquerda */
+    .projetos-palco__quadro { max-width: calc((100% - 11 * var(--s-5)) * 7 / 12 + 6 * var(--s-5)); }
+  }
+  @supports (animation-timeline: view()) {
+    @media (min-width: 960px) and (prefers-reduced-motion: no-preference) {
+      /* Computador: o palco segura a tela por duas alturas; o quadro cresce do cartão à tela inteira e fica */
+      .projetos-palco { height: 200vh; }
+      .projetos-palco__fixo {
+        position: sticky;
+        top: 72px;
+        height: calc(100vh - 72px);
+        display: grid;
+      }
+      .projetos-palco__quadro.chanfrado {
+        --palco-inicio: 0.5;
+        max-width: none;
+        height: 100%;
+        animation-range: contain 0% contain 55%;
+      }
+      .projetos-palco__quadro .projetos-tela-area { height: 100%; }
+      .projetos-palco__quadro .projetos-tela { height: calc(100% - 2 * var(--espessura)); }
+      .projetos-palco__quadro .projetos-tela > :global(*) { height: 100%; aspect-ratio: auto; }
+    }
+  }
+  @media (min-width: 960px) {
     .projetos__grade {
       grid-template-columns: repeat(12, minmax(0, 1fr));
       gap: var(--s-5);
