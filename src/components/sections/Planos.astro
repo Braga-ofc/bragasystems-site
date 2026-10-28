@@ -39,7 +39,7 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
 
     <ul class="planos__lista" role="list">
       {ordem.map((plano) => (
-        <li class:list={["planos__item", plano.destaque && "planos__item--destaque"]}>
+        <li class:list={["planos__item", `planos__item--${plano.id}`, plano.destaque && "planos__item--destaque"]}>
           <CartaoPlano plano={plano} />
         </li>
       ))}
@@ -194,12 +194,26 @@ const contPreco = sep > 0 ? continuo.nome.slice(sep + 3) : "";
     próprio conteúdo (sem vão antes da entrega) e alinhados por baixo: as três entregas e os três
     botões na mesma linha, e o Performance sobe acima deles.
   */
+  /*
+    Alturas em degraus (pedido do Gustavo, 28/10/2026): Performance o maior, Signature um degrau
+    abaixo, Essencial dois. Os três esticam até a altura do Performance e descem pela margem de cima,
+    alinhados pela base; a lista usa um pouco mais da largura (até 1240 px) para os três caberem na tela.
+  */
   @media (min-width: 1024px) {
     .planos__lista {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.18fr) minmax(0, 1fr);
-      align-items: end;
+      --largura: min(1240px, 100vw - 2 * var(--gutter));
+      width: var(--largura);
+      margin-inline: calc((100% - var(--largura)) / 2);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(0, 1fr);
+      align-items: stretch;
       gap: var(--s-5);
     }
     .planos__item--destaque { grid-column: 2; grid-row: 1; }
+    .planos__item--signature { margin-top: var(--s-6); }
+    .planos__item--essencial { margin-top: var(--s-8); }
+  }
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .planos__item--signature { margin-top: var(--s-5); }
+    .planos__item--essencial { margin-top: var(--s-7); }
   }
 </style>

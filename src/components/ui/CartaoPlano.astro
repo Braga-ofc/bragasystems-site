@@ -471,6 +471,47 @@ const tambem = { rotulo: performance.tambem.slice(0, fimRotulo), texto: performa
     .plano { --pad: var(--s-6); }
   }
 
+  /* Computador: os três cartões mais compactos (o Performance um pouco mais), para caberem numa tela */
+  @media (min-width: 1024px) {
+    .plano--padrao { --pad: var(--s-5); }
+    .plano--padrao .plano__corpo { gap: var(--s-4); }
+    .plano--padrao .plano__oferta { gap: var(--s-3); }
+    .plano--padrao .plano__lista { gap: var(--s-2); }
+    .plano--padrao .plano__lista--itens { padding-top: var(--s-4); }
+    .plano--padrao .plano__fim { gap: var(--s-3); padding-top: 0; }
+    .plano--padrao .plano__prazo { padding-top: var(--s-3); }
+    .plano--destaque { --pad: var(--s-5); padding-top: calc(var(--pad) + var(--s-3)); }
+    .plano--destaque .plano__corpo { gap: var(--s-4); }
+    .plano--destaque .plano__oferta { gap: var(--s-3); }
+    .plano--destaque .plano__para { max-width: none; }
+    .plano--destaque .plano__numero { font-size: calc(var(--t-h1) * 1.12); }
+    .plano--destaque .plano__recebe { gap: var(--s-3); padding-top: var(--s-4); }
+    .plano--destaque .plano__lista { gap: var(--s-2); }
+    .plano--destaque .plano__conta-linha { padding-block: var(--s-2); }
+    .plano--destaque .plano__fim { gap: var(--s-3); padding-top: 0; }
+    .plano--destaque .plano__prazo { padding-top: var(--s-3); }
+  }
+  /* Notebook de tela baixa (1366×768 e parecidos): só os respiros e o número encolhem, o texto não */
+  @media (min-width: 1024px) and (max-height: 820px) {
+    .plano--padrao { --pad: var(--s-4); }
+    .plano--padrao .plano__corpo { gap: var(--s-3); }
+    .plano--padrao .plano__oferta { gap: var(--s-2); }
+    .plano--padrao .plano__lista { gap: 6px; }
+    .plano--padrao .plano__lista--itens { padding-top: var(--s-3); }
+    .plano--padrao .plano__legenda { margin-top: 0; }
+    .plano--destaque { --pad: var(--s-4); padding-top: calc(var(--pad) + var(--s-3)); }
+    .plano--destaque .plano__corpo { gap: var(--s-2); }
+    .plano--destaque .plano__oferta { gap: var(--s-2); }
+    .plano--destaque .plano__numero { font-size: var(--t-h1); }
+    .plano--destaque .plano__legenda { margin-top: 0; }
+    .plano--destaque .plano__recebe { gap: var(--s-2); padding-top: var(--s-3); }
+    .plano--destaque .plano__lista { gap: 6px; }
+    .plano--destaque .plano__conta-linha { padding-block: var(--s-1); }
+    .plano--destaque .plano__tambem { line-height: 1.4; }
+    .plano--destaque .plano__fim { gap: var(--s-2); }
+    .plano--destaque .plano__prazo { padding-top: var(--s-2); }
+  }
+
   /* Cartão largo (o Performance na linha inteira do tablet): a oferta e o botão à esquerda, a lista à direita */
   @container plano (min-width: 600px) {
     .plano__corpo {
