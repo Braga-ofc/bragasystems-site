@@ -29,7 +29,9 @@ if (caminhos.length !== 2 || corpoD + hasteD !== caminhos[0].d) throw new Error(
 const pecas = [
   { nome: "haste", d: hasteD, cor: caminhos[0].cor },
   { nome: "corpo", d: corpoD, cor: caminhos[0].cor },
-  { nome: "nucleo", d: caminhos[1].d, cor: caminhos[1].cor },
+  // O núcleo entra em prata com as outras peças; a cópia em ciano acende por cima no fim da montagem
+  { nome: "nucleo", d: caminhos[1].d, cor: caminhos[0].cor },
+  { nome: "luz", d: caminhos[1].d, cor: caminhos[1].cor },
 ];
 
 // Formas do núcleo do B (as mesmas de ui/CamadaViva), em viewBox 48
@@ -263,11 +265,15 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
       .proposta__destaque { animation: proposta-da-esquerda linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
       .proposta__texto { animation: proposta-da-direita linear both; animation-timeline: view(); animation-range: entry 10% cover 40%; }
 
-      /* O B se monta: a haste sobe, o corpo chega da direita e o núcleo encaixa em 45°. Termina idêntico ao arquivo. */
-      .proposta__peca { animation: linear both; animation-timeline: view(); }
-      .proposta__peca--haste { animation-name: peca-haste; animation-range: entry 30% cover 42%; }
-      .proposta__peca--corpo { animation-name: peca-corpo; animation-range: entry 45% cover 48%; }
-      .proposta__peca--nucleo { animation-name: peca-nucleo; animation-range: cover 40% cover 56%; }
+      /* O B se monta em prata: a haste sobe, o corpo chega da direita e o núcleo encaixa em 45°; no fim, o núcleo acende em ciano. Termina idêntico ao arquivo. */
+      /* Uma linha do tempo só para o B inteiro: com view() em cada peça, cada uma media a própria caixa e chegavam fora de ordem */
+      .proposta__marca { view-timeline: --marca block; }
+      /* Propriedades separadas: o minificador trocava o atalho sem nome ("linear both") por "none" */
+      .proposta__peca { animation-timing-function: linear; animation-fill-mode: both; animation-timeline: --marca; }
+      .proposta__peca--haste { animation-name: peca-haste; animation-range: entry 40% cover 40%; }
+      .proposta__peca--corpo { animation-name: peca-corpo; animation-range: entry 70% cover 46%; }
+      .proposta__peca--nucleo { animation-name: peca-nucleo; animation-range: cover 42% cover 54%; }
+      .proposta__peca--luz { animation-name: peca-luz; animation-range: cover 56% cover 62%; }
 
       /* Benefícios um por vez: a placa fica presa e cada linha ocupa um quarto da passagem */
       .proposta__palco { height: 300vh; view-timeline: --beneficios block; }
@@ -329,6 +335,7 @@ const virada = resto.join(" ").replace("vender", '<mark data-marca="pronta">vend
   @keyframes peca-haste { from { opacity: 0; translate: 0 64px; } }
   @keyframes peca-corpo { from { opacity: 0; translate: 72px 0; } }
   @keyframes peca-nucleo { from { opacity: 0; translate: -56px -56px; } }
+  @keyframes peca-luz { from { opacity: 0; } }
   @keyframes beneficio { 0% { opacity: 0; translate: 0 28px; } 18%, 82% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 -28px; } }
   @keyframes beneficio-primeiro { 0%, 82% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: 0 -28px; } }
   @keyframes beneficio-ultimo { 0% { opacity: 0; translate: 0 28px; } 18%, 100% { opacity: 1; translate: 0 0; } }

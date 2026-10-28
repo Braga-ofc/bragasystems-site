@@ -4,6 +4,8 @@
   dezenas rodando fora da tela a página nunca descansava (Lighthouse: 94 s de bloqueio na carga).
   - Começam paradas e só andam na primeira interação ou 6 s depois da carga, e depois da abertura.
   - Fora da tela (com meia tela de folga), pausam; perto da tela, voltam.
+  - Enquanto a página rola, todas pausam e voltam de onde estavam logo que a rolagem para (medido em
+    28/10/2026 num celular simulado: de 37 para 47 quadros/s e nenhuma tarefa longa).
   As animações presas à rolagem (animation-timeline) e as finitas não passam por aqui.
   Só retoma o que este script pausou: o que a página pausa por conta própria continua com a página.
 */
@@ -16,15 +18,20 @@ const sempreVisiveis = [...document.querySelectorAll<HTMLElement>("header, [data
 const visivel = new Set<Element>(sempreVisiveis);
 const pausadas = new WeakSet<Animation>();
 let liberado = false;
+let rolando = false;
 
 const infinitas = (el: Element) =>
   el.getAnimations({ subtree: true }).filter(
     (a) => a.timeline === document.timeline && a.effect?.getComputedTiming().iterations === Infinity,
   );
 
-function aplicar(area: Element) {
-  const rodar = liberado && visivel.has(area);
-  for (const a of infinitas(area)) {
+/** Animações infinitas por área, guardadas: listar todas a cada rolagem forçava recálculo de estilo. */
+const porArea = new Map<Element, Animation[]>();
+
+function aplicar(area: Element, recontar = true) {
+  if (recontar || !porArea.has(area)) porArea.set(area, infinitas(area));
+  const rodar = liberado && !rolando && visivel.has(area);
+  for (const a of porArea.get(area)!) {
     if (!rodar && a.playState === "running") {
       a.pause();
       pausadas.add(a);
@@ -34,7 +41,7 @@ function aplicar(area: Element) {
     }
   }
 }
-const aplicarTudo = () => [...areas, ...sempreVisiveis].forEach(aplicar);
+const aplicarTudo = () => [...areas, ...sempreVisiveis].forEach((a) => aplicar(a));
 
 if (!reduzido && "IntersectionObserver" in window) {
   const observador = new IntersectionObserver(
@@ -49,6 +56,24 @@ if (!reduzido && "IntersectionObserver" in window) {
   );
   areas.forEach((a) => observador.observe(a));
   aplicarTudo();
+
+  // Durante a rolagem, o olho está no conteúdo: as luzes param e voltam 180 ms depois do último movimento
+  let fimDaRolagem = 0;
+  addEventListener(
+    "scroll",
+    () => {
+      if (!rolando) {
+        rolando = true;
+        for (const area of visivel) aplicar(area, false);
+      }
+      clearTimeout(fimDaRolagem);
+      fimDaRolagem = window.setTimeout(() => {
+        rolando = false;
+        for (const area of visivel) aplicar(area, false);
+      }, 180);
+    },
+    { passive: true },
+  );
 
   // Libera depois da carga, com o navegador livre, e só quando a abertura em vídeo já saiu
   const liberar = () => {
