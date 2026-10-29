@@ -1,8 +1,12 @@
 /* Fontes da marca, hospedadas no próprio site (SIL Open Font License). */
 @font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: swap; src: url("/fonts/space-grotesk-latin-500-normal.woff2") format("woff2"); }
 @font-face { font-family: "Space Grotesk"; font-weight: 600; font-display: swap; src: url("/fonts/space-grotesk-latin-600-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); }
-@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("/fonts/inter-latin-500-normal.woff2") format("woff2"); }
+/* Inter 400 é o texto corrido: se chegasse depois da primeira pintura, o subtítulo do hero ganhava
+   uma linha e empurrava a página (CLS de até 0,11 em 1024 px). Ela é pré-carregada (Base.astro);
+   "optional" só a usa se chegar no primeiro instante, senão fica a reserva nesta visita, sem pulo. */
+@font-face { font-family: "Inter"; font-weight: 400; font-display: optional; src: url("/fonts/inter-latin-400-normal.woff2") format("woff2"); }
+/* Inter 500 é o menu do topo e os rótulos: a mesma regra, para o menu não andar quando ela chega */
+@font-face { font-family: "Inter"; font-weight: 500; font-display: optional; src: url("/fonts/inter-latin-500-normal.woff2") format("woff2"); }
 @font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("/fonts/inter-latin-600-normal.woff2") format("woff2"); }
 @font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: swap; src: url("/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
 @font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: swap; src: url("/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
