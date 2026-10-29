@@ -209,7 +209,8 @@ const brilhos = [
     inset: 17.5%;
     overflow: hidden;
     border-radius: 999px;
-    background: var(--surface-sunken);
+    /* O tom do fundo do estúdio: completa as laterais da foto, que fica menor que o círculo */
+    background: linear-gradient(#141c1f, #0f1419 45%, #0a0b0d);
     box-shadow: 0 0 0 4px var(--surface);
     clip-path: circle(50%);
   }
@@ -223,14 +224,21 @@ const brilhos = [
     opacity: 0;
     pointer-events: none;
   }
-  /* Foto em pé (2:3): do cabelo ao relógio, com zoom leve entre o rosto e a mão (como na EBEN) */
+  /*
+    Foto em pé (2:3) inteira na largura de 78% do círculo (pedido do Gustavo: a da EBEN, que enche o
+    círculo, ficava próxima demais). As laterais esfumam no tom do fundo; o círculo corta a parte de baixo.
+  */
   .sobre__retrato :global(.sobre__foto) {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 5%;
+    left: 11%;
+    width: 78%;
+    height: 117%;
     object-fit: cover;
-    object-position: 50% 15%;
-    transform-origin: 46% 32%;
-    scale: 1.15;
+    object-position: 50% 0;
+    transform-origin: 50% 30%;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
   }
 
   .sobre__brilhos { inset: 0; }
@@ -262,7 +270,7 @@ const brilhos = [
     .sobre__palco[data-moldura="pronta"] :global(.sobre__foto) { scale: 1.6; }
     .sobre__palco[data-moldura="pronta"] .sobre__deco { opacity: 0; scale: 0.9; }
 
-    /* A entrada: a íris abre em 1,6 s, a foto se afasta em 2,4 s e as camadas acendem */
+    /* A entrada: a íris abre em 1,6 s, a foto se afasta em 2,4 s até o tamanho real e as camadas acendem */
     .sobre__palco[data-moldura="aberta"] .sobre__retrato { transition: clip-path 1.6s var(--ease-saida) 0.1s; }
     .sobre__palco[data-moldura="aberta"] .sobre__retrato::after {
       animation: sobre-aro-cresce 1.6s var(--ease-saida) 0.1s both, sobre-aro-some 1.9s linear 0.1s both;
