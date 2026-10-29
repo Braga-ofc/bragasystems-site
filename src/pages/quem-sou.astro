@@ -16,6 +16,8 @@ import Secao from "../components/ui/Secao.astro";
 import Botao from "../components/ui/Botao.astro";
 import fotoBlazer from "../assets/gustavo/gustavo-braga-blazer.jpg";
 import fotoPalco from "../assets/gustavo/gustavo-braga-palco.jpg";
+import fotoFim from "../assets/gustavo/gustavo-braga-bracos-cruzados-recorte.png";
+import Icone from "../components/ui/Icone.astro";
 import { quemSou as q, type Marco } from "../content/quem-sou";
 import { pecasDoB } from "../lib/marca";
 import { rich } from "../lib/texto";
@@ -25,6 +27,8 @@ const dois = (n: number) => String(n).padStart(2, "0");
 const marcos: readonly Marco[] = q.historia.marcos;
 // A frase de Aristóteles palavra por palavra: cada uma acende na vez dela conforme a rolagem
 const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
+// "Por que BRAGA SYSTEMS": o nome da marca em ciano, letra por letra (o leitor de tela lê o título inteiro)
+const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
 ---
 <Base titulo={q.seo.titulo} descricao={q.seo.descricao}>
   <main id="conteudo" class="qs">
@@ -122,7 +126,9 @@ const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
           <path class="qs-nome__nucleo" d={pecasDoB.nucleo} fill={pecasDoB.corLuz} />
         </svg>
         <div>
-          <h2 class="qs-titulo">{q.nome.titulo}</h2>
+          <h2 class="qs-titulo qs-nome__titulo" aria-label={q.nome.titulo}>
+            <span aria-hidden="true">{prefixoNome} </span><span class="qs-nome__marca" aria-hidden="true">{[...(marcaNome ?? "")].map((l, i) => <span style={`--i:${i}`}>{l}</span>)}</span>
+          </h2>
           <div class="qs-nome__texto">
             {q.nome.paragrafos.map((p) => <p class="sobe-rolagem" set:html={rich(p)} />)}
           </div>
@@ -182,20 +188,34 @@ const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
         <div class="qs-fora__texto">
           <p class="qs-rotulo">{q.foraDoCodigo.titulo}</p>
           <h2 class="qs-titulo">{q.foraDoCodigo.chamada}</h2>
-          {q.foraDoCodigo.paragrafos.map((p, i) => <p class:list={["sobe-rolagem", i === 2 && "qs-fora__fecho"]}>{p}</p>)}
+          {q.foraDoCodigo.paragrafos.map((p, i) => <p class:list={["sobe-rolagem", i === 2 && "qs-fora__fecho"]} set:html={rich(p)} />)}
+          {/* Base: o botão "follow me" do Instagram que o Gustavo mandou, com "Conheça-me" e o chanfro da marca */}
+          <a class="qs-insta" href={q.foraDoCodigo.instagram.url} target="_blank" rel="noopener" aria-label={`${q.foraDoCodigo.instagram.chamada} no Instagram: ${q.foraDoCodigo.instagram.usuario}`}>
+            <span class="qs-insta__icone" aria-hidden="true"><Icone nome="instagram" tamanho={18} /></span>
+            <span class="qs-insta__chamada" aria-hidden="true">{q.foraDoCodigo.instagram.chamada}</span>
+            <span class="qs-insta__usuario" aria-hidden="true">{q.foraDoCodigo.instagram.usuario}</span>
+          </a>
         </div>
       </div>
     </Secao>
 
     {/* ---------- Fechamento ---------- */}
-    <Secao class="qs-fim" largura="estreita">
-      <h2 class="qs-fim__titulo">{q.fechamento.titulo}</h2>
-      <p class="qs-fim__texto">{q.fechamento.texto}</p>
-      <div class="qs-fim__acoes">
-        <Botao href={montarLinkWhatsapp("quem-sou")} icone="whatsapp" origem="quem-sou">{q.fechamento.botao}</Botao>
-        <Botao variante="secundario" href={q.fechamento.planos.href} icone="seta">{q.fechamento.planos.texto}</Botao>
+    <Secao class="qs-fim">
+      <div class="qs-fim__grade">
+        <div class="qs-fim__texto-bloco">
+          <h2 class="qs-fim__titulo">{q.fechamento.titulo}</h2>
+          <p class="qs-fim__texto">{q.fechamento.texto}</p>
+          <div class="qs-fim__acoes">
+            <Botao href={montarLinkWhatsapp("quem-sou")} icone="whatsapp" origem="quem-sou">{q.fechamento.botao}</Botao>
+            <Botao variante="secundario" href={q.fechamento.planos.href} icone="seta">{q.fechamento.planos.texto}</Botao>
+          </div>
+          <p class="qs-fim__micro">{q.fechamento.micro}</p>
+        </div>
+        {/* A foto sem fundo encosta na base da seção, como a do hero */}
+        <div class="qs-fim__foto">
+          <Image src={fotoFim} alt={q.fechamento.fotoAlt} widths={[320, 480, 640, 820]} sizes="(min-width: 960px) 440px, min(78vw, 360px)" quality={80} loading="lazy" decoding="async" />
+        </div>
       </div>
-      <p class="qs-fim__micro">{q.fechamento.micro}</p>
     </Secao>
   </main>
 </Base>
@@ -603,6 +623,22 @@ const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
   @media (prefers-reduced-motion: no-preference) {
     .qs-nome__nucleo { animation: qs-pulsa 2.4s ease-in-out infinite alternate; }
   }
+  /* O nome da marca em ciano; as letras sobem uma a uma quando o título entra na tela */
+  .qs-nome__marca { color: var(--accent); white-space: nowrap; }
+  .qs-nome__marca span { display: inline-block; white-space: pre; }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .qs-nome__titulo { view-timeline: --nome block; }
+      .qs-nome__marca span {
+        animation-name: qs-letra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --nome;
+        animation-range: entry calc(30% + var(--i) * 4%) entry calc(70% + var(--i) * 4%);
+      }
+    }
+  }
+  @keyframes qs-letra { from { opacity: 0; translate: 0 0.5em; color: var(--ink-strong); } to { opacity: 1; translate: 0 0; color: var(--accent); } }
   @keyframes qs-pulsa { from { opacity: 0.55; } to { opacity: 1; } }
 
   /* ---------- Compromissos ---------- */
@@ -685,6 +721,71 @@ const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
   .qs-fora__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
   .qs-fora__texto p:not(.qs-rotulo) { max-width: 60ch; margin: 0 0 var(--s-4); font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
   .qs-fora__texto .qs-fora__fecho { margin-top: var(--s-5); font-size: var(--t-h3); line-height: 1.5; color: var(--ink-strong); }
+  /* As três palavras do fecho em ciano, com um traço que se desenha embaixo de cada uma, em sequência */
+  .qs-fora__fecho :global(strong) {
+    font-weight: 600;
+    color: var(--accent);
+    background: linear-gradient(var(--accent), var(--accent)) left bottom / 100% 2px no-repeat;
+    padding-bottom: 2px;
+  }
+
+  /* Instagram: o botão "follow me" mandado pelo Gustavo, nas cores e no chanfro da marca. No hover (e no
+     foco), o degradê do Instagram atravessa o botão levando o ícone e o @ entra no lugar de "Conheça-me". */
+  .qs-insta {
+    --c: 10px;
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    width: 168px;
+    height: 44px;
+    margin-top: var(--s-4);
+    overflow: hidden;
+    background: #F2F7FF;
+    box-shadow: inset 0 0 0 1px var(--accent);
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+    color: #0B0F14;
+    text-decoration: none;
+    transition: scale 120ms var(--ease-saida);
+  }
+  .qs-insta__chamada { margin-left: 36%; font: 600 15px/1 var(--font-sans); }
+  .qs-insta__usuario {
+    position: absolute;
+    top: 50%;
+    left: -110px;
+    translate: 0 -50%;
+    font: 700 14px/1 var(--font-sans);
+    color: #FFFFFF;
+    transition: transform 600ms var(--ease-saida);
+  }
+  .qs-insta__icone {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    color: #FFFFFF;
+    transition: transform 500ms var(--ease-saida);
+  }
+  .qs-insta__icone::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    right: 0;
+    width: 168px;
+    height: 100%;
+    background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
+  }
+  .qs-insta:hover .qs-insta__icone,
+  .qs-insta:focus-visible .qs-insta__icone { transform: translateX(124px); }
+  .qs-insta:hover .qs-insta__usuario,
+  .qs-insta:focus-visible .qs-insta__usuario { transform: translateX(130px); }
+  .qs-insta:active { scale: 1.03; }
+  .qs-insta:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    .qs-insta__icone, .qs-insta__usuario { transition: none; }
+  }
   @media (min-width: 960px) { .qs-fora__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--s-9); } }
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
@@ -705,10 +806,52 @@ const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
     }
   }
 
-  /* ---------- Fechamento ---------- */
-  .qs-fim { text-align: left; }
-  .qs-fim__titulo { margin: 0 0 var(--s-4); font: 600 var(--t-display)/1.08 var(--font-display); letter-spacing: -0.03em; color: var(--ink-strong); }
+  /* ---------- Fechamento: o convite à esquerda, a foto sem fundo à direita, encostada na base ---------- */
+  .qs-fim__grade { display: grid; gap: var(--s-6); align-items: end; }
+  .qs-fim__texto-bloco { align-self: center; }
+  .qs-fim__titulo { max-width: 16ch; margin: 0 0 var(--s-4); font: 600 var(--t-display)/1.08 var(--font-display); letter-spacing: -0.03em; text-wrap: balance; color: var(--ink-strong); }
   .qs-fim__texto { max-width: 52ch; margin: 0 0 var(--s-6); font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
   .qs-fim__acoes { display: flex; flex-wrap: wrap; gap: var(--s-3); }
   .qs-fim__micro { margin: var(--s-4) 0 0; font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+  .qs-fim__foto {
+    position: relative;
+    justify-self: center;
+    width: min(78vw, 360px);
+    margin-bottom: calc(-1 * var(--secao-respiro));
+  }
+  /* Luz ciano atrás do retrato, sem desfoque (o degradê já é suave) */
+  .qs-fim__foto::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 8% -12% 0;
+    background: radial-gradient(closest-side, rgb(53 213 232 / 0.22), transparent);
+  }
+  .qs-fim__foto :global(img) { display: block; width: 100%; height: auto; }
+  @media (min-width: 960px) {
+    .qs-fim__grade { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--s-8); }
+    .qs-fim__foto { width: min(100%, 440px); justify-self: end; }
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .qs-fim__foto :global(img) {
+        animation-name: qs-entra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 35%;
+      }
+      .qs-fora__fecho :global(strong) {
+        background-size: 0% 2px;
+        animation-name: qs-sublinha;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+      }
+      .qs-fora__fecho :global(strong:nth-of-type(1)) { animation-range: entry 70% cover 40%; }
+      .qs-fora__fecho :global(strong:nth-of-type(2)) { animation-range: entry 90% cover 46%; }
+      .qs-fora__fecho :global(strong:nth-of-type(3)) { animation-range: cover 30% cover 54%; }
+    }
+  }
+  @keyframes qs-sublinha { from { background-size: 0% 2px; color: var(--ink-strong); } to { background-size: 100% 2px; color: var(--accent); } }
 </style>
