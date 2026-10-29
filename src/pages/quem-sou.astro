@@ -44,7 +44,15 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
           <p class="qs-capa__lead">{q.abertura.texto}</p>
         </div>
         <figure class="qs-capa__figura">
-          <div class="qs-capa__foto chanfrado">
+          {/* Contínuo (pedido do Gustavo): o feixe corre pela borda, uma linha de luz varre a foto e os
+              cantos de mira respiram. Só transform, opacidade e o ângulo do feixe; pausa fora da tela
+              e na rolagem (scripts/animacoes). */}
+          <span class="qs-mira qs-mira--1" aria-hidden="true"></span>
+          <span class="qs-mira qs-mira--2" aria-hidden="true"></span>
+          <span class="qs-mira qs-mira--3" aria-hidden="true"></span>
+          <span class="qs-mira qs-mira--4" aria-hidden="true"></span>
+          <div class="qs-capa__foto chanfrado feixe feixe--continuo">
+            <span class="qs-capa__varredura" aria-hidden="true"></span>
             <Image src={fotoBlazer} alt={q.abertura.fotoAlt} widths={[360, 520, 720, 960]} sizes="(min-width: 960px) 460px, min(88vw, 460px)" quality={80} loading="eager" fetchpriority="high" />
           </div>
           <figcaption class="qs-legenda">{q.abertura.legenda.nome.split(" ")[0]} <b>{q.abertura.legenda.nome.split(" ")[1]}</b> · {q.abertura.legenda.cargo}</figcaption>
@@ -258,15 +266,69 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
     color: var(--ink-strong);
   }
   .qs-capa__lead { max-width: 46ch; margin: 0; font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
-  .qs-capa__figura { margin: 0; justify-self: center; width: min(100%, 460px); }
+  .qs-capa__figura { position: relative; margin: 0; justify-self: center; width: min(100%, 460px); }
   .qs-capa__foto {
     --c: var(--chanfro-lg);
-    --cor-borda: var(--line-forte);
+    --espessura: 3px;
+    --cor-borda: color-mix(in srgb, var(--accent) 35%, var(--line));
+    position: relative;
     aspect-ratio: 1;
     overflow: hidden;
     clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
   }
-  .qs-capa__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+  /* A foto 2 px para dentro, no mesmo chanfro: a borda (e o feixe que corre nela) aparece em volta */
+  .qs-capa__foto :global(img) {
+    position: absolute;
+    inset: var(--espessura);
+    width: calc(100% - 2 * var(--espessura));
+    height: calc(100% - 2 * var(--espessura));
+    object-fit: cover;
+    object-position: 50% 20%;
+    clip-path: polygon(calc(var(--c) - 1px) 0, 100% 0, 100% calc(100% - var(--c) + 1px), calc(100% - var(--c) + 1px) 100%, 0 100%, 0 calc(var(--c) - 1px));
+  }
+  .qs-capa__foto.feixe--continuo::before { animation-duration: 3s; }
+
+  /* A linha de luz: um degradê com a borda de baixo acesa, que desce pela foto e descansa antes de voltar */
+  .qs-capa__varredura {
+    position: absolute;
+    z-index: 2;
+    inset: 0 var(--espessura) auto;
+    height: 34%;
+    background: linear-gradient(transparent, rgb(53 213 232 / 0.14) 75%, rgb(53 213 232 / 0.75) 99%, rgb(186 245 252 / 0.95));
+    mix-blend-mode: screen;
+    translate: 0 -110%;
+    pointer-events: none;
+  }
+
+  /* Cantos de mira em 90° fora da moldura */
+  .qs-mira {
+    --m: 22px;
+    position: absolute;
+    z-index: 1;
+    width: var(--m);
+    height: var(--m);
+    border: 0 solid var(--accent);
+    pointer-events: none;
+  }
+  .qs-mira--1 { top: -12px; left: -12px; border-width: 2px 0 0 2px; --dx: -4px; --dy: -4px; }
+  .qs-mira--2 { top: -12px; right: -12px; border-width: 2px 2px 0 0; --dx: 4px; --dy: -4px; }
+  .qs-mira--3 { bottom: calc(1.4em + var(--s-3) - 12px); right: -12px; border-width: 0 2px 2px 0; --dx: 4px; --dy: 4px; }
+  .qs-mira--4 { bottom: calc(1.4em + var(--s-3) - 12px); left: -12px; border-width: 0 0 2px 2px; --dx: -4px; --dy: 4px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .qs-capa__varredura { animation: qs-varre 4s cubic-bezier(0.45, 0, 0.25, 1) 1.4s infinite; }
+    .qs-mira { animation: qs-respira 2.6s ease-in-out 1.2s infinite alternate; }
+  }
+  @keyframes qs-varre {
+    0% { translate: 0 -110%; opacity: 0; }
+    6% { opacity: 1; }
+    68% { translate: 0 310%; opacity: 1; }
+    76%, 100% { translate: 0 310%; opacity: 0; }
+  }
+  @keyframes qs-respira {
+    from { translate: 0 0; opacity: 0.55; }
+    to { translate: var(--dx) var(--dy); opacity: 1; }
+  }
   .qs-legenda {
     margin-top: var(--s-3);
     font: 500 var(--t-label)/1.4 var(--font-mono);
