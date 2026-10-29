@@ -68,8 +68,8 @@ const brilhos = [
           class="sobre__foto"
           src={foto}
           alt={sobre.retratoAlt}
-          widths={[240, 360, 480, 720]}
-          sizes="(min-width: 960px) 340px, (min-width: 720px) 190px, min(240px, 62vw)"
+          widths={[260, 400, 520, 800]}
+          sizes="(min-width: 960px) 400px, (min-width: 720px) 210px, min(250px, 64vw)"
           quality={80}
           loading="lazy"
           decoding="async"
@@ -119,7 +119,8 @@ const brilhos = [
 <style>
   /* Celular: a foto acima do nome; o texto embaixo, na largura toda */
   .sobre__grade {
-    --retrato: min(352px, 100%);
+    /* O palco pode passar um pouco da coluna no celular: as marcas (raio 188 de 400) ainda cabem na tela */
+    --retrato: min(380px, 106%);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -496,7 +497,7 @@ const brilhos = [
   /* Tablet: a foto à esquerda, nome e texto ao lado */
   @media (min-width: 720px) {
     .sobre__grade {
-      --retrato: 280px;
+      --retrato: 320px;
       grid-template-columns: var(--retrato) minmax(0, 1fr);
       grid-template-areas:
         "retrato cabeca"
@@ -508,7 +509,7 @@ const brilhos = [
   }
 
   /*
-    Computador: o encaixe em 4:5 nas colunas 1–5 e o texto nas 6–12, centrado na altura dele
+    Computador: a moldura nas colunas 1–6 e o texto nas 7–12, centrado na altura dela
     (as linhas de cima e de baixo da grade são folgas iguais). Se o texto for mais alto, como
     perto de 960 px, é o encaixe que se centra nele.
   */
@@ -520,14 +521,14 @@ const brilhos = [
       column-gap: var(--s-5);
     }
     .sobre__palco {
-      grid-column: 1 / span 5;
+      grid-column: 1 / span 6;
       grid-row: 1 / -1;
       align-self: center;
-      width: min(100%, 32rem);
+      width: min(100%, 38rem);
     }
-    /* O texto começa na coluna 6, recuado: os dois botões cabem lado a lado em 1440 */
-    .sobre__cabeca { grid-column: 6 / -1; grid-row: 2; padding-left: var(--s-7); }
-    .sobre__corpo { grid-column: 6 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-7); }
+    /* A moldura nas colunas 1–6 (maior desde 29/10/2026) e o texto nas 7–12 */
+    .sobre__cabeca { grid-column: 7 / -1; grid-row: 2; padding-left: var(--s-5); }
+    .sobre__corpo { grid-column: 7 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-5); }
     .sobre__titulo { max-width: 24ch; }
   }
 </style>
