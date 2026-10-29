@@ -234,7 +234,7 @@ export const sobre = {
     "Eu crio páginas que fazem a pré-venda por você: explicam o seu serviço, mostram por que ele vale o preço e trazem o cliente pronto para fechar.",
     "Do briefing à publicação, é comigo que você fala. Sem atendente, sem repasse, nada de telefone sem fio.",
   ],
-  retratoAlt: "Gustavo Braga, de camiseta preta, com a mão no queixo, olhando para a câmera",
+  retratoAlt: "Gustavo Braga, de camisa escura, sorrindo, com os braços cruzados",
   botaoHistoria: "Conheça minha história",
 } as const;
 

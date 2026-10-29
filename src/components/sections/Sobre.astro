@@ -1,20 +1,33 @@
 ---
 /*
   Sobre (copy 2.9): logo depois da Dor, em fundo claro azul-gelo, a pessoa por trás da página:
-  nome, missão e valor. A foto (outra pose, diferente da do hero) fica num encaixe chanfrado com
-  marcas de enquadramento em 90°. No celular vem acima do nome, centrada; no computador, em 4:5 à
-  esquerda. Fundo: dobras de luz e fios em ciano que deslizam devagar (a partir do "Background
+  nome, missão e valor. A foto (braços cruzados, desde 29/10/2026) fica na moldura do "Quem sou eu?"
+  do site da EBEN, pedida pelo Gustavo e trazida para a marca: o retrato num círculo, cercado por um
+  mostrador de marcas em ciano, por "BRAGA · SYSTEMS" escrito em volta (como na foto de perfil), por
+  um aro deslocado em órbita, por losangos que piscam, por um halo ciano e por duas ondas tracejadas.
+  Cada camada gira devagar para um lado (a pausa fora da tela e na rolagem é a de scripts/animacoes).
+  Ao aparecer, a íris abre do centro com um aro aceso, a foto sai de um zoom fechado e as camadas
+  entram girando mais rápido até a volta lenta. No celular vem acima do nome, centrada; no computador,
+  à esquerda. Fundo: dobras de luz e fios em ciano que deslizam devagar (a partir do "Background
   premium" do Gustavo, redesenhado nas cores da marca). As bordas de cima e de baixo escurecem até
   o preto, para a passagem da Dor e para a Proposta ser contínua. O único botão é o da história.
 */
 import Secao from "../ui/Secao.astro";
 import { Image } from "astro:assets";
-import foto from "../../assets/gustavo/gustavo-braga-retrato-hd.jpg";
+import foto from "../../assets/gustavo/gustavo-braga-bracos-cruzados.jpg";
 import { sobre } from "../../content/home";
 import { rich } from "../../lib/texto";
 
 // "pré-venda" leva o marca-texto (pedido do Gustavo, 19/10/2026); se a copy mudar, sai sem o destaque.
 const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<mark data-marca="pronta">$&</mark>'));
+
+// Losangos em volta do retrato: posição, tamanho e cor de cada um (os mesmos lugares das estrelas da EBEN)
+const brilhos = [
+  "top:6%;right:8%;--tam:22px",
+  "top:14%;left:4%;--tam:10px;--cor:var(--ink)",
+  "bottom:10%;left:6%;--tam:16px;--cor:var(--ink)",
+  "right:2%;bottom:22%;--tam:12px",
+];
 ---
 <Secao id="sobre" tema="claro" class="sobre">
   <div class="sobre__ceu" aria-hidden="true">
@@ -27,19 +40,45 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
     <span class="sobre__traco sobre__traco--4"></span>
   </div>
   <div class="sobre__grade">
-    <div class="sobre__retrato chanfrado">
-      <Image
-        class="sobre__foto"
-        src={foto}
-        alt={sobre.retratoAlt}
-        widths={[320, 480, 640, 880]}
-        sizes="(min-width: 960px) 440px, (min-width: 720px) 240px, min(320px, 100vw)"
-        quality={80}
-        loading="lazy"
-        decoding="async"
-      />
-      <span class="sobre__marca sobre__marca--topo" aria-hidden="true"></span>
-      <span class="sobre__marca sobre__marca--base" aria-hidden="true"></span>
+    <div class="sobre__palco" data-moldura>
+      {/* De fora para dentro, cada camada gira para um lado: horário, anti-horário, horário... */}
+      <span class="sobre__deco sobre__gira sobre__gira--longe sobre__onda sobre__onda--longe" aria-hidden="true"></span>
+      <span class="sobre__deco sobre__gira sobre__gira--perto sobre__gira--anti sobre__onda sobre__onda--perto" aria-hidden="true"></span>
+      <span class="sobre__deco sobre__gira sobre__gira--halo sobre__halo" aria-hidden="true"></span>
+
+      <svg viewBox="0 0 400 400" class="sobre__deco sobre__mostrador" aria-hidden="true" focusable="false">
+        <defs>
+          <path id="sobre-anel" d="M 200 200 m -160 0 a 160 160 0 1 1 320 0 a 160 160 0 1 1 -320 0" />
+        </defs>
+        <g class="sobre__gira sobre__gira--marcas">
+          <circle cx="200" cy="200" r="188" pathLength="120" class="sobre__marcas" />
+          <circle cx="200" cy="200" r="188" pathLength="12" class="sobre__marcas sobre__marcas--grandes" />
+        </g>
+        <g class="sobre__gira sobre__gira--texto sobre__gira--anti">
+          <text class="sobre__anel-texto">
+            <textPath href="#sobre-anel" textLength="1000" lengthAdjust="spacing">BRAGA · SYSTEMS · BRAGA · SYSTEMS · BRAGA · SYSTEMS · </textPath>
+          </text>
+        </g>
+      </svg>
+
+      <span class="sobre__deco sobre__gira sobre__gira--orbita sobre__orbita" aria-hidden="true"><span class="sobre__aro"></span></span>
+
+      <div class="sobre__retrato">
+        <Image
+          class="sobre__foto"
+          src={foto}
+          alt={sobre.retratoAlt}
+          widths={[240, 360, 480, 720]}
+          sizes="(min-width: 960px) 340px, (min-width: 720px) 190px, min(240px, 62vw)"
+          quality={80}
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <span class="sobre__deco sobre__gira sobre__gira--brilhos sobre__gira--anti sobre__brilhos" aria-hidden="true">
+        {brilhos.map((estilo, i) => <i class={"sobre__brilho sobre__brilho--" + (i + 1)} style={estilo}></i>)}
+      </span>
     </div>
 
     <header class="sobre__cabeca">
@@ -57,12 +96,30 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
       </a>
     </div>
   </div>
+
+  {/* O script fica dentro da Secao: fora dela, quebraria a linha divisória entre seções */}
+  <script>
+    // A íris abre uma vez, quando a moldura aparece. Só arma se ela ainda estiver abaixo da tela.
+    const palco = document.querySelector<HTMLElement>("[data-moldura]");
+    if (palco && !matchMedia("(prefers-reduced-motion: reduce)").matches && "IntersectionObserver" in window && palco.getBoundingClientRect().top > innerHeight) {
+      palco.dataset.moldura = "pronta";
+      const observador = new IntersectionObserver(
+        ([e]) => {
+          if (!e.isIntersecting) return;
+          observador.disconnect();
+          palco.dataset.moldura = "aberta";
+        },
+        { threshold: 0.35 },
+      );
+      observador.observe(palco);
+    }
+  </script>
 </Secao>
 
 <style>
   /* Celular: a foto acima do nome; o texto embaixo, na largura toda */
   .sobre__grade {
-    --retrato: min(320px, 100%);
+    --retrato: min(352px, 100%);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -73,50 +130,175 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
     min-width: 0;
   }
 
-  /* ---------- O encaixe do retrato ---------- */
-  .sobre__retrato {
-    --c: var(--chanfro);
-    --cor-borda: var(--line);
-    --cor-fundo: var(--surface);
-    --marca: 10px;
-    --marca-recuo: 8px;
+  /* ---------- A moldura do retrato (a do "Quem sou eu?" da EBEN, nas cores da marca) ----------
+     Medidas em porcentagem do palco: retrato com 65% (raio 130 no desenho de 400), texto no raio 160
+     e marcas no raio 188. As ondas passam da borda do palco; a seção corta o que sai dela. */
+  .sobre__palco {
     grid-area: retrato;
     justify-self: center;
+    position: relative;
     width: var(--retrato);
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1;
+  }
+  .sobre__deco { position: absolute; pointer-events: none; }
+
+  .sobre__onda {
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 1;
+    border: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 999px;
+    translate: -50% -50%;
+  }
+  .sobre__onda--perto { width: 122%; }
+  .sobre__onda--longe {
+    width: 150%;
+    border-style: dotted;
+    border-width: 2px;
+    border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+
+  /* Halo atrás do retrato: ciano elétrico e ciano profundo em fatias, para a volta aparecer.
+     Sem filter blur (trava o computador): a máscara radial já apaga as bordas. */
+  .sobre__halo {
+    inset: 4%;
+    border-radius: 999px;
+    background: conic-gradient(
+      rgb(53 213 232 / 0.75),
+      transparent 22%,
+      rgb(9 106 120 / 0.55) 40%,
+      transparent 62%,
+      rgb(53 213 232 / 0.6) 80%,
+      rgb(53 213 232 / 0.75)
+    );
+    -webkit-mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+    mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+    opacity: 0.6;
+  }
+
+  .sobre__mostrador { inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .sobre__marcas {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 7;
+    stroke-dasharray: 0.12 0.88;
+    opacity: 0.5;
+  }
+  .sobre__marcas--grandes { stroke-width: 16; stroke-dasharray: 0.03 0.97; opacity: 0.9; }
+  .sobre__anel-texto {
+    fill: var(--ink);
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+  }
+
+  /* O aro do tamanho do retrato, deslocado: ao girar, ele orbita a foto */
+  .sobre__orbita { inset: 0; }
+  .sobre__aro {
+    position: absolute;
+    inset: 17.5%;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    translate: 3% 3%;
+  }
+
+  .sobre__retrato {
+    position: absolute;
+    inset: 17.5%;
     overflow: hidden;
+    border-radius: 999px;
+    background: var(--surface-sunken);
+    box-shadow: 0 0 0 4px var(--surface);
+    clip-path: circle(50%);
   }
-
-  /* A foto segue o recorte chanfrado do encaixe, por dentro da borda fina */
-  .sobre__foto {
+  /* Aro aceso na borda da íris: cresce junto com a abertura e some no fim */
+  .sobre__retrato::after {
+    content: "";
     position: absolute;
-    inset: 1px;
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    object-fit: cover;
-    object-position: 50% 22%;
-    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
-  }
-
-  /* Marcas de enquadramento em 90°, nos dois cantos retos do encaixe */
-  .sobre__marca {
-    position: absolute;
-    width: var(--marca);
-    height: var(--marca);
+    inset: 0;
+    border: 2px solid var(--accent);
+    border-radius: 999px;
+    opacity: 0;
     pointer-events: none;
   }
-  .sobre__marca--topo {
-    top: var(--marca-recuo);
-    right: var(--marca-recuo);
-    border-top: 1px solid var(--line-forte);
-    border-right: 1px solid var(--line-forte);
+  /* Foto quadrada: do cabelo aos braços cruzados, com zoom leve centrado no rosto */
+  .sobre__retrato :global(.sobre__foto) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    transform-origin: 45% 30%;
+    scale: 1.12;
   }
-  .sobre__marca--base {
-    bottom: var(--marca-recuo);
-    left: var(--marca-recuo);
-    border-bottom: 1px solid var(--line-forte);
-    border-left: 1px solid var(--line-forte);
+
+  .sobre__brilhos { inset: 0; }
+  .sobre__brilho {
+    position: absolute;
+    width: var(--tam);
+    aspect-ratio: 1;
+    background: var(--cor, var(--accent));
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
   }
+
+  /* Rotação das camadas: --dir dá o sentido, --volta o tempo de uma volta lenta e --arranque o
+     quanto a camada gira a mais na entrada */
+  .sobre__gira { --dir: 1; --volta: 120s; --arranque: 160deg; }
+  .sobre__gira--anti { --dir: -1; }
+  .sobre__gira--longe { --volta: 200s; --arranque: 90deg; }
+  .sobre__gira--perto { --volta: 150s; --arranque: 120deg; }
+  .sobre__gira--halo { --volta: 40s; --arranque: 200deg; }
+  .sobre__gira--marcas { --volta: 110s; --arranque: 180deg; }
+  .sobre__gira--texto { --volta: 90s; --arranque: 200deg; }
+  .sobre__gira--orbita { --volta: 45s; --arranque: 240deg; }
+  .sobre__gira--brilhos { --volta: 80s; --arranque: 150deg; }
+  /* Dentro do SVG, o centro da volta é o centro do desenho */
+  .sobre__mostrador .sobre__gira { transform-box: view-box; transform-origin: center; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* Antes da entrada: íris fechada, foto bem perto e camadas apagadas e recolhidas */
+    .sobre__palco[data-moldura="pronta"] .sobre__retrato { clip-path: circle(0%); }
+    .sobre__palco[data-moldura="pronta"] :global(.sobre__foto) { scale: 1.6; }
+    .sobre__palco[data-moldura="pronta"] .sobre__deco { opacity: 0; scale: 0.9; }
+
+    /* A entrada: a íris abre em 1,6 s, a foto se afasta em 2,4 s e as camadas acendem */
+    .sobre__palco[data-moldura="aberta"] .sobre__retrato { transition: clip-path 1.6s var(--ease-saida) 0.1s; }
+    .sobre__palco[data-moldura="aberta"] .sobre__retrato::after {
+      animation: sobre-aro-cresce 1.6s var(--ease-saida) 0.1s both, sobre-aro-some 1.9s linear 0.1s both;
+    }
+    .sobre__palco[data-moldura="aberta"] :global(.sobre__foto) {
+      transition: scale 2.4s var(--ease-saida) 0.1s, transform 1.2s var(--ease-saida);
+    }
+    .sobre__palco[data-moldura="aberta"] .sobre__deco { transition: opacity 1.2s ease 0.2s, scale 1.8s var(--ease-saida) 0.2s; }
+
+    /* A volta lenta roda sempre; a entrada soma uma volta rápida que desacelera até o ritmo lento */
+    .sobre__gira { animation: sobre-volta var(--volta) linear infinite; }
+    .sobre__palco[data-moldura="aberta"] .sobre__gira {
+      animation: sobre-volta var(--volta) linear infinite, sobre-arranque 3.2s var(--ease-saida) both;
+    }
+
+    .sobre__brilho { animation: sobre-pisca 2.8s ease-in-out infinite alternate; }
+    .sobre__brilho--2 { animation-duration: 2.2s; animation-delay: -0.8s; }
+    .sobre__brilho--3 { animation-duration: 3.4s; animation-delay: -1.6s; }
+    .sobre__brilho--4 { animation-duration: 2.5s; animation-delay: -2.1s; }
+
+    .sobre__retrato :global(.sobre__foto) { transition: transform 1.2s var(--ease-saida); }
+    @media (hover: hover) {
+      .sobre__palco:hover :global(.sobre__foto) { transform: scale(1.05); }
+    }
+  }
+  @keyframes sobre-volta { to { transform: rotate(calc(360deg * var(--dir))); } }
+  @keyframes sobre-arranque {
+    from { rotate: calc(var(--arranque) * var(--dir) * -1); }
+    to { rotate: 0deg; }
+  }
+  @keyframes sobre-aro-cresce { from { scale: 0; } to { scale: 1; } }
+  @keyframes sobre-aro-some { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes sobre-pisca {
+    from { opacity: 0.35; scale: 0.6; rotate: 0deg; }
+    to { opacity: 1; scale: 1; rotate: 45deg; }
+  }
+  @media (forced-colors: active) { .sobre__deco { display: none; } }
 
   /* ---------- O texto ---------- */
   .sobre__cabeca {
@@ -311,34 +493,10 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
   }
   @media (forced-colors: active) { .sobre__ceu { display: none; } }
 
-  /* Entrada da foto: o encaixe abre de baixo para cima e a foto assenta, presos à rolagem */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .sobre__retrato {
-        animation: sobre-retrato linear both;
-        animation-timeline: view();
-        animation-range: entry 0% cover 35%;
-      }
-      .sobre__retrato :global(.sobre__foto) {
-        animation: sobre-foto linear both;
-        animation-timeline: view();
-        animation-range: entry 0% cover 40%;
-      }
-    }
-  }
-  @keyframes sobre-retrato {
-    from { opacity: 0.2; clip-path: inset(100% 0 0 0); translate: 0 40px; }
-    to { opacity: 1; clip-path: inset(0 0 0 0); translate: 0 0; }
-  }
-  @keyframes sobre-foto {
-    from { scale: 1.15; filter: blur(8px); }
-    to { scale: 1; filter: blur(0); }
-  }
-
   /* Tablet: a foto à esquerda, nome e texto ao lado */
   @media (min-width: 720px) {
     .sobre__grade {
-      --retrato: 240px;
+      --retrato: 280px;
       grid-template-columns: var(--retrato) minmax(0, 1fr);
       grid-template-areas:
         "retrato cabeca"
@@ -347,7 +505,6 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
       column-gap: var(--s-7);
       row-gap: var(--s-5);
     }
-    .sobre__retrato { --c: var(--chanfro-lg); --marca: 14px; --marca-recuo: 12px; }
   }
 
   /*
@@ -362,15 +519,12 @@ const paragrafos = sobre.paragrafos.map((p) => rich(p).replace("pré-venda", '<m
       grid-template-areas: none;
       column-gap: var(--s-5);
     }
-    .sobre__retrato {
+    .sobre__palco {
       grid-column: 1 / span 5;
-      justify-self: stretch;
       grid-row: 1 / -1;
       align-self: center;
-      --marca: 18px;
-      --marca-recuo: 16px;
+      width: min(100%, 32rem);
     }
-    .sobre__retrato { width: auto; }
     /* O texto começa na coluna 6, recuado: os dois botões cabem lado a lado em 1440 */
     .sobre__cabeca { grid-column: 6 / -1; grid-row: 2; padding-left: var(--s-7); }
     .sobre__corpo { grid-column: 6 / -1; grid-row: 3; margin-top: var(--s-6); padding-left: var(--s-7); }
