@@ -114,7 +114,6 @@ export const quemSou = {
     titulo: "Agora você já sabe quem vai cuidar da sua página.",
     texto: "Me conta sobre o seu negócio. Eu te digo, com sinceridade, qual plano faz sentido para o seu momento. E do primeiro “oi” à publicação, quem fala com você sou eu.",
     botao: "Quero conversar com o Gustavo",
-    fotoAlt: "Gustavo Braga sorrindo, de braços cruzados",
     planos: { texto: "Ver os planos", href: "/#planos" },
     micro: "Resposta em até 1 dia útil.",
   },
