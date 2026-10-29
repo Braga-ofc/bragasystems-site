@@ -1,7 +1,7 @@
 ---
 /*
   Sobre (copy 2.9): logo depois da Dor, em fundo claro azul-gelo, a pessoa por trás da página:
-  nome, missão e valor. A foto (braços cruzados, desde 29/10/2026) fica na moldura do "Quem sou eu?"
+  nome, missão e valor. A foto (mão no queixo) fica na moldura do "Quem sou eu?"
   do site da EBEN, pedida pelo Gustavo e trazida para a marca: o retrato num círculo, cercado por um
   mostrador de marcas em ciano, por "BRAGA · SYSTEMS" escrito em volta (como na foto de perfil), por
   um aro deslocado em órbita, por losangos que piscam, por um halo ciano e por duas ondas tracejadas.
@@ -14,7 +14,7 @@
 */
 import Secao from "../ui/Secao.astro";
 import { Image } from "astro:assets";
-import foto from "../../assets/gustavo/gustavo-braga-bracos-cruzados.jpg";
+import foto from "../../assets/gustavo/gustavo-braga-retrato-hd.jpg";
 import { sobre } from "../../content/home";
 import { rich } from "../../lib/texto";
 
@@ -223,14 +223,14 @@ const brilhos = [
     opacity: 0;
     pointer-events: none;
   }
-  /* Foto quadrada: do cabelo aos braços cruzados, com zoom leve centrado no rosto */
+  /* Foto em pé (2:3): do cabelo ao relógio, com zoom leve entre o rosto e a mão (como na EBEN) */
   .sobre__retrato :global(.sobre__foto) {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 20%;
-    transform-origin: 45% 30%;
-    scale: 1.12;
+    object-position: 50% 15%;
+    transform-origin: 46% 32%;
+    scale: 1.15;
   }
 
   .sobre__brilhos { inset: 0; }
