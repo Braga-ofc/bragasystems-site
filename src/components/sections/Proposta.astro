@@ -18,20 +18,16 @@
 import Secao from "../ui/Secao.astro";
 import { proposta } from "../../content/home";
 import { aspas } from "../../lib/texto";
-import simbolo from "../../assets/logo/simbolo-escuro.svg?raw";
+import { pecasDoB } from "../../lib/marca";
 
-// O B da marca em três peças (haste, corpo e núcleo), só com translate e opacidade: no fim da
-// montagem, idêntico ao arquivo (manual: nunca distorcer nem girar). A conta abaixo quebra o build
-// se as peças deixarem de somar o desenho original.
-const caminhos = [...simbolo.matchAll(/<path fill="(#[0-9A-F]+)"[^>]*? d="([^"]+)"/gi)].map((m) => ({ cor: m[1], d: m[2] }));
-const [corpoD, hasteD] = caminhos[0].d.split(/(?=M)/);
-if (caminhos.length !== 2 || corpoD + hasteD !== caminhos[0].d) throw new Error("Proposta: as peças do B não somam o símbolo do arquivo");
+// O B da marca em três peças (lib/marca), só com translate e opacidade: no fim da montagem,
+// idêntico ao arquivo (manual: nunca distorcer nem girar).
 const pecas = [
-  { nome: "haste", d: hasteD, cor: caminhos[0].cor },
-  { nome: "corpo", d: corpoD, cor: caminhos[0].cor },
+  { nome: "haste", d: pecasDoB.haste, cor: pecasDoB.corPeca },
+  { nome: "corpo", d: pecasDoB.corpo, cor: pecasDoB.corPeca },
   // O núcleo entra em prata com as outras peças; a cópia em ciano acende por cima no fim da montagem
-  { nome: "nucleo", d: caminhos[1].d, cor: caminhos[0].cor },
-  { nome: "luz", d: caminhos[1].d, cor: caminhos[1].cor },
+  { nome: "nucleo", d: pecasDoB.nucleo, cor: pecasDoB.corPeca },
+  { nome: "luz", d: pecasDoB.nucleo, cor: pecasDoB.corLuz },
 ];
 
 // Formas do núcleo do B (as mesmas de ui/CamadaViva), em viewBox 48

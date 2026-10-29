@@ -1,0 +1,714 @@
+---
+/*
+  Quem sou eu (copy §20; história e "Fora do código" da copy 2.25). Montada com o método da skill
+  scroll-craft (brief em metricas/scrollcraft/builds/quem-sou/BRIEF.md), na gramática "editorial em
+  capítulos": a história do Gustavo em seis capítulos numerados, cada um com um movimento diferente.
+  Movimento exclusivo da página: a história monta o B. Na margem (folio), o símbolo da marca é
+  desenhado em traço capítulo a capítulo, ganha cor e, no capítulo "BRAGA SYSTEMS", o núcleo acende;
+  no fim fica idêntico ao arquivo (lib/marca). O pico é o capítulo 04: o fundo vira claro, "código."
+  é riscado e "copy." ganha o marca-texto.
+  Tudo em CSS preso à rolagem (animation-timeline), como o resto do site. Sem suporte ou com movimento
+  reduzido, a página aparece pronta: B inteiro, textos visíveis, sem riscos animados.
+*/
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import Secao from "../components/ui/Secao.astro";
+import Botao from "../components/ui/Botao.astro";
+import fotoBlazer from "../assets/gustavo/gustavo-braga-blazer.jpg";
+import fotoPalco from "../assets/gustavo/gustavo-braga-palco.jpg";
+import { quemSou as q, type Marco } from "../content/quem-sou";
+import { pecasDoB } from "../lib/marca";
+import { rich } from "../lib/texto";
+import { montarLinkWhatsapp } from "../lib/whatsapp";
+
+const dois = (n: number) => String(n).padStart(2, "0");
+const marcos: readonly Marco[] = q.historia.marcos;
+// A frase de Aristóteles palavra por palavra: cada uma acende na vez dela conforme a rolagem
+const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
+---
+<Base titulo={q.seo.titulo} descricao={q.seo.descricao}>
+  <main id="conteudo" class="qs">
+    {/* ---------- Capa ---------- */}
+    <Secao class="qs-capa">
+      <svg class="qs-capa__dagua" viewBox="0 0 256 256" aria-hidden="true">
+        <path d={pecasDoB.haste + pecasDoB.corpo} fill-rule="evenodd" />
+        <path d={pecasDoB.nucleo} />
+      </svg>
+      <div class="qs-capa__grade">
+        <div class="qs-capa__texto">
+          <p class="qs-rotulo">{q.abertura.rotulo}</p>
+          <h1 class="qs-capa__titulo">{q.abertura.titulo}</h1>
+          <p class="qs-capa__lead">{q.abertura.texto}</p>
+        </div>
+        <figure class="qs-capa__figura">
+          <div class="qs-capa__foto chanfrado">
+            <Image src={fotoBlazer} alt={q.abertura.fotoAlt} widths={[360, 520, 720, 960]} sizes="(min-width: 960px) 460px, min(88vw, 460px)" quality={80} loading="eager" fetchpriority="high" />
+          </div>
+          <figcaption class="qs-legenda">{q.abertura.legenda.nome.split(" ")[0]} <b>{q.abertura.legenda.nome.split(" ")[1]}</b> · {q.abertura.legenda.cargo}</figcaption>
+        </figure>
+      </div>
+    </Secao>
+
+    {/* ---------- A história: folio com o B + seis capítulos ---------- */}
+    <Secao class="qs-historia">
+      <header class="qs-historia__cabeca">
+        <h2 class="qs-titulo">{q.historia.titulo}</h2>
+        <p class="qs-saudacao sobe-rolagem">{q.historia.saudacao}</p>
+      </header>
+
+      <div class="qs-linha">
+        <aside class="qs-folio" aria-hidden="true">
+          <div class="qs-folio__placa chanfrado">
+            <svg class="qs-folio__b" viewBox="0 0 256 256">
+              <path class="qs-b qs-b--haste" d={pecasDoB.haste} fill={pecasDoB.corPeca} pathLength="1" />
+              <path class="qs-b qs-b--corpo" d={pecasDoB.corpo} fill={pecasDoB.corPeca} fill-rule="evenodd" pathLength="1" />
+              <path class="qs-b qs-b--nucleo" d={pecasDoB.nucleo} fill={pecasDoB.corPeca} pathLength="1" />
+              <path class="qs-b-luz" d={pecasDoB.nucleo} fill={pecasDoB.corLuz} />
+            </svg>
+            <ol class="qs-folio__rotulos">
+              {marcos.map((m, i) => <li style={`--cap: --cap${i + 1}`}><span>{dois(i + 1)}</span> {m.titulo}</li>)}
+            </ol>
+          </div>
+        </aside>
+
+        <ol class="qs-capitulos">
+          {marcos.map((m, i) => (
+            <li class:list={["qs-cap", `qs-cap--${i + 1}`, m.virada && "qs-cap--pico tema-claro"]} style={`view-timeline-name: --cap${i + 1}`}>
+              <p class="qs-cap__num" aria-hidden="true">{dois(i + 1)}</p>
+              <h3 class="qs-cap__titulo">{m.titulo}</h3>
+              <div class="qs-cap__texto">
+                {m.texto.map((p) => <p>{p}</p>)}
+              </div>
+
+              {m.funcoes && (
+                <ul class="qs-funcoes" role="list">
+                  {m.funcoes.map((f, j) => <li class="chanfrado" style={`--j:${j}`}>{f}</li>)}
+                </ul>
+              )}
+
+              {m.carimbo && <p class="qs-carimbo">{m.carimbo}</p>}
+
+              {m.virada && (
+                <p class="qs-virada">
+                  <span class="qs-virada__linha">{m.virada.antes} <s class="qs-virada__risco">{m.virada.riscada}</s></span>
+                  <span class="qs-virada__linha qs-virada__linha--2">{m.virada.depois} <mark data-marca="pronta" class="qs-virada__copy">{m.virada.destaque}</mark></span>
+                </p>
+              )}
+
+              {i === 4 && <p class="qs-sobrenome" aria-hidden="true">BRAGA</p>}
+
+              {m.citacao && (
+                <figure class="qs-citacao">
+                  <p class="qs-citacao__ponte">{m.citacao.ponte} {m.citacao.autor}:</p>
+                  <blockquote class="qs-citacao__frase">
+                    <p>“{palavrasCitacao.map((p, k) => <span style={`--k:${k}`}>{p}{k < palavrasCitacao.length - 1 ? " " : ""}</span>)}”</p>
+                  </blockquote>
+                  <figcaption class="qs-citacao__fecho">{m.citacao.fecho}</figcaption>
+                </figure>
+              )}
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <p class="qs-historia__fecho sobe-rolagem">{q.historia.fecho}</p>
+    </Secao>
+
+    {/* ---------- Por que BRAGA SYSTEMS ---------- */}
+    <Secao class="qs-nome" tema="elevado">
+      <div class="qs-nome__grade">
+        <svg class="qs-nome__b" viewBox="0 0 256 256" aria-hidden="true">
+          <path d={pecasDoB.haste + pecasDoB.corpo} fill={pecasDoB.corPeca} fill-rule="evenodd" />
+          <path class="qs-nome__nucleo" d={pecasDoB.nucleo} fill={pecasDoB.corLuz} />
+        </svg>
+        <div>
+          <h2 class="qs-titulo">{q.nome.titulo}</h2>
+          <div class="qs-nome__texto">
+            {q.nome.paragrafos.map((p) => <p class="sobe-rolagem" set:html={rich(p)} />)}
+          </div>
+        </div>
+      </div>
+    </Secao>
+
+    {/* ---------- Quatro compromissos ---------- */}
+    <Secao class="qs-compromissos">
+      <h2 class="qs-titulo">{q.compromissos.titulo}</h2>
+      <ol class="qs-compromissos__lista" role="list">
+        {q.compromissos.itens.map((c, i) => (
+          <li class="qs-compromisso chanfrado" style={`--i:${i}`}>
+            <span class="qs-compromisso__num" aria-hidden="true">{dois(i + 1)}</span>
+            <h3>{c.titulo}</h3>
+            <p>{c.texto}</p>
+          </li>
+        ))}
+      </ol>
+    </Secao>
+
+    {/* ---------- Onde eu posso te ajudar + ferramentas ---------- */}
+    <Secao class="qs-ajuda" tema="elevado">
+      <div class="qs-ajuda__grade">
+        <div>
+          <h2 class="qs-titulo">{q.ajuda.titulo}</h2>
+          <ul class="qs-ajuda__lista" role="list">
+            {q.ajuda.itens.map((a) => <li class="sobe-rolagem"><strong>{a.titulo}:</strong> {a.texto}</li>)}
+          </ul>
+        </div>
+        <div class="qs-ferramentas">
+          <p class="qs-rotulo">{q.ferramentas.rotulo}</p>
+          <ul class="qs-ferramentas__lista" role="list">
+            {q.ferramentas.itens.map((f, i) => <li style={`--i:${i}`}>{f}</li>)}
+          </ul>
+        </div>
+      </div>
+    </Secao>
+
+    {/* ---------- Quem já confiou ---------- */}
+    <Secao class="qs-confiou" largura="estreita">
+      <figure class="qs-depoimento">
+        <blockquote class="foco-rolagem"><p>“{q.confiou.citacao}”</p></blockquote>
+        <figcaption><strong>{q.confiou.autor}</strong>, {q.confiou.cargo}</figcaption>
+      </figure>
+      <a class="qs-link" href={q.confiou.link.href} target="_blank" rel="noopener">{q.confiou.link.texto} <span aria-hidden="true">↗</span></a>
+    </Secao>
+
+    {/* ---------- Fora do código ---------- */}
+    <Secao class="qs-fora" tema="elevado">
+      <div class="qs-fora__grade">
+        <figure class="qs-fora__figura">
+          <div class="qs-fora__foto chanfrado">
+            <Image src={fotoPalco} alt={q.foraDoCodigo.fotoAlt} widths={[360, 520, 720, 900]} sizes="(min-width: 960px) 440px, min(88vw, 440px)" quality={78} loading="lazy" decoding="async" />
+          </div>
+        </figure>
+        <div class="qs-fora__texto">
+          <p class="qs-rotulo">{q.foraDoCodigo.titulo}</p>
+          <h2 class="qs-titulo">{q.foraDoCodigo.chamada}</h2>
+          {q.foraDoCodigo.paragrafos.map((p, i) => <p class:list={["sobe-rolagem", i === 2 && "qs-fora__fecho"]}>{p}</p>)}
+        </div>
+      </div>
+    </Secao>
+
+    {/* ---------- Fechamento ---------- */}
+    <Secao class="qs-fim" largura="estreita">
+      <h2 class="qs-fim__titulo">{q.fechamento.titulo}</h2>
+      <p class="qs-fim__texto">{q.fechamento.texto}</p>
+      <div class="qs-fim__acoes">
+        <Botao href={montarLinkWhatsapp("quem-sou")} icone="whatsapp" origem="quem-sou">{q.fechamento.botao}</Botao>
+        <Botao variante="secundario" href={q.fechamento.planos.href} icone="seta">{q.fechamento.planos.texto}</Botao>
+      </div>
+      <p class="qs-fim__micro">{q.fechamento.micro}</p>
+    </Secao>
+  </main>
+</Base>
+
+<style>
+  /* ---------- Comuns ---------- */
+  .qs-rotulo {
+    margin: 0 0 var(--s-4);
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .qs-titulo {
+    max-width: 22ch;
+    margin: 0 0 var(--s-6);
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: var(--ink-strong);
+  }
+  .qs p { text-wrap: pretty; }
+
+  /* ---------- Capa: texto à esquerda, foto na própria coluna com legenda ---------- */
+  .qs-capa__dagua {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    right: -12vw;
+    width: min(80vw, 760px);
+    translate: 0 -50%;
+    fill: var(--ink);
+    opacity: 0.035;
+    pointer-events: none;
+  }
+  .qs-capa__grade { display: grid; gap: var(--s-8); align-items: center; }
+  .qs-capa__titulo {
+    margin: 0 0 var(--s-5);
+    font-size: clamp(2.75rem, 1.6rem + 5vw, 5.25rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: var(--ink-strong);
+  }
+  .qs-capa__lead { max-width: 46ch; margin: 0; font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
+  .qs-capa__figura { margin: 0; justify-self: center; width: min(100%, 460px); }
+  .qs-capa__foto {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--line-forte);
+    aspect-ratio: 1;
+    overflow: hidden;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+  .qs-capa__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+  .qs-legenda {
+    margin-top: var(--s-3);
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .qs-legenda b { font-weight: 500; color: var(--accent); }
+
+  @media (min-width: 960px) {
+    .qs-capa__grade { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--s-9); }
+    .qs-capa__figura { justify-self: end; }
+  }
+
+  /* Entrada da capa (uma vez, ao abrir): o título sobe, a foto abre de baixo para cima */
+  @media (prefers-reduced-motion: no-preference) {
+    .qs-capa__texto > * { animation: qs-sobe 520ms var(--ease-saida) both; }
+    .qs-capa__titulo { animation-delay: 80ms; }
+    .qs-capa__lead { animation-delay: 180ms; }
+    .qs-capa__foto { animation: qs-abre 900ms var(--ease-saida) 120ms both; }
+    .qs-capa__foto :global(img) { animation: qs-assenta 1400ms var(--ease-saida) 120ms both; }
+    .qs-legenda { animation: qs-sobe 420ms var(--ease-saida) 700ms both; }
+  }
+  @keyframes qs-sobe { from { opacity: 0; translate: 0 16px; } }
+  @keyframes qs-abre { from { clip-path: polygon(0 100%, 100% 100%, 100% 100%, 100% 100%, 0 100%, 0 100%); } }
+  @keyframes qs-assenta { from { scale: 1.18; } }
+
+  /* ---------- História ---------- */
+  .qs-historia__cabeca { max-width: 640px; }
+  .qs-saudacao { margin: 0; font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
+
+  /*
+    A linha do tempo: o folio (placa com o B e o capítulo atual) gruda no alto; os capítulos rolam.
+    timeline-scope deixa o folio, que é irmão dos capítulos, ler a rolagem de cada um (--cap1 a --cap6).
+  */
+  .qs-linha {
+    timeline-scope: --cap1, --cap2, --cap3, --cap4, --cap5, --cap6;
+    display: grid;
+    gap: var(--s-6);
+    margin-top: var(--s-8);
+  }
+  .qs-folio { position: sticky; top: 72px; z-index: 2; }
+  .qs-folio__placa {
+    --c: var(--chanfro);
+    --cor-borda: var(--line);
+    --cor-fundo: #11161D;
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+  }
+  .qs-folio__b { flex: none; width: 36px; height: 36px; overflow: visible; }
+  .qs-folio__rotulos {
+    position: relative;
+    flex: 1;
+    min-height: 1.4em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 500 var(--t-small)/1.4 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .qs-folio__rotulos span { color: var(--accent); margin-right: var(--s-2); }
+  /* Sem rolagem presa (ou com movimento reduzido): a placa não acompanha os capítulos, então mostra só o B
+     pronto no computador e some no celular */
+  .qs-folio__rotulos li { display: none; }
+  @media (max-width: 959.98px) { .qs-folio { display: none; } }
+
+  .qs-capitulos { display: grid; margin: 0; padding: 0; list-style: none; }
+  .qs-cap { position: relative; padding-block: var(--s-9); border-top: 1px solid var(--line); }
+  .qs-cap__num {
+    margin: 0 0 var(--s-3);
+    font: 600 clamp(4.5rem, 3rem + 7vw, 9rem)/0.9 var(--font-display);
+    letter-spacing: -0.04em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-forte);
+  }
+  .qs-cap__titulo {
+    margin: 0 0 var(--s-5);
+    font-size: var(--t-h2);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink-strong);
+  }
+  .qs-cap__texto { display: grid; gap: var(--s-4); max-width: 60ch; }
+  .qs-cap__texto p { margin: 0; font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
+
+  /* 02: as três funções */
+  .qs-funcoes { display: flex; flex-wrap: wrap; gap: var(--s-3); margin: var(--s-6) 0 0; padding: 0; list-style: none; }
+  .qs-funcoes li {
+    --c: var(--chanfro-sm);
+    --cor-borda: var(--line);
+    /* Fundo opaco por dentro: o chanfrado desenha só a borda (sem ele, a cor da borda enche a etiqueta) */
+    --cor-fundo: #0B0F14;
+    padding: var(--s-2) var(--s-4);
+    font: 500 var(--t-small)/1.4 var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  /* 03: o curso carimbado */
+  .qs-carimbo {
+    display: inline-block;
+    margin: var(--s-6) 0 0;
+    padding: var(--s-3) var(--s-5);
+    border: 2px solid var(--accent);
+    font: 600 var(--t-small)/1.3 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    rotate: -3deg;
+  }
+
+  /* 04 (o pico): fundo claro de ponta a ponta, mais espaço de rolagem e a frase presa no meio da tela */
+  .qs-cap--pico { min-height: 230vh; border-top: 0; isolation: isolate; }
+  .qs-cap--pico::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0 -100vw;
+    background: var(--surface);
+  }
+  .qs-cap--pico .qs-cap__num { -webkit-text-stroke-color: var(--accent); }
+  .qs-virada {
+    position: sticky;
+    top: 34vh;
+    display: grid;
+    margin: var(--s-9) 0 0;
+    font: 600 clamp(2.5rem, 1.2rem + 5.5vw, 5.75rem)/1.05 var(--font-display);
+    letter-spacing: -0.035em;
+    color: var(--ink-strong);
+  }
+  .qs-virada__risco { position: relative; text-decoration: none; }
+  .qs-virada__risco::after {
+    content: "";
+    position: absolute;
+    left: -0.04em;
+    right: -0.04em;
+    top: 54%;
+    height: 0.09em;
+    background: var(--accent);
+  }
+
+  /* 05: o sobrenome como pano de fundo do capítulo */
+  .qs-sobrenome {
+    position: absolute;
+    z-index: -1;
+    right: 0;
+    bottom: var(--s-5);
+    margin: 0;
+    font: 600 clamp(5rem, 2rem + 14vw, 15rem)/0.8 var(--font-display);
+    letter-spacing: -0.05em;
+    color: var(--ink);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .qs-cap--5 { isolation: isolate; }
+
+  /* 06: Aristóteles */
+  .qs-citacao { margin: var(--s-8) 0 0; }
+  .qs-citacao__ponte { margin: 0 0 var(--s-3); font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); }
+  .qs-citacao__frase { margin: 0; }
+  .qs-citacao__frase p { margin: 0; max-width: 18ch; font: 600 clamp(2rem, 1.2rem + 3.6vw, 4rem)/1.1 var(--font-display); letter-spacing: -0.03em; color: var(--ink-strong); }
+  .qs-citacao__fecho { margin-top: var(--s-5); font-size: var(--t-body-lg); color: var(--ink); }
+
+  .qs-historia__fecho { max-width: 52ch; margin: var(--s-9) 0 0; font-size: var(--t-h3); line-height: 1.5; color: var(--ink-strong); }
+
+  @media (min-width: 960px) {
+    .qs-linha { grid-template-columns: 220px minmax(0, 1fr); gap: var(--s-9); }
+    .qs-folio { align-self: start; top: calc(72px + var(--s-7)); }
+    .qs-folio__placa { flex-direction: column; align-items: flex-start; gap: var(--s-5); padding: var(--s-5); }
+    .qs-folio__b { width: 96px; height: 96px; }
+    .qs-folio__rotulos { width: 100%; min-height: 2.8em; }
+  }
+
+  /*
+    O movimento exclusivo e os capítulos, presos à rolagem. Cada capítulo tem a própria linha do tempo
+    (--capN) e um movimento diferente: número em paralaxe (01), funções acendendo (02), carimbo seco (03),
+    fundo claro + risco + marca-texto (04), sobrenome deslizando (05) e a frase palavra por palavra (06).
+  */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* A placa do folio: o capítulo atual troca conforme a rolagem */
+      .qs-folio { display: block; }
+      .qs-folio__rotulos li { display: block; }
+      .qs-folio__rotulos li {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        animation-name: qs-rotulo;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: var(--cap);
+        animation-range: entry 70% exit 30%;
+      }
+
+      /* O B desenhado em traço capítulo a capítulo; a cor entra depois e o traço sai no fim */
+      .qs-b {
+        stroke: var(--accent);
+        stroke-width: 6;
+        stroke-dasharray: 1;
+        stroke-linejoin: miter;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+      }
+      .qs-b--haste {
+        animation-name: qs-traco, qs-preenche, qs-apaga;
+        animation-timeline: --cap1, --cap3, --cap6;
+        animation-range: entry 60% cover 55%, entry 60% cover 50%, entry 50% cover 45%;
+      }
+      .qs-b--corpo {
+        animation-name: qs-traco, qs-preenche, qs-apaga;
+        animation-timeline: --cap2, --cap4, --cap6;
+        animation-range: entry 60% cover 60%, cover 10% cover 30%, entry 50% cover 45%;
+      }
+      .qs-b--nucleo {
+        animation-name: qs-traco, qs-preenche, qs-apaga;
+        animation-timeline: --cap3, --cap5, --cap6;
+        animation-range: entry 80% cover 60%, entry 60% cover 40%, entry 50% cover 45%;
+      }
+      .qs-b-luz {
+        animation-name: qs-acende;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap5;
+        animation-range: cover 35% cover 55%;
+      }
+
+      /* 01: o número em paralaxe dentro do próprio capítulo */
+      .qs-cap__num {
+        animation-name: qs-paralaxe;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: cover;
+      }
+      .qs-cap__titulo,
+      .qs-cap__texto {
+        animation-name: qs-entra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 35%;
+      }
+
+      /* 02: as funções acendem uma a uma */
+      .qs-funcoes li {
+        animation-name: qs-funcao;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap2;
+        animation-range: cover calc(32% + var(--j) * 8%) cover calc(40% + var(--j) * 8%);
+      }
+
+      /* 03: o carimbo cai seco */
+      .qs-carimbo {
+        animation-name: qs-carimba;
+        animation-timing-function: cubic-bezier(0.5, 0, 0.2, 1);
+        animation-fill-mode: both;
+        animation-timeline: --cap3;
+        animation-range: cover 38% cover 46%;
+      }
+
+      /* 04: o fundo claro corta de baixo para cima; "código." é riscado e "copy." é marcada */
+      .qs-cap--pico::before {
+        animation-name: qs-corte;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap4;
+        animation-range: entry 0% entry 45%;
+      }
+      .qs-virada__risco::after {
+        transform-origin: left;
+        animation-name: qs-risca;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap4;
+        animation-range: cover 40% cover 50%;
+      }
+      .qs-virada__linha--2 {
+        animation-name: qs-entra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap4;
+        animation-range: cover 48% cover 56%;
+      }
+      .qs-virada__copy::before {
+        animation-name: qs-marca;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap4;
+        animation-range: cover 56% cover 66%;
+      }
+
+      /* 05: o sobrenome desliza atrás do texto */
+      .qs-sobrenome {
+        animation-name: qs-desliza;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap5;
+        animation-range: cover;
+      }
+
+      /* 06: a frase acende palavra por palavra */
+      .qs-citacao__frase span {
+        animation-name: qs-palavra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --cap6;
+        animation-range: cover calc(30% + var(--k) * 4%) cover calc(36% + var(--k) * 4%);
+      }
+    }
+  }
+  @keyframes qs-rotulo {
+    0% { opacity: 0; translate: 0 10px; }
+    14%, 86% { opacity: 1; translate: 0 0; }
+    100% { opacity: 0; translate: 0 -10px; }
+  }
+  @keyframes qs-traco { from { stroke-dashoffset: 1; fill-opacity: 0; } to { stroke-dashoffset: 0; fill-opacity: 0; } }
+  @keyframes qs-preenche { from { fill-opacity: 0; } to { fill-opacity: 1; } }
+  @keyframes qs-apaga { from { stroke-opacity: 1; } to { stroke-opacity: 0; } }
+  @keyframes qs-acende { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes qs-paralaxe { from { translate: 0 3rem; } to { translate: 0 -3rem; } }
+  @keyframes qs-entra { from { opacity: 0; translate: 0 2rem; } to { opacity: 1; translate: 0 0; } }
+  @keyframes qs-funcao {
+    from { opacity: 0.25; --cor-borda: var(--line); color: var(--ink-muted); }
+    to { opacity: 1; --cor-borda: var(--accent); color: var(--ink-strong); }
+  }
+  @keyframes qs-carimba { from { opacity: 0; scale: 1.6; rotate: -9deg; } to { opacity: 1; scale: 1; rotate: -3deg; } }
+  @keyframes qs-corte { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes qs-risca { from { scale: 0 1; } to { scale: 1 1; } }
+  @keyframes qs-marca { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes qs-desliza { from { translate: 12% 0; } to { translate: -12% 0; } }
+  @keyframes qs-palavra { from { opacity: 0.12; } to { opacity: 1; } }
+
+  /* ---------- Por que BRAGA SYSTEMS ---------- */
+  .qs-nome__grade { display: grid; gap: var(--s-7); align-items: center; }
+  .qs-nome__b { width: min(180px, 40vw); height: auto; }
+  .qs-nome__texto { display: grid; gap: var(--s-4); max-width: 60ch; }
+  .qs-nome__texto p { margin: 0; font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
+  .qs-nome__texto :global(strong) { font-weight: 600; color: var(--ink-strong); }
+  @media (min-width: 960px) {
+    .qs-nome__grade { grid-template-columns: 280px minmax(0, 1fr); gap: var(--s-9); }
+    .qs-nome__b { width: 100%; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .qs-nome__nucleo { animation: qs-pulsa 2.4s ease-in-out infinite alternate; }
+  }
+  @keyframes qs-pulsa { from { opacity: 0.55; } to { opacity: 1; } }
+
+  /* ---------- Compromissos ---------- */
+  .qs-compromissos__lista { display: grid; gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
+  .qs-compromisso {
+    --c: var(--chanfro);
+    --cor-borda: var(--line);
+    --cor-fundo: color-mix(in srgb, var(--surface-raised) 60%, transparent);
+    padding: var(--s-6);
+  }
+  .qs-compromisso__num { font: 500 var(--t-label)/1 var(--font-mono); letter-spacing: 0.16em; color: var(--accent); }
+  .qs-compromisso h3 { margin: var(--s-4) 0 var(--s-3); font-size: var(--t-h3); font-weight: 600; color: var(--ink-strong); }
+  .qs-compromisso p { margin: 0; line-height: 1.6; color: var(--ink); }
+  @media (min-width: 720px) { .qs-compromissos__lista { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .qs-compromisso {
+        animation-name: qs-entra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry calc(10% + var(--i) * 6%) cover calc(28% + var(--i) * 6%);
+      }
+    }
+  }
+
+  /* ---------- Onde ajudo + ferramentas ---------- */
+  .qs-ajuda__grade { display: grid; gap: var(--s-8); }
+  .qs-ajuda__lista { display: grid; gap: var(--s-4); margin: 0; padding: 0; list-style: none; }
+  .qs-ajuda__lista li { padding-left: var(--s-5); border-left: 2px solid var(--accent); font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
+  .qs-ajuda__lista strong { font-weight: 600; color: var(--ink-strong); }
+  .qs-ferramentas__lista { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+  .qs-ferramentas__lista li {
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--line);
+    font: 500 var(--t-label)/1.4 var(--font-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  @media (min-width: 960px) { .qs-ajuda__grade { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--s-9); } }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .qs-ferramentas__lista li {
+        animation-name: qs-entra;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry calc(20% + var(--i) * 5%) entry calc(70% + var(--i) * 5%);
+      }
+    }
+  }
+
+  /* ---------- Quem já confiou ---------- */
+  .qs-depoimento { margin: 0; }
+  .qs-depoimento blockquote { margin: 0; }
+  .qs-depoimento blockquote p { margin: 0; font: 600 clamp(1.75rem, 1.1rem + 2.6vw, 3rem)/1.15 var(--font-display); letter-spacing: -0.02em; color: var(--ink-strong); }
+  .qs-depoimento figcaption { margin-top: var(--s-5); color: var(--ink-muted); }
+  .qs-depoimento strong { color: var(--ink-strong); font-weight: 600; }
+  .qs-link {
+    display: inline-block;
+    margin-top: var(--s-6);
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    transition: color var(--dur) var(--ease-saida);
+  }
+  .qs-link:hover { color: var(--accent-hover); }
+
+  /* ---------- Fora do código ---------- */
+  .qs-fora__grade { display: grid; gap: var(--s-8); align-items: center; }
+  .qs-fora__figura { margin: 0; justify-self: center; width: min(100%, 440px); }
+  .qs-fora__foto {
+    --c: var(--chanfro-lg);
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+  }
+  .qs-fora__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
+  .qs-fora__texto p:not(.qs-rotulo) { max-width: 60ch; margin: 0 0 var(--s-4); font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
+  .qs-fora__texto .qs-fora__fecho { margin-top: var(--s-5); font-size: var(--t-h3); line-height: 1.5; color: var(--ink-strong); }
+  @media (min-width: 960px) { .qs-fora__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--s-9); } }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .qs-fora__foto {
+        animation-name: qs-corte;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 40%;
+      }
+      .qs-fora__foto :global(img) {
+        animation-name: qs-assenta;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 50%;
+      }
+    }
+  }
+
+  /* ---------- Fechamento ---------- */
+  .qs-fim { text-align: left; }
+  .qs-fim__titulo { margin: 0 0 var(--s-4); font: 600 var(--t-display)/1.08 var(--font-display); letter-spacing: -0.03em; color: var(--ink-strong); }
+  .qs-fim__texto { max-width: 52ch; margin: 0 0 var(--s-6); font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
+  .qs-fim__acoes { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+  .qs-fim__micro { margin: var(--s-4) 0 0; font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+</style>
