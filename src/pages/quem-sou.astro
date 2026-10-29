@@ -721,13 +721,8 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
   .qs-fora__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
   .qs-fora__texto p:not(.qs-rotulo) { max-width: 60ch; margin: 0 0 var(--s-4); font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
   .qs-fora__texto .qs-fora__fecho { margin-top: var(--s-5); font-size: var(--t-h3); line-height: 1.5; color: var(--ink-strong); }
-  /* As três palavras do fecho em ciano, com um traço que se desenha embaixo de cada uma, em sequência */
-  .qs-fora__fecho :global(strong) {
-    font-weight: 600;
-    color: var(--accent);
-    background: linear-gradient(var(--accent), var(--accent)) left bottom / 100% 2px no-repeat;
-    padding-bottom: 2px;
-  }
+  /* As três palavras do fecho só em ciano, sem sublinhado (pedido do Gustavo); a cor acende em sequência */
+  .qs-fora__fecho :global(strong) { font-weight: 600; color: var(--accent); }
 
   /* Instagram: o botão "follow me" mandado pelo Gustavo, nas cores e no chanfro da marca. No hover (e no
      foco), o degradê do Instagram atravessa o botão levando o ícone e o @ entra no lugar de "Conheça-me". */
@@ -842,8 +837,7 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
         animation-range: entry 0% cover 35%;
       }
       .qs-fora__fecho :global(strong) {
-        background-size: 0% 2px;
-        animation-name: qs-sublinha;
+        animation-name: qs-acende-cor;
         animation-timing-function: linear;
         animation-fill-mode: both;
         animation-timeline: view();
@@ -853,5 +847,5 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
       .qs-fora__fecho :global(strong:nth-of-type(3)) { animation-range: cover 30% cover 54%; }
     }
   }
-  @keyframes qs-sublinha { from { background-size: 0% 2px; color: var(--ink-strong); } to { background-size: 100% 2px; color: var(--accent); } }
+  @keyframes qs-acende-cor { from { color: var(--ink-strong); } to { color: var(--accent); } }
 </style>
