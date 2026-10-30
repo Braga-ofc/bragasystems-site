@@ -71,6 +71,8 @@ export const quemSou = {
       "**SYSTEMS** é a forma como eu enxergo uma página: um sistema, em que texto, design e tecnologia se encaixam com precisão para entregar um único resultado.",
       "O símbolo da marca traduz essa ideia: um B formado por peças que se encaixam, com um núcleo de luz no centro, o ponto onde tudo se conecta.",
     ],
+    // Chamada do Instagram da marca (proposta de 29/10/2026, aguardando aprovação para a copy)
+    instagram: "Acompanhe a BRAGA SYSTEMS no Instagram:",
   },
   compromissos: {
     titulo: "Quatro compromissos em cada projeto",

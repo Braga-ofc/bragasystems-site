@@ -13,4 +13,6 @@ export const obrigado = {
     "Enquanto isso, pense em uma coisa: **o que você mais quer que o seu cliente faça ao entrar no site?** Essa resposta adianta muito a nossa conversa. Até logo!",
   ],
   assinatura: { nome: "Gustavo Braga", cargo: "fundador" },
+  // Chamada do Instagram da marca (proposta de 29/10/2026, aguardando aprovação para a copy)
+  instagram: "Enquanto isso, conheça o trabalho da BRAGA SYSTEMS no Instagram:",
 } as const;

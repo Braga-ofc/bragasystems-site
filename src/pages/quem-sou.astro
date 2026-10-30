@@ -17,6 +17,7 @@ import Botao from "../components/ui/Botao.astro";
 import fotoBlazer from "../assets/gustavo/gustavo-braga-blazer.jpg";
 import fotoPalco from "../assets/gustavo/gustavo-braga-palco.jpg";
 import Icone from "../components/ui/Icone.astro";
+import InstagramCartao from "../components/ui/InstagramCartao.astro";
 import { quemSou as q, type Marco } from "../content/quem-sou";
 import { pecasDoB } from "../lib/marca";
 import { rich } from "../lib/texto";
@@ -139,6 +140,10 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
           </h2>
           <div class="qs-nome__texto">
             {q.nome.paragrafos.map((p) => <p class="sobe-rolagem" set:html={rich(p)} />)}
+          </div>
+          <div class="qs-nome__insta">
+            <p>{q.nome.instagram}</p>
+            <InstagramCartao />
           </div>
         </div>
       </div>
@@ -677,6 +682,8 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
   .qs-nome__texto { display: grid; gap: var(--s-4); max-width: 60ch; }
   .qs-nome__texto p { margin: 0; font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
   .qs-nome__texto :global(strong) { font-weight: 600; color: var(--ink-strong); }
+  .qs-nome__insta { display: grid; gap: var(--s-4); margin-top: var(--s-7); }
+  .qs-nome__insta p { margin: 0; font: 500 var(--t-label)/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); }
   @media (min-width: 960px) {
     .qs-nome__grade { grid-template-columns: 280px minmax(0, 1fr); gap: var(--s-9); }
     .qs-nome__b { width: 100%; }
