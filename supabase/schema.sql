@@ -37,7 +37,8 @@ create table if not exists public.leads (
     whatsapp ~ '^(1[1-9]|2[12478]|3[1-578]|4[1-9]|5[1345]|6[1-9]|7[134579]|8[1-9]|9[1-9])(9[0-9]{8}|[2-5][0-9]{7})$'
   ),
   tipo_projeto  text check (tipo_projeto in ('landing', 'site', 'nao-sei')),
-  investimento  text check (investimento in ('Até R$ 1.500', 'De R$ 1.500 a R$ 3.000', 'Acima de R$ 3.000', 'Prefiro conversar antes')),
+  -- Faixas de 30/10/2026 (uma por plano); as antigas continuam válidas para os leads já salvos
+  investimento  text check (investimento in ('Até R$ 1.000', 'De R$ 1.000 a R$ 2.000', 'Acima de R$ 2.000', 'Prefiro conversar antes', 'Até R$ 1.500', 'De R$ 1.500 a R$ 3.000', 'Acima de R$ 3.000')),
   -- Uma geração vira no máximo um lead (o reenvio não duplica). Sem "on delete": apague o lead antes da geração
   geracao_id    uuid unique references public.geracoes_ia (id),
   -- Só utm_source, utm_medium, utm_campaign e utm_content, em texto de até 100 caracteres

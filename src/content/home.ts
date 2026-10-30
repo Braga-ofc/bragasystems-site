@@ -265,7 +265,7 @@ export const ctaFinal = {
     tipo: { rotulo: "O que você precisa?", opcoes: ["Landing page", "Site completo", "Ainda não sei"] },
     investimento: {
       rotulo: "Quanto pretende investir?",
-      opcoes: ["Até R$ 1.500", "De R$ 1.500 a R$ 3.000", "Acima de R$ 3.000", "Prefiro conversar antes"],
+      opcoes: ["Até R$ 1.000", "De R$ 1.000 a R$ 2.000", "Acima de R$ 2.000", "Prefiro conversar antes"],
     },
     consentimento: "Autorizo o contato pelo WhatsApp e o uso dos meus dados conforme a [Política de Privacidade].",
   },
