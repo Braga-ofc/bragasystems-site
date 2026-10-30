@@ -13,6 +13,11 @@
 	},
 	"observability": {
 		"enabled": true
+	},
+	// Configurações do servidor que NÃO são segredo (o painel só oferece "Secret" com o deploy pelo GitHub)
+	"vars": {
+		// Para onde vai o aviso de cada lead novo (função enviar-lead)
+		"AVISO_EMAIL_PARA": "bragasystemsofc@gmail.com"
 	}
 	// Segredos (chaves) NÃO entram aqui: ficam no painel do Cloudflare como Secret.
 }

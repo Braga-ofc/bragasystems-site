@@ -6,4 +6,4 @@ ANTHROPIC_API_KEY=
 TURNSTILE_SECRET_KEY=
 RESEND_API_KEY=
 IP_HASH_SALT=
-AVISO_EMAIL_PARA=bragasystemsofc@gmail.com
+# AVISO_EMAIL_PARA fica em wrangler.jsonc ("vars"): não é segredo
