@@ -29,6 +29,14 @@ const marcos: readonly Marco[] = q.historia.marcos;
 const palavrasCitacao = marcos[5].citacao?.texto.split(" ") ?? [];
 // "Por que BRAGA SYSTEMS": o nome da marca em ciano, letra por letra (o leitor de tela lê o título inteiro)
 const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
+// Equalizador da moldura do "Fora do código": cada barra com altura, tempo e atraso próprios (fixos no build)
+let sementeEq = 11;
+const sorteio = () => ((sementeEq = (sementeEq * 16807) % 2147483647) / 2147483647);
+const barras = Array.from({ length: 28 }, () => ({
+  alto: (0.35 + sorteio() * 0.65).toFixed(2),
+  dur: Math.round(520 + sorteio() * 700),
+  atraso: -Math.round(sorteio() * 1200),
+}));
 ---
 <Base titulo={q.seo.titulo} descricao={q.seo.descricao}>
   <main id="conteudo" class="qs">
@@ -193,10 +201,16 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
     {/* ---------- Fora do código ---------- */}
     <Secao class="qs-fora" tema="elevado">
       <div class="qs-fora__grade">
+        {/* Moldura de estúdio (pedido do Gustavo, 29/10/2026): uma placa chanfrada deslocada atrás da foto
+            e um equalizador que pulsa embaixo dela, como os medidores de uma mesa de som */}
         <figure class="qs-fora__figura">
+          <span class="qs-fora__placa chanfrado" aria-hidden="true"></span>
           <div class="qs-fora__foto chanfrado">
             <Image src={fotoPalco} alt={q.foraDoCodigo.fotoAlt} widths={[360, 520, 720, 900]} sizes="(min-width: 960px) 440px, min(88vw, 440px)" quality={78} loading="lazy" decoding="async" />
           </div>
+          <span class="qs-fora__eq" aria-hidden="true">
+            {barras.map((b) => <i style={`--alto:${b.alto};--dur:${b.dur}ms;--atraso:${b.atraso}ms`}></i>)}
+          </span>
         </figure>
         <div class="qs-fora__texto">
           <p class="qs-rotulo">{q.foraDoCodigo.titulo}</p>
@@ -779,14 +793,56 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
 
   /* ---------- Fora do código ---------- */
   .qs-fora__grade { display: grid; gap: var(--s-8); align-items: center; }
-  .qs-fora__figura { margin: 0; justify-self: center; width: min(100%, 440px); }
+  .qs-fora__figura {
+    --desloca: 16px;
+    position: relative;
+    isolation: isolate;
+    margin: 0 var(--desloca) 0 0;
+    justify-self: center;
+    width: min(100% - var(--desloca), 440px);
+  }
+  /* A placa de trás: o mesmo chanfro, contorno ciano, deslocada na diagonal; afasta mais no hover */
+  .qs-fora__placa {
+    --c: var(--chanfro-lg);
+    --cor-borda: var(--accent);
+    --cor-fundo: #0E1319;
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 calc(var(--eq-alto) + var(--s-4));
+    translate: var(--desloca) var(--desloca);
+    transition: translate 300ms var(--ease-saida);
+  }
+  .qs-fora__figura:hover .qs-fora__placa { translate: calc(var(--desloca) + 6px) calc(var(--desloca) + 6px); }
   .qs-fora__foto {
     --c: var(--chanfro-lg);
+    position: relative;
     aspect-ratio: 3 / 4;
     overflow: hidden;
     clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
   }
   .qs-fora__foto :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
+
+  /* O equalizador: barras finas que sobem e descem, cada uma no seu tempo (só scale, no compositor) */
+  .qs-fora__figura { --eq-alto: 40px; }
+  .qs-fora__eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: var(--eq-alto);
+    margin-top: var(--s-4);
+  }
+  .qs-fora__eq i {
+    flex: 1;
+    height: 100%;
+    background: linear-gradient(to top, var(--ciano-profundo), var(--accent));
+    transform-origin: bottom;
+    scale: 1 var(--alto);
+    clip-path: polygon(0 3px, 3px 0, 100% 0, 100% 100%, 0 100%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .qs-fora__eq i { animation: qs-eq var(--dur) ease-in-out var(--atraso) infinite alternate; }
+  }
+  @keyframes qs-eq { from { scale: 1 0.12; } to { scale: 1 var(--alto); } }
   .qs-fora__texto p:not(.qs-rotulo) { max-width: 60ch; margin: 0 0 var(--s-4); font-size: var(--t-body-lg); line-height: 1.65; color: var(--ink); }
   .qs-fora__texto .qs-fora__fecho { margin-top: var(--s-5); font-size: var(--t-h3); line-height: 1.5; color: var(--ink-strong); }
   /* As três palavras do fecho só em ciano, sem sublinhado (pedido do Gustavo); a cor acende em sequência */
@@ -852,6 +908,13 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
   @media (min-width: 960px) { .qs-fora__grade { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--s-9); } }
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
+      .qs-fora__placa {
+        animation-name: qs-placa;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 45%;
+      }
       .qs-fora__foto {
         animation-name: qs-corte;
         animation-timing-function: linear;
@@ -887,5 +950,6 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
       .qs-fora__fecho :global(strong:nth-of-type(3)) { animation-range: cover 30% cover 54%; }
     }
   }
+  @keyframes qs-placa { from { translate: 0 0; opacity: 0; } to { translate: var(--desloca) var(--desloca); opacity: 1; } }
   @keyframes qs-acende-cor { from { color: var(--ink-strong); } to { color: var(--accent); } }
 </style>
