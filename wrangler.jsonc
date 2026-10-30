@@ -14,6 +14,8 @@
 	"observability": {
 		"enabled": true
 	},
+	// IA do gerador de headlines (Cloudflare Workers AI, grátis dentro da cota diária)
+	"ai": { "binding": "AI" },
 	// Configurações do servidor que NÃO são segredo (o painel só oferece "Secret" com o deploy pelo GitHub)
 	"vars": {
 		// Para onde vai o aviso de cada lead novo (função enviar-lead)

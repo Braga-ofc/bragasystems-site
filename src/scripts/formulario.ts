@@ -5,6 +5,7 @@
   Nenhum dado pessoal vai para a URL, o console ou a medição.
 */
 import { montarLinkWhatsapp, semCodigoPais, soDigitos, whatsappValido } from "../lib/whatsapp";
+import { pedirToken } from "./turnstile";
 
 type Controle = HTMLInputElement | HTMLSelectElement;
 
@@ -255,8 +256,9 @@ function iniciarFormulario(form: HTMLFormElement) {
     modulo?.classList.add("feixe--continuo");
 
     try {
-      // Próxima etapa: o token do Turnstile entra aqui (campo "turnstile" no corpo do pedido).
+      const turnstile = await pedirToken(form.querySelector<HTMLElement>("[data-turnstile]"));
       const resposta = await postarJson("/api/enviar-lead", {
+        turnstile,
         origem: "formulario",
         nome: dadosNome,
         whatsapp: soDigitos(whatsapp.value),

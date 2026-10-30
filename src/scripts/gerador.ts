@@ -4,6 +4,7 @@
   A headline aparece como se fosse digitada (Typing Animation do Magic UI, MIT, recriado em TS).
   Nenhum dado pessoal vai para a URL, o console ou a medição.
 */
+import { pedirToken } from "./turnstile";
 import {
   definirCarregando,
   lerUtm,
@@ -146,8 +147,8 @@ function iniciar(raiz: HTMLElement) {
     let falha: "limite" | "erro" | null = null;
     let frase = "";
     try {
-      // Próxima etapa: o token do Turnstile entra aqui (campo "turnstile" no corpo do pedido).
-      const resposta = await postarJson("/api/gerar-headline", valores);
+      const turnstile = await pedirToken(formGerar.querySelector<HTMLElement>("[data-turnstile]"));
+      const resposta = await postarJson("/api/gerar-headline", { ...valores, turnstile });
       if (resposta.status === 429) {
         falha = "limite";
       } else if (!resposta.ok) {
@@ -229,8 +230,9 @@ function iniciar(raiz: HTMLElement) {
     processando(true, botaoLead);
     let enviado: boolean;
     try {
-      // Próxima etapa: um novo token do Turnstile entra aqui (campo "turnstile" no corpo do pedido).
+      const turnstile = await pedirToken(formLead.querySelector<HTMLElement>("[data-turnstile]"));
       const resposta = await postarJson("/api/enviar-lead", {
+        turnstile,
         origem: "gerador",
         nome: nome.value.trim(),
         whatsapp: soDigitos(whatsapp.value),

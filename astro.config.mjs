@@ -11,6 +11,9 @@ export default defineConfig({
   adapter: cloudflare({
     // Imagens otimizadas na hora do build, sem depender do Cloudflare Images.
     imageService: "compile",
+    // A IA (binding AI) só existe na Cloudflare: o build e o preview locais não abrem sessão remota
+    // (pediriam login). No deploy, a binding funciona normalmente.
+    remoteBindings: false,
   }),
   // O site não usa sessões: evita criar um KV no Cloudflare sem necessidade.
   session: false,

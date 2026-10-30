@@ -84,6 +84,7 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
         <p class="console__status" aria-hidden="true">{gerador.carregando}</p>
         <div class="console__aviso" role="alert" data-aviso-geracao></div>
       </div>
+      <div class="turnstile" data-turnstile></div>
     </form>
 
     {/* Depois do resultado: as outras duas versões pelo WhatsApp */}
@@ -115,6 +116,7 @@ const tituloPartes = gerador.titulo.split(/(\S+-\S+)/).filter(Boolean);
           <Botao tipo="submit" larguraTotal icone="whatsapp">{gerador.depois.botao}</Botao>
           <div class="console__aviso" role="alert" data-aviso-lead></div>
         </div>
+        <div class="turnstile" data-turnstile></div>
       </form>
     </div>
 

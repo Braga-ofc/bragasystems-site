@@ -84,7 +84,8 @@ const { vagas } = Astro.props;
             <Fragment set:html={comLinkPrivacidade(ctaFinal.campos.consentimento)} />
           </Campo>
 
-          {/* Próxima etapa: o widget do Turnstile entra aqui, logo antes do botão. */}
+          {/* Turnstile: escondido; só aparece se a Cloudflare pedir um clique (scripts/turnstile) */}
+          <div class="turnstile" data-turnstile></div>
           <div class="cta-envio">
             <Botao tipo="submit" larguraTotal icone="seta">{ctaFinal.botao}</Botao>
             <div class="cta-aviso" role="alert" data-aviso></div>
