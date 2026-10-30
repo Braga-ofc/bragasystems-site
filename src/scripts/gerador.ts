@@ -227,7 +227,7 @@ function iniciar(raiz: HTMLElement) {
 
     ocupado = true;
     processando(true, botaoLead);
-    let enviado = false;
+    let enviado: boolean;
     try {
       // Próxima etapa: um novo token do Turnstile entra aqui (campo "turnstile" no corpo do pedido).
       const resposta = await postarJson("/api/enviar-lead", {
