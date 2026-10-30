@@ -40,7 +40,8 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
       <div class="qs-capa__grade">
         <div class="qs-capa__texto">
           <p class="qs-rotulo">{q.abertura.rotulo}</p>
-          <h1 class="qs-capa__titulo">{q.abertura.titulo}</h1>
+          {/* "Prazer," numa linha e o nome inteiro na outra (pedido do Gustavo: "Braga" ao lado de "Gustavo") */}
+          <h1 class="qs-capa__titulo">{q.abertura.titulo.split(/(?<=,) /)[0]} <span class="qs-capa__nome">{q.abertura.titulo.split(/(?<=,) /)[1]}</span></h1>
           <p class="qs-capa__lead">{q.abertura.texto}</p>
         </div>
         <figure class="qs-capa__figura">
@@ -259,12 +260,15 @@ const [prefixoNome, marcaNome] = q.nome.titulo.split(/ (?=BRAGA)/);
   .qs-capa__grade { display: grid; gap: var(--s-8); align-items: center; }
   .qs-capa__titulo {
     margin: 0 0 var(--s-5);
-    font-size: clamp(2.75rem, 1.6rem + 5vw, 5.25rem);
+    /* Pela largura da coluna (cqi): "Gustavo Braga." mede ~6,4× a fonte e sempre cabe numa linha */
+    font-size: clamp(2.25rem, 14.5cqi, 4.25rem);
     font-weight: 600;
     line-height: 1.02;
     letter-spacing: -0.035em;
     color: var(--ink-strong);
   }
+  .qs-capa__texto { container-type: inline-size; }
+  .qs-capa__nome { display: block; white-space: nowrap; }
   .qs-capa__lead { max-width: 46ch; margin: 0; font-size: var(--t-body-lg); line-height: 1.6; color: var(--ink); }
   .qs-capa__figura { position: relative; margin: 0; justify-self: center; width: min(100%, 460px); }
   .qs-capa__foto {
