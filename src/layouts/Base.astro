@@ -37,7 +37,10 @@ const temContador = vagasBuild !== undefined;
 // Com build.format "file", as páginas são montadas como /pagina.html (e a home como /index.html): o
 // canonical usa o endereço que o site mostra e o sitemap lista, sem ".html" (e a home na raiz)
 const canonical = new URL(Astro.url.pathname.replace(/\.html$/, "").replace(/(^|\/)index$/, "$1"), Astro.site).href;
-const ogImagem = og.imagem && new URL(og.imagem, Astro.site).href;
+// Toda página compartilhada leva uma imagem: sem uma própria, vai a da home (antes, só a home tinha)
+const ogImagem = new URL(og.imagem ?? compartilhar.imagem, Astro.site).href;
+const ogImagemAlt = og.imagem ? og.imagemAlt : compartilhar.imagemAlt;
+import { compartilhar } from "../content/home";
 ---
 <!doctype html>
 <html
@@ -63,7 +66,7 @@ const ogImagem = og.imagem && new URL(og.imagem, Astro.site).href;
         <meta property="og:image" content={ogImagem} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        {og.imagemAlt && <meta property="og:image:alt" content={og.imagemAlt} />}
+        {ogImagemAlt && <meta property="og:image:alt" content={ogImagemAlt} />}
         <meta name="twitter:card" content="summary_large_image" />
       </>
     )}
