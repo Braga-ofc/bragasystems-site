@@ -39,7 +39,7 @@ Eu não vendo os seus dados e não uso o seu WhatsApp para listas de transmissã
 Só com os serviços que fazem o site funcionar, cada um para a sua parte:
 - **Cloudflare:** hospedagem do site e verificação contra robôs (Turnstile).
 - **Supabase:** banco de dados onde ficam os contatos e as gerações.
-- **Anthropic:** a IA que escreve as headlines. Ela recebe só o que você digitou sobre o seu negócio, nunca o seu nome ou WhatsApp.
+- **Cloudflare Workers AI:** a IA que escreve as headlines, na mesma Cloudflare que hospeda o site. Ela recebe só o que você digitou sobre o seu negócio, nunca o seu nome ou WhatsApp.
 - **Resend:** envio do e-mail que me avisa de um novo contato.
 - **Google (Gmail e Google Analytics), Meta (Pixel) e Microsoft (Clarity):** o aviso de contato chega no meu Gmail; Analytics, Pixel e Clarity só são carregados se você aceitar os cookies.
 - **Asaas:** cobrança, só se você contratar.
