@@ -38,7 +38,7 @@ const barras = Array.from({ length: 28 }, () => ({
   atraso: -Math.round(sorteio() * 1200),
 }));
 ---
-<Base titulo={q.seo.titulo} descricao={q.seo.descricao}>
+<Base titulo={q.seo.titulo} descricao={q.seo.descricao} og={{ titulo: q.seo.titulo, descricao: q.seo.descricao, imagem: q.seo.imagem, imagemAlt: q.seo.imagemAlt }}>
   <main id="conteudo" class="qs">
     {/* ---------- Capa ---------- */}
     <Secao class="qs-capa">

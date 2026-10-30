@@ -14,6 +14,9 @@ export const quemSou = {
     titulo: "Quem sou eu: Gustavo Braga | BRAGA SYSTEMS",
     descricao:
       "Conheça Gustavo Braga, desenvolvedor web e fundador da BRAGA SYSTEMS. Landing pages e sites que fazem a pré-venda por você.",
+    // Imagem de compartilhamento própria (origem: BRAGASYSTEMS/site/compartilhamento/home.html?v=quem-sou)
+    imagem: "/og/quem-sou.jpg",
+    imagemAlt: "Gustavo Braga, de blazer preto, ao lado da frase “Prazer, Gustavo Braga.” e do logo da BRAGA SYSTEMS",
   },
   abertura: {
     rotulo: "Quem sou eu",
