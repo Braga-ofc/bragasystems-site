@@ -27,7 +27,7 @@ function limparUtm(valor: unknown): Record<string, string> | null {
   return Object.keys(saida).length ? saida : null;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const dados = await lerCorpo(request);
   if (!dados) return json({ erro: "pedido_invalido" }, 400);
 
@@ -42,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const lead: Record<string, unknown> = { origem, nome, whatsapp, consentimento: true, utm: limparUtm(dados.utm) };
   if (origem === "formulario") {
-    if (typeof dados.tipo_projeto !== "string" || !(dados.tipo_projeto in TIPOS)) return json({ erro: "campos" }, 400);
+    if (typeof dados.tipo_projeto !== "string" || !Object.hasOwn(TIPOS, dados.tipo_projeto)) return json({ erro: "campos" }, 400);
     if (typeof dados.investimento !== "string" || !INVESTIMENTOS.includes(dados.investimento)) return json({ erro: "campos" }, 400);
     lead.tipo_projeto = dados.tipo_projeto;
     lead.investimento = dados.investimento;
@@ -57,11 +57,20 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return json({ erro: "servidor" }, 502);
   }
-  // 409: essa geração já virou lead (o reenvio não duplica nem manda outro aviso)
-  if (salvo.status === 409) return json({ ok: true });
+  if (salvo.status === 409) {
+    const { code } = ((await salvo.json().catch(() => ({}))) ?? {}) as { code?: string };
+    // 23505: essa geração já virou lead (o reenvio não duplica nem manda outro aviso)
+    if (code === "23505") return json({ ok: true });
+    // 23503: a geração não existe mais (rotina de 30 dias ou exclusão LGPD): a pessoa vai pelo WhatsApp
+    return json({ erro: "geracao" }, 409);
+  }
   if (!salvo.ok) return json({ erro: "servidor" }, 502);
 
-  await avisar(lead).catch(() => undefined);
+  // O aviso sai depois da resposta (waitUntil): o e-mail lento nunca faz a pessoa ver erro de um lead salvo
+  const aviso = avisar(lead).catch(() => undefined);
+  const ctx = (locals as { cfContext?: { waitUntil(p: Promise<unknown>): void } }).cfContext;
+  if (ctx) ctx.waitUntil(aviso);
+  else await aviso;
   return json({ ok: true });
 };
 
@@ -109,6 +118,6 @@ async function avisar(lead: Record<string, unknown>) {
       subject: `Novo lead · ${origem} · ${nome}`,
       html: `<div style="font-family:Arial,sans-serif;font-size:15px;color:#0B0F14"><p>Novo lead pelo site (${origem}).</p><table>${tabela}</table>${extra}</div>`,
     }),
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(10000),
   });
 }

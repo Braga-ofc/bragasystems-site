@@ -148,7 +148,8 @@ function comPrazo(ms: number): AbortSignal {
 }
 
 /** POST com JSON e prazo máximo. Falha de rede ou de prazo vira exceção. */
-export function postarJson(endereco: string, corpo: unknown, ms = 15000): Promise<Response> {
+// 30 s: acima do pior caso das funções do servidor (lib/servidor: PRAZO), para nunca desistir de algo que deu certo
+export function postarJson(endereco: string, corpo: unknown, ms = 30000): Promise<Response> {
   return fetch(endereco, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },

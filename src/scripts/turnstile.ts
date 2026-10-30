@@ -30,10 +30,11 @@ function carregar(): Promise<void> {
 }
 
 const widgets = new WeakMap<HTMLElement, string>();
-let espera: ((token: string) => void) | null = null;
+// Quem espera o token de cada widget: um por formulário, para os tokens nunca se misturarem
+const esperando = new Map<string, (token: string) => void>();
 
 /** Pede um token para o envio deste formulário (o container é um elemento vazio dentro dele). */
-export async function pedirToken(container: HTMLElement | null, prazo = 20000): Promise<string> {
+export async function pedirToken(container: HTMLElement | null, prazo = 30000): Promise<string> {
   if (!CHAVE || !container) return "";
   try {
     await carregar();
@@ -42,24 +43,31 @@ export async function pedirToken(container: HTMLElement | null, prazo = 20000): 
   }
   const ts = window.turnstile;
   if (!ts) return "";
+  let id = widgets.get(container);
+  if (!id) {
+    const meu = ts.render(container, {
+      sitekey: CHAVE,
+      appearance: "interaction-only",
+      execution: "execute",
+      language: "pt-br",
+      callback: (token: string) => esperando.get(meu)?.(token),
+      "error-callback": () => esperando.get(meu)?.(""),
+    });
+    id = meu;
+    widgets.set(container, id);
+  } else {
+    // Cada token vale uma vez: recomeça antes de pedir o próximo
+    ts.reset(id);
+  }
+  const widget = id;
   return new Promise((ok) => {
-    const timer = window.setTimeout(() => ok(""), prazo);
-    espera = (token) => { window.clearTimeout(timer); ok(token); };
-    let id = widgets.get(container);
-    if (!id) {
-      id = ts.render(container, {
-        sitekey: CHAVE,
-        appearance: "interaction-only",
-        execution: "execute",
-        language: "pt-br",
-        callback: (token: string) => espera?.(token),
-        "error-callback": () => espera?.(""),
-      });
-      widgets.set(container, id);
-    } else {
-      // Cada token vale uma vez: recomeça antes de pedir o próximo
-      ts.reset(id);
-    }
-    ts.execute(id);
+    const fim = (token: string) => {
+      window.clearTimeout(timer);
+      esperando.delete(widget);
+      ok(token);
+    };
+    const timer = window.setTimeout(() => fim(""), prazo);
+    esperando.set(widget, fim);
+    ts.execute(widget);
   });
 }

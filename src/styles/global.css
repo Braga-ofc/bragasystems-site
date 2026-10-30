@@ -250,6 +250,5 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .chanfrado:focus-visible { outline: 2px solid Highlight; }
 }
 
-/* Turnstile (scripts/turnstile): vazio não ocupa espaço; com o desafio visível, ganha respiro */
+/* Turnstile (scripts/turnstile): sem margem própria; o widget só ocupa espaço quando o desafio aparece */
 .turnstile:empty { display: none; }
-.turnstile:not(:empty) { margin-block: var(--s-3); }

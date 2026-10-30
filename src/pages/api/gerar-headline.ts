@@ -2,7 +2,9 @@
   Função gerar-headline (mapa técnico, arquivo 08): confere o Turnstile, reserva a geração no Supabase
   (limite de 3 por pessoa a cada 24 h, pela função reservar_geracao, que trava pelo IP embaralhado),
   pede 3 headlines à Cloudflare Workers AI (decisão de 30/10/2026: grátis, sem conta) e devolve a 1ª.
-  Se a IA falhar, a reserva é desfeita: o erro não gasta o limite da pessoa.
+  Se a IA não responder (fora do ar ou fora do prazo), a reserva é desfeita: o erro não gasta o limite.
+  Se ela responder fora do tema ou com algo que não dá para usar, a reserva conta: senão, quem insiste
+  em pedidos inválidos gastaria a cota grátis da IA sem limite.
 */
 import type { APIRoute } from "astro";
 import { amb, ipDe, ipEmbaralhado, json, lerCorpo, supabase, textoLimpo, turnstileValido } from "../../lib/servidor";
@@ -46,6 +48,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!id) return json({ erro: "limite" }, 429);
 
   let headlines: string[] | null;
+  let respondeu = false;
   try {
     const saida = (await Promise.race([
       amb.AI.run(MODELO, {
@@ -56,18 +59,24 @@ export const POST: APIRoute = async ({ request }) => {
         max_tokens: 300,
         temperature: 0.8,
       }),
-      new Promise((_, falha) => setTimeout(() => falha(new Error("prazo")), 10000)),
+      new Promise((_, falha) => setTimeout(() => falha(new Error("prazo")), 8000)),
     ])) as { response?: unknown };
+    respondeu = true;
     headlines = lerHeadlines(saida?.response);
   } catch {
     headlines = null;
   }
 
+  const desfazer = () => supabase(`geracoes_ia?id=eq.${id}`, { method: "DELETE" }).catch(() => undefined);
   if (!headlines) {
-    // Desfaz a reserva para o erro não contar no limite das 3 gerações
-    await supabase(`geracoes_ia?id=eq.${id}`, { method: "DELETE" }).catch(() => undefined);
+    if (!respondeu) await desfazer();
     return json({ erro: "ia" }, 502);
   }
-  await supabase(`geracoes_ia?id=eq.${id}`, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ headlines }) }).catch(() => undefined);
+  // As 3 headlines precisam ficar salvas: é delas que sai o aviso com as outras 2 versões
+  const salvo = await supabase(`geracoes_ia?id=eq.${id}`, { method: "PATCH", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ headlines }) }).catch(() => null);
+  if (!salvo?.ok) {
+    await desfazer();
+    return json({ erro: "servidor" }, 502);
+  }
   return json({ headline: headlines[0], geracao_id: id });
 };
