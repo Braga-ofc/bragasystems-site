@@ -6,7 +6,7 @@ import sitemap from "@astrojs/sitemap";
 // Páginas estáticas por padrão. Só as rotas de API (src/pages/api/) rodam no servidor,
 // marcadas com `export const prerender = false`.
 export default defineConfig({
-  site: "https://bragasystems.com.br",
+  site: "https://bragasystemsofc.com.br",
   trailingSlash: "never",
   adapter: cloudflare({
     // Imagens otimizadas na hora do build, sem depender do Cloudflare Images.

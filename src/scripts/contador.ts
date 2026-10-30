@@ -44,7 +44,7 @@ function contar(el: HTMLElement, de: number, ate: number) {
 
 /** Endereço de teste: a máquina local ou o link do Cloudflare (*.workers.dev). Nunca o domínio oficial. */
 function enderecoDeTeste(): boolean {
-  // "bragasystems.com.br." (com ponto no fim) é o mesmo site: o ponto sai antes de comparar.
+  // "bragasystemsofc.com.br." (com ponto no fim) é o mesmo site: o ponto sai antes de comparar.
   const host = location.hostname.toLowerCase().replace(/\.+$/, "");
   return host === "localhost" || host === "127.0.0.1" || host.endsWith(".workers.dev");
 }

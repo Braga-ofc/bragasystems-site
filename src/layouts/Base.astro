@@ -34,7 +34,9 @@ const {
 
 const temContador = vagasBuild !== undefined;
 // Endereço oficial (mapa técnico 10): o canonical e o og apontam para o domínio, não para o link de teste
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+// Com build.format "file", as páginas são montadas como /pagina.html (e a home como /index.html): o
+// canonical usa o endereço que o site mostra e o sitemap lista, sem ".html" (e a home na raiz)
+const canonical = new URL(Astro.url.pathname.replace(/\.html$/, "").replace(/(^|\/)index$/, "$1"), Astro.site).href;
 const ogImagem = og.imagem && new URL(og.imagem, Astro.site).href;
 ---
 <!doctype html>

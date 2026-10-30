@@ -10,6 +10,6 @@
 /videos/*
   Cache-Control: public, max-age=604800
 
-# O link de teste nunca aparece no Google; o domínio oficial (bragasystems.com.br) aparece.
+# O link de teste nunca aparece no Google; o domínio oficial (bragasystemsofc.com.br) aparece.
 https://bragasystems-site.gubragah-oficiaal.workers.dev/*
   X-Robots-Tag: noindex
