@@ -7,6 +7,7 @@
   ao arquivo; o build quebra se as peças não somarem o desenho original. Sem movimento: o logo pronto.
 */
 import Icone from "../ui/Icone.astro";
+import InstagramCartao from "../ui/InstagramCartao.astro";
 import logo from "../../assets/logo/logo-vertical-escuro.svg?raw";
 import { rodape } from "../../content/home";
 import { cookies } from "../../content/cookies";
@@ -68,6 +69,8 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
     <div class="rodape__marca">
       <div class="rodape__logo" data-monta-logo set:html={logoMontado} />
       <p class="rodape__slogan">{rodape.slogan}</p>
+      {/* Instagram da marca com o cartão de perfil (pedido do Gustavo, 29/10/2026) */}
+      <div class="rodape__instagram"><InstagramCartao /></div>
     </div>
 
     <ul class="rodape__contatos" role="list">
@@ -173,6 +176,7 @@ const direitos = rodape.direitos.replace("{ANO}", String(new Date().getFullYear(
   .rodape__logo :global(.rodape__peca--nucleo) { transition-delay: 220ms; }
   .rodape__logo :global(.rodape__peca--letra) { transition-delay: calc(320ms + var(--i) * 50ms); }
   .rodape__logo :global(.rodape__peca--sub) { transition-delay: calc(600ms + var(--i) * 35ms); }
+  .rodape__instagram { margin-top: var(--s-3); padding-bottom: var(--s-6); }
   .rodape__slogan {
     max-width: 20ch;
     font: 500 var(--t-h2)/1.2 var(--font-display);
