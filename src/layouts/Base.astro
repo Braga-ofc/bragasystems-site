@@ -78,6 +78,23 @@ import { compartilhar } from "../content/home";
     <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/inter-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin />
     <slot name="head" />
+    {/*
+      Seções fora da tela não são desenhadas na entrada (global.css: content-visibility). Para os links
+      com âncora (menu, "Ver os planos") caírem no lugar certo, todas são desenhadas antes da rolagem:
+      ao chegar com # no endereço ou ao clicar num link # desta página (fase de captura, antes do Lenis).
+    */}
+    <script is:inline>
+      (function () {
+        var r = document.documentElement;
+        var todas = function () { r.classList.add("secoes-todas"); };
+        if (location.hash) todas();
+        document.addEventListener("click", function (e) {
+          var a = e.target && e.target.closest && e.target.closest("a[href*='#']");
+          if (a && a.hash && a.pathname === location.pathname) todas();
+        }, true);
+        addEventListener("hashchange", todas);
+      })();
+    </script>
   </head>
   <body>
     {moldura && <CamadaViva />}

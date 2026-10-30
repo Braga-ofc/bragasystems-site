@@ -252,3 +252,33 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Turnstile (scripts/turnstile): sem margem própria; o widget só ocupa espaço quando o desafio aparece */
 .turnstile:empty { display: none; }
+
+/*
+  Seções fora da tela não são desenhadas na entrada (medido em 30/10/2026 num celular simulado 4× mais
+  lento: pintura, layout e estilo das 11 seções somavam ~2,7 s e travavam a entrada). Cada seção é
+  desenhada quando chega perto da tela; as animações dela tocam do mesmo jeito, na mesma hora.
+  O tamanho reservado é o real medido (celular, tablet, computador) para a barra de rolagem e os
+  links do menu caírem no lugar certo; depois da 1ª vez o navegador guarda o tamanho exato ("auto").
+*/
+@supports (content-visibility: auto) {
+  /* O tamanho reservado conta só o conteúdo: tira o respiro de cima e de baixo da seção */
+  main > .secao { content-visibility: auto; contain-intrinsic-size: auto calc(var(--altura-secao, 1200px) - 2 * var(--secao-respiro)); }
+  /* Link com âncora (Base.astro): desenha tudo antes de rolar, para cair no lugar certo */
+  :root.secoes-todas main > .secao { content-visibility: visible; }
+  main > .dor { --altura-secao: 1260px; } #sobre { --altura-secao: 982px; } .proposta.secao { --altura-secao: 3050px; }
+  #metodo { --altura-secao: 1442px; } #projetos { --altura-secao: 2094px; } #planos { --altura-secao: 3424px; }
+  .processo.secao { --altura-secao: 1217px; } .garantia.secao { --altura-secao: 897px; } #duvidas { --altura-secao: 2512px; }
+  #contato { --altura-secao: 2199px; }
+}
+@media (min-width: 720px) {
+  main > .dor { --altura-secao: 1025px; } #sobre { --altura-secao: 690px; } .proposta.secao { --altura-secao: 3649px; }
+  #metodo { --altura-secao: 1093px; } #projetos { --altura-secao: 2114px; } #planos { --altura-secao: 2222px; }
+  .processo.secao { --altura-secao: 1048px; } .garantia.secao { --altura-secao: 886px; } #duvidas { --altura-secao: 2243px; }
+  #contato { --altura-secao: 2024px; }
+}
+@media (min-width: 1200px) {
+  main > .dor { --altura-secao: 1161px; } #sobre { --altura-secao: 804px; } .proposta.secao { --altura-secao: 3399px; }
+  #metodo { --altura-secao: 1175px; } #projetos { --altura-secao: 3222px; } #planos { --altura-secao: 1628px; }
+  .processo.secao { --altura-secao: 974px; } .garantia.secao { --altura-secao: 637px; } #duvidas { --altura-secao: 2155px; }
+  #contato { --altura-secao: 1571px; }
+}

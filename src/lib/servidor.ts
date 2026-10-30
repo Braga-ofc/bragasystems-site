@@ -101,7 +101,13 @@ export function supabase(caminho: string, init: RequestInit = {}): Promise<Respo
   if (!base || !amb.SUPABASE_SECRET_KEY) return Promise.reject(new Error("Supabase sem configuração"));
   return fetch(`${base.replace(/\/$/, "")}/rest/v1/${caminho}`, {
     ...init,
-    headers: { apikey: amb.SUPABASE_SECRET_KEY, "Content-Type": "application/json", ...init.headers },
+    // A chave antiga (service_role, um JWT "eyJ...") também precisa ir no Authorization; a nova (sb_secret_) só no apikey
+    headers: {
+      apikey: amb.SUPABASE_SECRET_KEY,
+      ...(amb.SUPABASE_SECRET_KEY.startsWith("eyJ") ? { Authorization: `Bearer ${amb.SUPABASE_SECRET_KEY}` } : {}),
+      "Content-Type": "application/json",
+      ...init.headers,
+    },
     signal: AbortSignal.timeout(PRAZO),
   });
 }
