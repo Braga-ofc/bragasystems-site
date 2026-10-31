@@ -240,6 +240,8 @@ function iniciarFormulario(form: HTMLFormElement) {
     const dadosNome = nome.value.trim();
     const textoTipo = tipo.value;
     const tipoMinusculo = textoTipo.toLocaleLowerCase("pt-BR");
+    const codigoTipo = codigosTipo[textoTipo] ?? textoTipo;
+    const origemZap = codigoTipo === "nao-sei" ? "formulario-nao-sei" : "formulario";
 
     enviando = true;
     if (botao) definirCarregando(botao, true);
@@ -252,7 +254,7 @@ function iniciarFormulario(form: HTMLFormElement) {
         origem: "formulario",
         nome: dadosNome,
         whatsapp: soDigitos(whatsapp.value),
-        tipo_projeto: codigosTipo[textoTipo] ?? textoTipo,
+        tipo_projeto: codigoTipo,
         investimento: investimento.value,
         consentimento: true,
         utm: lerUtm(),
@@ -260,7 +262,7 @@ function iniciarFormulario(form: HTMLFormElement) {
       if (!resposta.ok) throw new Error(String(resposta.status));
       // Nome e tipo ficam só no navegador (nunca na URL), para a página de obrigado abrir o WhatsApp.
       try {
-        sessionStorage.setItem("lead", JSON.stringify({ nome: dadosNome, tipo: tipoMinusculo, novo: true }));
+        sessionStorage.setItem("lead", JSON.stringify({ nome: dadosNome, tipo: tipoMinusculo, origem: origemZap, novo: true }));
       } catch {
         /* sem sessionStorage: a página de obrigado usa a mensagem sem nome */
       }
@@ -270,7 +272,7 @@ function iniciarFormulario(form: HTMLFormElement) {
       if (aviso) {
         mostrarAviso(aviso, modeloFalha)
           .querySelector<HTMLAnchorElement>("a[href]")
-          ?.setAttribute("href", montarLinkWhatsapp("formulario", { nome: dadosNome, tipo: tipoMinusculo }));
+          ?.setAttribute("href", montarLinkWhatsapp(origemZap, { nome: dadosNome, tipo: tipoMinusculo }));
       }
       enviando = false;
       if (botao) definirCarregando(botao, false);

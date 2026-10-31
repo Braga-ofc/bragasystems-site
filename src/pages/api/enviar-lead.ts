@@ -85,7 +85,16 @@ async function avisar(lead: Record<string, unknown>) {
     ["WhatsApp", `<a href="https://wa.me/55${zap}">${formatarWhatsapp(zap)}</a>`],
   ];
   let headlines: string[] = [];
+  let resposta = "";
+  const primeiro = nome.split(" ")[0];
   if (lead.origem === "formulario") {
+    // Proposta de 31/10/2026 (aguarda aprovação para entrar na copy): a resposta do Gustavo ao lead, pronta
+    const faixa = String(lead.investimento);
+    const quanto = faixa.startsWith("Prefiro") ? "" : ` e pretende investir ${faixa.charAt(0).toLocaleLowerCase("pt-BR")}${faixa.slice(1)}`;
+    resposta =
+      lead.tipo_projeto === "nao-sei"
+        ? `Oi, ${primeiro}! Aqui é o Gustavo, da BRAGA SYSTEMS. Recebi seu pedido pelo site. Para eu te ajudar a escolher entre landing page e site completo, me conta: o que você vende e para quem?`
+        : `Oi, ${primeiro}! Aqui é o Gustavo, da BRAGA SYSTEMS. Recebi seu pedido pelo site: você precisa de ${TIPOS[String(lead.tipo_projeto)].toLocaleLowerCase("pt-BR")}${quanto}. Para eu te indicar o melhor caminho, me conta: o que você vende e para quem?`;
     linhas.push(["Precisa de", TIPOS[String(lead.tipo_projeto)]], ["Investimento", String(lead.investimento)]);
   } else {
     const r = await supabase(`geracoes_ia?id=eq.${lead.geracao_id}&select=vende,para_quem,headlines`);
@@ -103,10 +112,13 @@ async function avisar(lead: Record<string, unknown>) {
     .join("");
   let extra = "";
   if (headlines.length) {
-    const resposta = `Oi, ${nome.split(" ")[0]}! Aqui é o Gustavo, da BRAGA SYSTEMS. Como prometido, aqui estão as outras versões da sua headline:\n\n1. ${headlines[1] ?? ""}\n2. ${headlines[2] ?? ""}\n\nQual combina mais com o seu negócio?`;
-    extra =
-      `<p style="margin-top:16px"><b>Headlines geradas:</b></p><ol>${headlines.map((h) => `<li>${escapar(h)}</li>`).join("")}</ol>` +
-      `<p><a href="https://wa.me/55${zap}?text=${encodeURIComponent(resposta)}" style="display:inline-block;padding:10px 16px;background:#35D5E8;color:#0B0F14;font-weight:bold;text-decoration:none">Responder no WhatsApp com as 2 versões</a></p>`;
+    resposta = `Oi, ${primeiro}! Aqui é o Gustavo, da BRAGA SYSTEMS. Como prometido, aqui estão as outras versões da sua headline:\n\n1. ${headlines[1] ?? ""}\n2. ${headlines[2] ?? ""}\n\nQual combina mais com o seu negócio?`;
+    extra = `<p style="margin-top:16px"><b>Headlines geradas:</b></p><ol>${headlines.map((h) => `<li>${escapar(h)}</li>`).join("")}</ol>`;
+  }
+  // Um toque: o WhatsApp abre na conversa do lead com a resposta escrita; quem envia é o Gustavo
+  if (resposta) {
+    const rotulo = headlines.length ? "Responder no WhatsApp com as 2 versões" : "Responder no WhatsApp";
+    extra += `<p style="margin-top:16px"><a href="https://wa.me/55${zap}?text=${encodeURIComponent(resposta)}" style="display:inline-block;padding:10px 16px;background:#35D5E8;color:#0B0F14;font-weight:bold;text-decoration:none">${rotulo}</a></p>`;
   }
   const origem = lead.origem === "gerador" ? "gerador" : "formulário";
   const r = await fetch("https://api.resend.com/emails", {

@@ -127,8 +127,9 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
   let link = botao?.href ?? "";
   let novo = false;
   try {
-    const lead = JSON.parse(sessionStorage.getItem("lead") ?? "null") as { nome?: string; tipo?: string; novo?: boolean } | null;
-    if (lead?.nome) link = montarLinkWhatsapp("formulario", { nome: lead.nome, tipo: lead.tipo ?? "" });
+    const lead = JSON.parse(sessionStorage.getItem("lead") ?? "null") as { nome?: string; tipo?: string; origem?: string; novo?: boolean } | null;
+    const origem = lead?.origem === "formulario-nao-sei" ? "formulario-nao-sei" : "formulario";
+    if (lead?.nome) link = montarLinkWhatsapp(origem, { nome: lead.nome, tipo: lead.tipo ?? "" });
     novo = lead?.novo === true;
     if (novo && !teste) sessionStorage.setItem("lead", JSON.stringify({ ...lead, novo: false }));
   } catch {

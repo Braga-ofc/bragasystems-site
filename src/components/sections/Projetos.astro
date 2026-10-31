@@ -148,7 +148,8 @@ const { eben, fundador } = projetos;
   <script>
     // A tela do case: o vídeo toca só enquanto pelo menos 40% dele aparece e para quando sai.
     // Não toca sozinho com movimento reduzido, com economia de dados ou com a aba escondida;
-    // aí fica a capa que está atrás dele. Se o navegador recusar o play(), também fica a capa.
+    // aí fica a capa que está atrás dele. Se o navegador recusar o play() (o Opera no Android recusa
+    // até sem som, visto no Xiaomi do Gustavo em 31/10/2026), fica a capa com o botão de tocar à vista.
     const videos = Array.from(document.querySelectorAll<HTMLVideoElement>("[data-tela-video]"));
     const semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
     const conexao = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
@@ -172,14 +173,29 @@ const { eben, fundador } = projetos;
     function atualizar(video: HTMLVideoElement) {
       const tocar =
         visiveis.has(video) && !pausadosPeloVisitante.has(video) && !semMovimento.matches && !conexao?.saveData && !document.hidden;
-      if (tocar) video.play().catch(() => {});
+      if (tocar) video.play().catch((e) => recusado(video, e));
       else if (!video.paused) video.pause();
+    }
+
+    // Toque automático bloqueado: o botão aparece como "tocar" e o toque da pessoa libera o vídeo
+    function recusado(video: HTMLVideoElement, e: unknown) {
+      if ((e as DOMException)?.name !== "NotAllowedError") return;
+      pausadosPeloVisitante.add(video);
+      const controle = controleDe(video);
+      if (controle) {
+        controle.hidden = false;
+        controle.dataset.bloqueado = "";
+      }
+      marcarControle(video);
     }
 
     for (const video of videos) {
       const controle = controleDe(video);
       video.addEventListener("playing", () => {
-        if (controle) controle.hidden = false;
+        if (controle) {
+          controle.hidden = false;
+          delete controle.dataset.bloqueado;
+        }
         marcarControle(video);
       });
       video.addEventListener("pause", () => marcarControle(video));
@@ -315,6 +331,16 @@ const { eben, fundador } = projetos;
     cursor: pointer;
   }
   .projetos-tela__controle[hidden] { display: none; }
+  /* Toque automático recusado: o botão de tocar vai para o centro da tela, maior, para ser visto */
+  .projetos-tela__controle[data-bloqueado] {
+    right: auto;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    width: 72px;
+    height: 72px;
+    translate: -50% -50%;
+  }
   .projetos-tela__controle:hover { --cor-borda: var(--ink-muted); }
   .projetos-tela__controle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .projetos-tela__controle :global(.projetos-tela__icone) { grid-area: 1 / 1; }
