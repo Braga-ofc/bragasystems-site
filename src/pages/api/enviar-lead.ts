@@ -125,8 +125,8 @@ async function avisar(lead: Record<string, unknown>) {
     method: "POST",
     headers: { Authorization: `Bearer ${amb.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      // Sem domínio verificado no Resend, o remetente de testes só entrega para o dono da conta (o Gmail da marca)
-      from: "Site BRAGA SYSTEMS <onboarding@resend.dev>",
+      // Domínio verificado no Resend em 31/10/2026 (DKIM, SPF e DMARC): sai do spam do Gmail
+      from: "Site BRAGA SYSTEMS <contato@bragasystemsofc.com.br>",
       to: [amb.AVISO_EMAIL_PARA],
       subject: `Novo lead · ${origem} · ${nome}`,
       html: `<div style="font-family:Arial,sans-serif;font-size:15px;color:#0B0F14"><p>Novo lead pelo site (${origem}).</p><table>${tabela}</table>${extra}</div>`,
