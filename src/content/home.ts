@@ -280,6 +280,8 @@ export const ctaFinal = {
   // Mapa técnico, arquivo 08: se a função falhar, o cliente nunca fica sem caminho.
   falhaEnvio: "Não foi possível enviar agora",
   falhaBotao: "Falar no WhatsApp",
+  // Copy 2.29: um pedido por número de WhatsApp (pedido do Gustavo em 31/10/2026)
+  jaRecebido: "Já recebemos o seu pedido com este número. Em breve chega uma mensagem no seu WhatsApp para conversarmos sobre o seu projeto.",
 } as const;
 
 export const ps = {

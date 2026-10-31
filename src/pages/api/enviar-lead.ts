@@ -51,6 +51,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
     lead.geracao_id = dados.geracao_id.toLowerCase();
   }
 
+  // Um pedido do formulário por número (31/10/2026): o repetido não vira lead nem manda outro aviso.
+  // shortcut: conferir antes de gravar deixa passar dois envios no mesmo instante; se acontecer, um índice único parcial no banco resolve
+  if (origem === "formulario") {
+    try {
+      const r = await supabase(`leads?origem=eq.formulario&whatsapp=eq.${whatsapp}&select=id&limit=1`);
+      if (!r.ok) return json({ erro: "servidor" }, 502);
+      if (((await r.json()) as unknown[]).length) return json({ ok: true, repetido: true });
+    } catch {
+      return json({ erro: "servidor" }, 502);
+    }
+  }
+
   let salvo: Response;
   try {
     salvo = await supabase("leads", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(lead) });
@@ -88,7 +100,7 @@ async function avisar(lead: Record<string, unknown>) {
   let resposta = "";
   const primeiro = nome.split(" ")[0];
   if (lead.origem === "formulario") {
-    // Proposta de 31/10/2026 (aguarda aprovação para entrar na copy): a resposta do Gustavo ao lead, pronta
+    // Copy 2.29 (aprovada em 31/10/2026): a resposta do Gustavo ao lead, pronta
     const faixa = String(lead.investimento);
     const quanto = faixa.startsWith("Prefiro") ? "" : ` e pretende investir ${faixa.charAt(0).toLocaleLowerCase("pt-BR")}${faixa.slice(1)}`;
     resposta =

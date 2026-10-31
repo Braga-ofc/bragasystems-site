@@ -171,6 +171,7 @@ function iniciarFormulario(form: HTMLFormElement) {
   const botao = form.querySelector<HTMLButtonElement>('button[type="submit"]');
   const aviso = form.querySelector<HTMLElement>("[data-aviso]");
   const modeloFalha = form.querySelector<HTMLTemplateElement>('template[data-modelo="falha"]');
+  const modeloRepetido = form.querySelector<HTMLTemplateElement>('template[data-modelo="repetido"]');
   const modulo = form.closest<HTMLElement>("[data-modulo]");
   const msg = {
     vazio: form.dataset.erroVazio ?? "",
@@ -260,6 +261,15 @@ function iniciarFormulario(form: HTMLFormElement) {
         utm: lerUtm(),
       });
       if (!resposta.ok) throw new Error(String(resposta.status));
+      // Esse número já mandou um pedido: avisa na caixa e fica, sem novo lead nem nova conversão
+      const { repetido } = (await resposta.json().catch(() => ({}))) as { repetido?: boolean };
+      if (repetido) {
+        if (aviso) mostrarAviso(aviso, modeloRepetido);
+        enviando = false;
+        if (botao) definirCarregando(botao, false);
+        modulo?.classList.remove("feixe--continuo");
+        return;
+      }
       // Nome e tipo ficam só no navegador (nunca na URL), para a página de obrigado abrir o WhatsApp.
       try {
         sessionStorage.setItem("lead", JSON.stringify({ nome: dadosNome, tipo: tipoMinusculo, origem: origemZap, novo: true }));
