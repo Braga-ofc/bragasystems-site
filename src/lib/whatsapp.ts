@@ -12,9 +12,20 @@ export function montarLinkWhatsapp(origem: Origem, dados: { nome?: string; tipo?
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(texto)}`;
 }
 
-/* ---------- Número de WhatsApp: a mesma regra no navegador e, na próxima etapa, no servidor ---------- */
+/* ---------- Número de WhatsApp: a mesma regra no navegador e no servidor ---------- */
 
 export const soDigitos = (valor: string) => valor.replace(/\D/g, "");
+
+/** (61) 9999-9999 ou (61) 99999-9999, conforme a quantidade de dígitos. */
+export function formatarWhatsapp(d: string): string {
+  if (!d) return "";
+  if (d.length <= 2) return `(${d}`;
+  const ddd = d.slice(0, 2);
+  const resto = d.slice(2);
+  if (resto.length <= 4) return `(${ddd}) ${resto}`;
+  if (d.length <= 10) return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;
+  return `(${ddd}) ${resto.slice(0, 5)}-${resto.slice(5)}`;
+}
 
 /** DDDs em uso no Brasil (Anatel). */
 const DDDS = new Set([

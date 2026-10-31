@@ -262,7 +262,8 @@ export const ctaFinal = {
   campos: {
     nome: "Seu nome",
     whatsapp: "Seu WhatsApp",
-    tipo: { rotulo: "O que você precisa?", opcoes: ["Landing page", "Site completo", "Ainda não sei"] },
+    // Código (o que vai para a tabela leads) → texto da copy: a função enviar-lead usa o mesmo mapa
+    tipo: { rotulo: "O que você precisa?", opcoes: { landing: "Landing page", site: "Site completo", "nao-sei": "Ainda não sei" } },
     investimento: {
       rotulo: "Quanto pretende investir?",
       opcoes: ["Até R$ 1.000", "De R$ 1.000 a R$ 2.000", "Acima de R$ 2.000", "Prefiro conversar antes"],

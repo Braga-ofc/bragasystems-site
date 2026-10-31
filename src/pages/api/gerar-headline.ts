@@ -48,7 +48,9 @@ export const POST: APIRoute = async ({ request }) => {
   if (!id) return json({ erro: "limite" }, 429);
 
   let headlines: string[] | null;
-  let respondeu = false;
+  // A IA que estoura o prazo continua rodando e gastando a cota: essa tentativa conta no limite, como a que respondeu
+  let conta = false;
+  let relogio: ReturnType<typeof setTimeout> | undefined;
   try {
     const saida = (await Promise.race([
       amb.AI.run(MODELO, {
@@ -59,17 +61,25 @@ export const POST: APIRoute = async ({ request }) => {
         max_tokens: 300,
         temperature: 0.8,
       }),
-      new Promise((_, falha) => setTimeout(() => falha(new Error("prazo")), 8000)),
+      // 8 s: com o Turnstile, a reserva e o PATCH (PRAZO cada), fica abaixo dos 30 s do navegador
+      new Promise((_, falha) => {
+        relogio = setTimeout(() => {
+          conta = true;
+          falha(new Error("prazo"));
+        }, 8000);
+      }),
     ])) as { response?: unknown };
-    respondeu = true;
+    conta = true;
     headlines = lerHeadlines(saida?.response);
   } catch {
     headlines = null;
+  } finally {
+    clearTimeout(relogio);
   }
 
   const desfazer = () => supabase(`geracoes_ia?id=eq.${id}`, { method: "DELETE" }).catch(() => undefined);
   if (!headlines) {
-    if (!respondeu) await desfazer();
+    if (!conta) await desfazer();
     return json({ erro: "ia" }, 502);
   }
   // As 3 headlines precisam ficar salvas: é delas que sai o aviso com as outras 2 versões

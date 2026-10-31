@@ -9,6 +9,9 @@ test("aceita JSON puro com 3 frases e tira as aspas", () => {
 test("acha o JSON no meio de texto", () => {
   assert.deepEqual(lerHeadlines('Claro! {"headlines": ["a", "b", "c"]} pronto'), ["a", "b", "c"]);
 });
+test("chaves num comentário depois do JSON não estragam a leitura", () => {
+  assert.deepEqual(lerHeadlines('{"headlines": ["a", "b {c}", "d"]}\nObs: evitei promessas {absolutas}'), ["a", "b {c}", "d"]);
+});
 test("aceita a resposta já como objeto", () => {
   assert.deepEqual(lerHeadlines({ headlines: ["a", "b", "c"] }), ["a", "b", "c"]);
 });

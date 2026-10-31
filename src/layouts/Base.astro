@@ -85,14 +85,18 @@ import { compartilhar } from "../content/home";
     */}
     <script is:inline>
       (function () {
-        var r = document.documentElement;
-        var todas = function () { r.classList.add("secoes-todas"); };
+        const r = document.documentElement;
+        const todas = function () { r.classList.add("secoes-todas"); };
         if (location.hash) todas();
         document.addEventListener("click", function (e) {
-          var a = e.target && e.target.closest && e.target.closest("a[href*='#']");
+          const a = e.target && e.target.closest && e.target.closest("a[href*='#']");
           if (a && a.hash && a.pathname === location.pathname) todas();
         }, true);
         addEventListener("hashchange", todas);
+        // Formulários que falam com /api/ só enviam pelo script: tocar antes de ele carregar não leva a uma página de JSON
+        document.addEventListener("submit", function (e) {
+          if (e.target.matches("form[action^='/api/']")) e.preventDefault();
+        }, true);
       })();
     </script>
   </head>
@@ -107,10 +111,17 @@ import { compartilhar } from "../content/home";
       import "../scripts/animacoes";
       // Medidor de fluidez para testar no celular de verdade: liga com ?fps ou #fps no endereço
       // e continua ligado nas próximas páginas da mesma aba
-      let fps = /fps/i.test(location.search + location.hash);
+      // Só o parâmetro exato: códigos de anúncio (gclid, fbclid) podem conter "fps" por acaso
+      const busca = new URLSearchParams(location.search);
+      let fps = busca.has("fps") || location.hash === "#fps";
       try {
         if (fps) sessionStorage.setItem("braga-fps", "1");
         else fps = sessionStorage.getItem("braga-fps") === "1";
+        // UTMs da primeira página com UTM na aba (mapa técnico 12): o formulário e o gerador mandam com o lead
+        const utm = Object.fromEntries(
+          ["utm_source", "utm_medium", "utm_campaign", "utm_content"].flatMap((k) => (busca.get(k) ? [[k, busca.get(k)!.slice(0, 100)]] : [])),
+        );
+        if (Object.keys(utm).length && !sessionStorage.getItem("utm")) sessionStorage.setItem("utm", JSON.stringify(utm));
       } catch {}
       if (fps) import("../scripts/diagnostico");
       // Fora da primeira tela: liga depois que o hero começou a entrar, sem travar a abertura

@@ -6,12 +6,12 @@
 */
 import type { APIRoute } from "astro";
 import { amb, escapar, ipDe, json, lerCorpo, supabase, textoLimpo, turnstileValido } from "../../lib/servidor";
-import { soDigitos, whatsappValido } from "../../lib/whatsapp";
+import { formatarWhatsapp, soDigitos, whatsappValido } from "../../lib/whatsapp";
 import { ctaFinal } from "../../content/home";
 
 export const prerender = false;
 
-const TIPOS: Record<string, string> = { landing: "Landing page", site: "Site completo", "nao-sei": "Ainda não sei" };
+const TIPOS: Record<string, string> = ctaFinal.campos.tipo.opcoes;
 const INVESTIMENTOS: readonly string[] = ctaFinal.campos.investimento.opcoes;
 const CHAVES_UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content"];
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -67,7 +67,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (!salvo.ok) return json({ erro: "servidor" }, 502);
 
   // O aviso sai depois da resposta (waitUntil): o e-mail lento nunca faz a pessoa ver erro de um lead salvo
-  const aviso = avisar(lead).catch(() => undefined);
+  // O erro fica no log do Worker (Observability): o lead está salvo, mas o aviso não chegou
+  const aviso = avisar(lead).catch((e) => console.error("aviso por e-mail falhou:", e instanceof Error ? e.message : e));
   const ctx = (locals as { cfContext?: { waitUntil(p: Promise<unknown>): void } }).cfContext;
   if (ctx) ctx.waitUntil(aviso);
   else await aviso;
@@ -81,7 +82,7 @@ async function avisar(lead: Record<string, unknown>) {
   const zap = String(lead.whatsapp);
   const linhas: [string, string][] = [
     ["Nome", nome],
-    ["WhatsApp", `<a href="https://wa.me/55${zap}">(${zap.slice(0, 2)}) ${zap.slice(2, -4)}-${zap.slice(-4)}</a>`],
+    ["WhatsApp", `<a href="https://wa.me/55${zap}">${formatarWhatsapp(zap)}</a>`],
   ];
   let headlines: string[] = [];
   if (lead.origem === "formulario") {
@@ -108,7 +109,7 @@ async function avisar(lead: Record<string, unknown>) {
       `<p><a href="https://wa.me/55${zap}?text=${encodeURIComponent(resposta)}" style="display:inline-block;padding:10px 16px;background:#35D5E8;color:#0B0F14;font-weight:bold;text-decoration:none">Responder no WhatsApp com as 2 versões</a></p>`;
   }
   const origem = lead.origem === "gerador" ? "gerador" : "formulário";
-  await fetch("https://api.resend.com/emails", {
+  const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${amb.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -120,4 +121,5 @@ async function avisar(lead: Record<string, unknown>) {
     }),
     signal: AbortSignal.timeout(10000),
   });
+  if (!r.ok) throw new Error(`Resend respondeu ${r.status}: ${(await r.text().catch(() => "")).slice(0, 200)}`);
 }

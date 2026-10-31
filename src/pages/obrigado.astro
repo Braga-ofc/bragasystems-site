@@ -123,30 +123,32 @@ const balao = "M392 64 L548 64 L548 166 L524 190 L452 190 L412 222 L412 190 L392
   const teste = /[?&]teste\b/.test(location.search);
 
   // A mensagem do formulário, com o nome e o tipo de projeto guardados no navegador; sem eles, a geral
+  // "novo" só vem do envio que acabou de dar certo: recarregar, voltar do WhatsApp ou abrir direto não conta de novo
   let link = botao?.href ?? "";
+  let novo = false;
   try {
-    const lead = JSON.parse(sessionStorage.getItem("lead") ?? "null") as { nome?: string; tipo?: string } | null;
+    const lead = JSON.parse(sessionStorage.getItem("lead") ?? "null") as { nome?: string; tipo?: string; novo?: boolean } | null;
     if (lead?.nome) link = montarLinkWhatsapp("formulario", { nome: lead.nome, tipo: lead.tipo ?? "" });
+    novo = lead?.novo === true;
+    if (novo && !teste) sessionStorage.setItem("lead", JSON.stringify({ ...lead, novo: false }));
   } catch {
     /* sem sessionStorage: fica a mensagem geral */
   }
   if (botao && link) botao.href = link;
 
   // Conversão (mapa técnico 12): o Pixel conta o cadastro completo, se a medição foi aceita e carregou.
-  // A visita a /obrigado já é a conversão no GA4.
   addEventListener("load", () => {
+    if (!novo) return;
     window.setTimeout(() => {
       const fbq = (window as unknown as { fbq?: (...a: unknown[]) => void }).fbq;
       fbq?.("track", "CompleteRegistration");
     }, 600);
   });
 
-  // Abre o WhatsApp uma vez por visita: ao voltar dele ou recarregar, fica só o botão
-  let jaAbriu = false;
-  try { jaAbriu = sessionStorage.getItem("braga-obrigado-abriu") === "1"; } catch {}
+  // Abre o WhatsApp uma vez por envio: ao voltar dele ou recarregar, fica só o botão
+  const jaAbriu = !novo;
   function abrir() {
     if (jaAbriu || teste || !link) return;
-    try { sessionStorage.setItem("braga-obrigado-abriu", "1"); } catch {}
     window.location.assign(link);
   }
 

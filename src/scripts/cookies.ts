@@ -71,11 +71,27 @@ function abrir(preferencias: boolean) {
   if (preferencias) caixa("medicao")?.focus();
 }
 
+/** Expira os cookies pelo nome no endereço atual e em cada domínio pai (o GA4 grava no domínio raiz). */
+function apagarCookies(nomes: RegExp) {
+  const partes = location.hostname.split(".");
+  const dominios = [""].concat(partes.slice(0, -1).map((_, i) => `; domain=.${partes.slice(i).join(".")}`));
+  for (const par of document.cookie.split(";")) {
+    const nome = par.split("=")[0].trim();
+    if (!nomes.test(nome)) continue;
+    for (const d of dominios) document.cookie = `${nome}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${d}`;
+  }
+}
+
 function salvar(nova: Escolha) {
   const antes = ler();
   try { localStorage.setItem(CHAVE, JSON.stringify(nova)); } catch {}
   if (banner) banner.hidden = true;
-  const retirou = antes && ((antes.medicao && !nova.medicao) || (antes.marketing && !nova.marketing));
+  const tirouMedicao = !!antes?.medicao && !nova.medicao;
+  const tirouMarketing = !!antes?.marketing && !nova.marketing;
+  // LGPD: retirar o aceite apaga os cookies que já ficaram (GA4 e Clarity; Pixel)
+  if (tirouMedicao) apagarCookies(/^(_ga|_gid|_gat|_clck|_clsk)/);
+  if (tirouMarketing) apagarCookies(/^(_fbp|_fbc)$/);
+  const retirou = tirouMedicao || tirouMarketing;
   if (retirou && carregados.size) location.reload();
   else carregar(nova);
 }

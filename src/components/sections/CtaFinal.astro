@@ -22,9 +22,8 @@ const corte = ctaFinal.titulo.indexOf(': "');
 const tituloCena = corte >= 0 ? ctaFinal.titulo.slice(0, corte + 1) : ctaFinal.titulo;
 const tituloPergunta = corte >= 0 ? ctaFinal.titulo.slice(corte + 2).replace(/^"/, "\u201C").replace(/"$/, "\u201D") : "";
 
-// Códigos do tipo de projeto para a função enviar-lead, na mesma ordem das opções da copy.
-const codigos = ["landing", "site", "nao-sei"];
-const tipos = Object.fromEntries(ctaFinal.campos.tipo.opcoes.map((opcao, i) => [opcao, codigos[i]]));
+// Texto da opção → código do tipo de projeto para a função enviar-lead.
+const tipos = Object.fromEntries(Object.entries(ctaFinal.campos.tipo.opcoes).map(([codigo, opcao]) => [opcao, codigo]));
 const [microResposta, microFundador] = ctaFinal.microcopy;
 
 interface Props {
@@ -69,7 +68,7 @@ const { vagas } = Astro.props;
             nome="tipo_projeto"
             tipo="selecao"
             rotulo={ctaFinal.campos.tipo.rotulo}
-            opcoes={[...ctaFinal.campos.tipo.opcoes]}
+            opcoes={Object.values(ctaFinal.campos.tipo.opcoes)}
             obrigatorio
           />
           <Campo

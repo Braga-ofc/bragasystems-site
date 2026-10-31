@@ -93,7 +93,7 @@ function iniciar(raiz: HTMLElement) {
   const anuncio = raiz.querySelector<HTMLElement>("[data-anuncio]");
   const textoCarregando = raiz.querySelector(".console__status")?.textContent?.trim() ?? "";
   const msg = {
-    // Só o campo vazio para aqui; tamanho e links a função confere no servidor (vira a mensagem de erro).
+    // Vazio ou com 1 letra só (o servidor pede 2) para aqui com a mensagem de campo vazio.
     gerarVazio: formGerar.dataset.erroVazio ?? "",
     vazio: formLead.dataset.erroVazio ?? "",
     whatsapp: formLead.dataset.erroWhatsapp ?? "",
@@ -114,10 +114,12 @@ function iniciar(raiz: HTMLElement) {
 
   /* ---------- 1. Gerar a headline ---------- */
 
+  const preenchido = (campo: HTMLInputElement) => campo.value.trim().length >= 2;
+
   // O erro fica ligado ao campo (aria-describedby do Campo) e some assim que ele ganha texto.
   for (const campo of [vende, paraQuem]) {
     campo.addEventListener("input", () => {
-      if (campo.getAttribute("aria-invalid") === "true" && campo.value.trim()) limparErroCampo(campo);
+      if (campo.getAttribute("aria-invalid") === "true" && preenchido(campo)) limparErroCampo(campo);
     });
   }
 
@@ -127,7 +129,7 @@ function iniciar(raiz: HTMLElement) {
     if (avisoGeracao) mostrarAviso(avisoGeracao, null);
 
     const valores = { vende: vende.value.trim(), paraQuem: paraQuem.value.trim() };
-    const vazios = [vende, paraQuem].filter((campo) => !campo.value.trim());
+    const vazios = [vende, paraQuem].filter((campo) => !preenchido(campo));
     for (const campo of [vende, paraQuem]) {
       if (vazios.includes(campo)) mostrarErroCampo(campo, msg.gerarVazio);
       else limparErroCampo(campo);

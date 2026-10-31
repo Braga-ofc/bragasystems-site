@@ -67,18 +67,26 @@ function desenhar() {
   quadro = 0;
   let ocupado = false;
   const alto = window.innerHeight;
+  const max = Math.max(1, document.documentElement.scrollHeight - alto);
+  const progresso = Math.min(1, Math.max(0, window.scrollY / max));
+  const y = alto * (0.14 + 0.72 * progresso);
+  const comLuz = !!luz && !reduzido && mouseX >= 0;
+  if (comLuz) {
+    luzX += (mouseX - luzX) * 0.18;
+    luzY += (mouseY - luzY) * 0.18;
+  }
 
-  if (nucleo) {
-    const max = Math.max(1, document.documentElement.scrollHeight - alto);
-    const progresso = Math.min(1, Math.max(0, window.scrollY / max));
-    const y = alto * (0.14 + 0.72 * progresso);
+  // Todas as leituras de layout antes de qualquer escrita: ler depois de mudar estilo força um layout por quadro
+  const r = nucleo?.getBoundingClientRect();
+  const s = nucleo ? secaoEm(y) : null;
+  const sob = comLuz ? secaoEm(Math.min(alto - 1, Math.max(0, luzY))) : null;
 
+  if (nucleo && r && s) {
     // Gira com a velocidade da rolagem e volta devagar ao repouso
     const v = window.scrollY - ultimoY;
     ultimoY = window.scrollY;
     if (!reduzido) giro = giro * 0.9 + Math.max(-40, Math.min(40, v * 0.6)) * 0.1;
     // Inclina na direção do mouse, até 12 px
-    const r = nucleo.getBoundingClientRect();
     const alvoX = !reduzido && mouseX >= 0 ? Math.max(-12, Math.min(12, (mouseX - (r.left + r.width / 2)) * 0.02)) : 0;
     const alvoY = !reduzido && mouseY >= 0 ? Math.max(-12, Math.min(12, (mouseY - y) * 0.02)) : 0;
     incX += (alvoX - incX) * 0.12;
@@ -86,17 +94,13 @@ function desenhar() {
     nucleo.style.transform = `translate3d(${incX.toFixed(2)}px, ${(y + incY).toFixed(2)}px, 0) rotate(${giro.toFixed(2)}deg)`;
     if (Math.abs(giro) > 0.05 || Math.abs(alvoX - incX) > 0.05 || Math.abs(alvoY - incY) > 0.05) ocupado = true;
 
-    const s = secaoEm(y);
     marcarForma(s.forma);
     nucleo.toggleAttribute("data-claro", s.claro);
     if (fundo && fundo.dataset.tom !== s.tom) fundo.dataset.tom = s.tom;
   }
 
-  if (luz && !reduzido && mouseX >= 0) {
-    luzX += (mouseX - luzX) * 0.18;
-    luzY += (mouseY - luzY) * 0.18;
+  if (luz && sob) {
     luz.style.transform = `translate3d(${luzX.toFixed(1)}px, ${luzY.toFixed(1)}px, 0)`;
-    const sob = secaoEm(Math.min(alto - 1, Math.max(0, luzY)));
     luz.toggleAttribute("data-claro", sob.claro);
     // Na Dor a luz fica neutra: o único ciano do bloco é o fechamento
     luz.toggleAttribute("data-neutra", sob.el.classList.contains("dor"));

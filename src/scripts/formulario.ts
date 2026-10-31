@@ -4,26 +4,15 @@
   validação, erros dos campos, botão carregando, UTM e envio com prazo.
   Nenhum dado pessoal vai para a URL, o console ou a medição.
 */
-import { montarLinkWhatsapp, semCodigoPais, soDigitos, whatsappValido } from "../lib/whatsapp";
+import { formatarWhatsapp, montarLinkWhatsapp, semCodigoPais, soDigitos, whatsappValido } from "../lib/whatsapp";
 import { pedirToken } from "./turnstile";
 
 type Controle = HTMLInputElement | HTMLSelectElement;
 
 /* ---------- Peças compartilhadas ---------- */
 
-// A regra do número mora em lib/whatsapp.ts, para o servidor usar a mesma na próxima etapa.
-export { soDigitos, whatsappValido };
-
-/** (61) 9999-9999 ou (61) 99999-9999, conforme a quantidade de dígitos. */
-export function formatarWhatsapp(d: string): string {
-  if (!d) return "";
-  if (d.length <= 2) return `(${d}`;
-  const ddd = d.slice(0, 2);
-  const resto = d.slice(2);
-  if (resto.length <= 4) return `(${ddd}) ${resto}`;
-  if (d.length <= 10) return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;
-  return `(${ddd}) ${resto.slice(0, 5)}-${resto.slice(5)}`;
-}
+// A regra do número mora em lib/whatsapp.ts: o servidor usa a mesma.
+export { formatarWhatsapp, soDigitos, whatsappValido };
 
 /**
  * Máscara leve enquanto digita, sem perder a posição do cursor.
@@ -271,7 +260,7 @@ function iniciarFormulario(form: HTMLFormElement) {
       if (!resposta.ok) throw new Error(String(resposta.status));
       // Nome e tipo ficam só no navegador (nunca na URL), para a página de obrigado abrir o WhatsApp.
       try {
-        sessionStorage.setItem("lead", JSON.stringify({ nome: dadosNome, tipo: tipoMinusculo }));
+        sessionStorage.setItem("lead", JSON.stringify({ nome: dadosNome, tipo: tipoMinusculo, novo: true }));
       } catch {
         /* sem sessionStorage: a página de obrigado usa a mensagem sem nome */
       }
